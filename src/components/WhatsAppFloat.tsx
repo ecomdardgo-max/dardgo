@@ -1,10 +1,10 @@
 export function WhatsAppFloat() {
   return (
     <a
-      href="https://wa.me/919999999999?text=Hi%2C%20I%20want%20to%20order%20DARDGO%20products"
+      href="https://wa.me/918430739932?text=Hi%2C%20I%20want%20to%20order%20DARDGO%20products"
       target="_blank"
       rel="noopener noreferrer"
-      className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full flex items-center justify-center shadow-lg transition-all hover:scale-110"
+      className="fixed bottom-20 lg:bottom-6 right-4 sm:right-6 z-50 w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg transition-all hover:scale-110 animate-whatsapp-pulse"
       style={{ backgroundColor: '#25D366' }}
       aria-label="Chat on WhatsApp"
     >

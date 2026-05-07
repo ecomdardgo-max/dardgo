@@ -3,56 +3,77 @@ import dardgoLogo from "@/assets/dardgo-logo.webp";
 
 export function Footer() {
   return (
-    <footer className="bg-foreground pt-12 sm:pt-16 pb-6">
+    <footer className="bg-foreground pt-14 sm:pt-20 pb-24 lg:pb-8">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-10">
+        {/* Top section */}
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12 mb-12">
           <div>
-            <img src={dardgoLogo} alt="DARDGO" className="h-12 mb-4 brightness-0 invert" />
-            <p className="text-sm leading-relaxed mb-4" style={{ color: 'rgba(255,255,255,0.55)' }}>
-              Premium Ayurvedic pain relief & wellness products. AYUSH Certified, GMP & FDA Approved. Made in India.
+            <img src={dardgoLogo} alt="DARDGO" className="h-12 mb-5 brightness-0 invert" />
+            <p className="text-sm leading-relaxed mb-5 text-white/50">
+              India's most trusted Ayurvedic wellness brand. AYUSH Certified, GMP & FDA Approved. Premium natural products for pain relief & health.
             </p>
-            <div className="flex gap-3">
-              <a href="https://wa.me/918430739932" target="_blank" rel="noopener noreferrer" className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center hover:bg-primary transition-colors">
-                <svg className="w-4 h-4" fill="white" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-              </a>
-              <a href="https://instagram.com/dardgo" target="_blank" rel="noopener noreferrer" className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center hover:bg-primary transition-colors">
-                <svg className="w-4 h-4" fill="white" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
-              </a>
+            <div className="flex gap-2.5">
+              {[
+                { label: "WhatsApp", href: "https://wa.me/918430739932", icon: "M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" },
+                { label: "Instagram", href: "https://instagram.com/dardgo", icon: "M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" },
+              ].map((social) => (
+                <a
+                  key={social.label}
+                  href={social.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-10 h-10 rounded-xl bg-white/8 flex items-center justify-center hover:bg-primary transition-colors"
+                  aria-label={social.label}
+                >
+                  <svg className="w-4 h-4" fill="white" viewBox="0 0 24 24"><path d={social.icon} /></svg>
+                </a>
+              ))}
             </div>
           </div>
+
           <div>
-            <h4 className="font-bold text-sm mb-4 tracking-wide uppercase" style={{ color: 'rgba(255,255,255,0.9)' }}>Quick Links</h4>
-            <nav className="flex flex-col gap-2.5">
-              <Link to="/" className="text-sm hover:text-brand-yellow transition-colors" style={{ color: 'rgba(255,255,255,0.55)' }}>Home</Link>
-              <a href="/#products" className="text-sm hover:text-brand-yellow transition-colors" style={{ color: 'rgba(255,255,255,0.55)' }}>Shop Products</a>
-              <Link to="/about" className="text-sm hover:text-brand-yellow transition-colors" style={{ color: 'rgba(255,255,255,0.55)' }}>About Us</Link>
-              <Link to="/contact" className="text-sm hover:text-brand-yellow transition-colors" style={{ color: 'rgba(255,255,255,0.55)' }}>Contact</Link>
+            <h4 className="font-semibold text-sm mb-5 text-white/90">Quick Links</h4>
+            <nav className="flex flex-col gap-3">
+              <Link to="/" className="text-sm text-white/45 hover:text-brand-yellow transition-colors">Home</Link>
+              <a href="/#products" className="text-sm text-white/45 hover:text-brand-yellow transition-colors">Shop Products</a>
+              <Link to="/about" className="text-sm text-white/45 hover:text-brand-yellow transition-colors">About Us</Link>
+              <Link to="/blog" className="text-sm text-white/45 hover:text-brand-yellow transition-colors">Health Blog</Link>
+              <Link to="/contact" className="text-sm text-white/45 hover:text-brand-yellow transition-colors">Contact</Link>
             </nav>
           </div>
+
           <div>
-            <h4 className="font-bold text-sm mb-4 tracking-wide uppercase" style={{ color: 'rgba(255,255,255,0.9)' }}>Categories</h4>
-            <nav className="flex flex-col gap-2.5">
-              <a href="/#products" className="text-sm hover:text-brand-yellow transition-colors" style={{ color: 'rgba(255,255,255,0.55)' }}>Pain Relief Oils</a>
-              <a href="/#products" className="text-sm hover:text-brand-yellow transition-colors" style={{ color: 'rgba(255,255,255,0.55)' }}>Ayurvedic Tablets</a>
-              <a href="/#products" className="text-sm hover:text-brand-yellow transition-colors" style={{ color: 'rgba(255,255,255,0.55)' }}>Beauty Products</a>
-              <a href="/#products" className="text-sm hover:text-brand-yellow transition-colors" style={{ color: 'rgba(255,255,255,0.55)' }}>Halwa Formation</a>
+            <h4 className="font-semibold text-sm mb-5 text-white/90">Categories</h4>
+            <nav className="flex flex-col gap-3">
+              <a href="/#products" className="text-sm text-white/45 hover:text-brand-yellow transition-colors">Pain Relief Oils</a>
+              <a href="/#products" className="text-sm text-white/45 hover:text-brand-yellow transition-colors">Joint Care</a>
+              <a href="/#products" className="text-sm text-white/45 hover:text-brand-yellow transition-colors">Immunity Boosters</a>
+              <a href="/#products" className="text-sm text-white/45 hover:text-brand-yellow transition-colors">Digestive Care</a>
+              <a href="/#products" className="text-sm text-white/45 hover:text-brand-yellow transition-colors">Beauty & Skin</a>
             </nav>
           </div>
+
           <div>
-            <h4 className="font-bold text-sm mb-4 tracking-wide uppercase" style={{ color: 'rgba(255,255,255,0.9)' }}>Contact</h4>
-            <div className="flex flex-col gap-3 text-sm" style={{ color: 'rgba(255,255,255,0.55)' }}>
-              <p>📧 support@dardgo.com</p>
-              <p>📞 +91 84307 39932</p>
+            <h4 className="font-semibold text-sm mb-5 text-white/90">Contact Us</h4>
+            <div className="flex flex-col gap-3.5 text-sm text-white/45">
+              <a href="mailto:support@dardgo.com" className="hover:text-brand-yellow transition-colors">📧 support@dardgo.com</a>
+              <a href="tel:+918430739932" className="hover:text-brand-yellow transition-colors">📞 +91 84307 39932</a>
               <p>📍 India</p>
+            </div>
+            <div className="mt-5 p-4 rounded-2xl bg-white/5 border border-white/8">
+              <p className="text-xs text-white/60 font-semibold mb-1">Certifications</p>
+              <p className="text-[10px] text-white/35">AYUSH • ISO 9001 • GMP • FDA • Lab Tested</p>
             </div>
           </div>
         </div>
-        <div className="border-t pt-5 flex flex-col sm:flex-row items-center justify-between gap-3" style={{ borderColor: 'rgba(255,255,255,0.08)' }}>
-          <p className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>
+
+        {/* Bottom */}
+        <div className="border-t border-white/8 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <p className="text-xs text-white/30">
             © {new Date().getFullYear()} DARDGO. All rights reserved.
           </p>
-          <p className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>
-            Ab Raho Har Pal Khush! 🌿
+          <p className="text-xs text-white/30">
+            Made with 🌿 in India | Ab Raho Har Pal Khush!
           </p>
         </div>
       </div>

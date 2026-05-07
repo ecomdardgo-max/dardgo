@@ -5,8 +5,8 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  --font-display: 'Playfair Display', Georgia, serif;
-  --font-body: system-ui, -apple-system, sans-serif;
+  --font-display: 'Poppins', system-ui, sans-serif;
+  --font-body: 'DM Sans', system-ui, sans-serif;
 
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
@@ -43,7 +43,10 @@
   --color-brand-yellow: var(--brand-yellow);
   --color-brand-yellow-light: var(--brand-yellow-light);
   --color-brand-cream: var(--brand-cream);
+  --color-brand-beige: var(--brand-beige);
   --color-brand-earth: var(--brand-earth);
+  --color-brand-orange: var(--brand-orange);
+  --color-brand-gold: var(--brand-gold);
 
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
@@ -61,51 +64,54 @@
 }
 
 :root {
-  --radius: 0.625rem;
+  --radius: 0.75rem;
 
-  /* DARDGO Brand Colors - matching dardgo.com */
-  --brand-green: oklch(0.50 0.14 142);       /* #3D8B37 - primary green */
-  --brand-green-light: oklch(0.58 0.12 142);  /* lighter green */
-  --brand-green-dark: oklch(0.38 0.14 142);   /* darker green for gradients */
-  --brand-yellow: oklch(0.85 0.17 90);        /* #FFD700 - yellow accent */
-  --brand-yellow-light: oklch(0.92 0.10 90);  /* soft yellow */
-  --brand-cream: oklch(0.97 0.01 90);         /* cream background */
-  --brand-earth: oklch(0.45 0.06 60);         /* earthy tone */
+  /* DARDGO Premium Ayurvedic Palette */
+  --brand-green: oklch(0.45 0.15 145);        /* #2E7D32 - Ayurvedic Green */
+  --brand-green-light: oklch(0.62 0.14 145);   /* #66BB6A - Herbal Light Green */
+  --brand-green-dark: oklch(0.32 0.12 145);    /* Deep forest green */
+  --brand-yellow: oklch(0.87 0.16 90);         /* Gold highlight */
+  --brand-yellow-light: oklch(0.93 0.08 90);   /* Soft gold */
+  --brand-cream: oklch(0.97 0.01 85);          /* #F8F5EF - Warm cream */
+  --brand-beige: oklch(0.94 0.02 75);          /* #EFE7DA - Soft beige */
+  --brand-earth: oklch(0.45 0.06 60);          /* Earthy brown */
+  --brand-orange: oklch(0.72 0.16 55);         /* Soft orange CTA */
+  --brand-gold: oklch(0.78 0.14 80);           /* Premium gold */
 
-  /* Semantic tokens mapped to DARDGO green */
-  --background: oklch(0.99 0.002 90);
-  --foreground: oklch(0.18 0.03 50);
+  /* Semantic tokens */
+  --background: oklch(0.98 0.005 85);          /* Warm off-white */
+  --foreground: oklch(0.15 0.02 50);           /* #1E1E1E Dark text */
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.18 0.03 50);
+  --card-foreground: oklch(0.15 0.02 50);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.18 0.03 50);
-  --primary: oklch(0.50 0.14 142);            /* DARDGO green */
+  --popover-foreground: oklch(0.15 0.02 50);
+  --primary: oklch(0.45 0.15 145);             /* Ayurvedic Green */
   --primary-foreground: oklch(0.99 0.005 90);
-  --secondary: oklch(0.96 0.02 90);
-  --secondary-foreground: oklch(0.28 0.04 50);
-  --muted: oklch(0.96 0.01 90);
+  --secondary: oklch(0.97 0.01 85);            /* Warm cream */
+  --secondary-foreground: oklch(0.25 0.04 50);
+  --muted: oklch(0.96 0.01 85);
   --muted-foreground: oklch(0.50 0.03 50);
-  --accent: oklch(0.85 0.17 90);             /* DARDGO yellow */
-  --accent-foreground: oklch(0.18 0.06 50);
+  --accent: oklch(0.72 0.16 55);               /* Soft orange */
+  --accent-foreground: oklch(0.99 0.005 90);
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.984 0.003 247.858);
-  --border: oklch(0.92 0.015 90);
-  --input: oklch(0.92 0.015 90);
-  --ring: oklch(0.50 0.14 142);
+  --border: oklch(0.93 0.01 85);
+  --input: oklch(0.93 0.01 85);
+  --ring: oklch(0.45 0.15 145);
 
-  --chart-1: oklch(0.50 0.14 142);
-  --chart-2: oklch(0.85 0.17 90);
-  --chart-3: oklch(0.58 0.12 142);
-  --chart-4: oklch(0.92 0.10 90);
+  --chart-1: oklch(0.45 0.15 145);
+  --chart-2: oklch(0.87 0.16 90);
+  --chart-3: oklch(0.62 0.14 145);
+  --chart-4: oklch(0.72 0.16 55);
   --chart-5: oklch(0.45 0.06 60);
-  --sidebar: oklch(0.97 0.01 90);
-  --sidebar-foreground: oklch(0.18 0.03 50);
-  --sidebar-primary: oklch(0.50 0.14 142);
+  --sidebar: oklch(0.97 0.01 85);
+  --sidebar-foreground: oklch(0.15 0.02 50);
+  --sidebar-primary: oklch(0.45 0.15 145);
   --sidebar-primary-foreground: oklch(0.99 0.005 90);
-  --sidebar-accent: oklch(0.96 0.02 90);
-  --sidebar-accent-foreground: oklch(0.28 0.04 50);
-  --sidebar-border: oklch(0.92 0.015 90);
-  --sidebar-ring: oklch(0.50 0.14 142);
+  --sidebar-accent: oklch(0.96 0.02 85);
+  --sidebar-accent-foreground: oklch(0.25 0.04 50);
+  --sidebar-border: oklch(0.93 0.01 85);
+  --sidebar-ring: oklch(0.45 0.15 145);
 }
 
 @layer base {
@@ -116,15 +122,25 @@
     background-color: var(--color-background);
     color: var(--color-foreground);
     font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-display);
+    font-weight: 600;
   }
 }
 
 @layer utilities {
-  .text-gradient-yellow {
-    background: linear-gradient(135deg, var(--brand-yellow), var(--brand-yellow-light));
+  /* Gradient utilities */
+  .text-gradient-green {
+    background: linear-gradient(135deg, var(--brand-green), var(--brand-green-light));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .text-gradient-gold {
+    background: linear-gradient(135deg, var(--brand-gold), var(--brand-yellow));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -133,20 +149,48 @@
     background: linear-gradient(135deg, var(--brand-green-dark), var(--brand-green));
   }
   .bg-gradient-warm {
-    background: linear-gradient(180deg, var(--brand-cream), oklch(0.99 0.002 90));
+    background: linear-gradient(180deg, var(--brand-cream), var(--background));
   }
-  .bg-gradient-yellow {
-    background: linear-gradient(135deg, var(--brand-yellow), var(--brand-yellow-light));
+  .bg-gradient-cream {
+    background: linear-gradient(135deg, var(--brand-cream), var(--brand-beige));
   }
-  .bg-topbar {
-    background-color: var(--brand-green);
+  .bg-gradient-orange {
+    background: linear-gradient(135deg, var(--brand-orange), oklch(0.78 0.14 50));
   }
+  .bg-gradient-gold {
+    background: linear-gradient(135deg, var(--brand-gold), var(--brand-yellow));
+  }
+
+  /* Shadow utilities */
   .shadow-brand {
-    box-shadow: 0 8px 30px -8px oklch(0.50 0.14 142 / 0.2);
+    box-shadow: 0 8px 30px -8px oklch(0.45 0.15 145 / 0.15);
   }
-  .shadow-yellow {
-    box-shadow: 0 8px 30px -8px oklch(0.85 0.17 90 / 0.4);
+  .shadow-soft {
+    box-shadow: 0 4px 20px -4px oklch(0 0 0 / 0.08);
   }
+  .shadow-gold {
+    box-shadow: 0 8px 30px -8px oklch(0.87 0.16 90 / 0.35);
+  }
+  .shadow-card {
+    box-shadow: 0 1px 3px oklch(0 0 0 / 0.04), 0 6px 16px oklch(0 0 0 / 0.04);
+  }
+  .shadow-card-hover {
+    box-shadow: 0 4px 12px oklch(0 0 0 / 0.06), 0 12px 28px oklch(0 0 0 / 0.08);
+  }
+
+  /* Glassmorphism */
+  .glass {
+    background: oklch(1 0 0 / 0.7);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+  }
+  .glass-dark {
+    background: oklch(0.15 0.02 50 / 0.6);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+  }
+
+  /* Scrollbar */
   .scrollbar-hide {
     -ms-overflow-style: none;
     scrollbar-width: none;
@@ -156,11 +200,49 @@
   }
 }
 
+/* Animations */
 @keyframes marquee {
   0% { transform: translateX(0); }
   100% { transform: translateX(-50%); }
 }
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-12px); }
+}
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 0 0 oklch(0.45 0.15 145 / 0.4); }
+  50% { box-shadow: 0 0 20px 8px oklch(0.45 0.15 145 / 0); }
+}
+@keyframes whatsapp-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 oklch(0.65 0.2 150 / 0.4); }
+  50% { box-shadow: 0 0 0 12px oklch(0.65 0.2 150 / 0); }
+}
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+@keyframes slide-up {
+  0% { transform: translateY(20px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
 
 .animate-marquee {
-  animation: marquee 25s linear infinite;
+  animation: marquee 30s linear infinite;
+}
+.animate-float {
+  animation: float 4s ease-in-out infinite;
+}
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+.animate-whatsapp-pulse {
+  animation: whatsapp-pulse 2s ease-in-out infinite;
+}
+.animate-shimmer {
+  background: linear-gradient(90deg, transparent 0%, oklch(1 0 0 / 0.4) 50%, transparent 100%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+.animate-slide-up {
+  animation: slide-up 0.5s ease-out;
 }

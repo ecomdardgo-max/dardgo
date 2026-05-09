@@ -1,9 +1,17 @@
 import { toast } from "sonner";
 
-const SHOPIFY_API_VERSION = '2025-07';
-const SHOPIFY_STORE_PERMANENT_DOMAIN = 'dardgo-aura-lsiqw.myshopify.com';
+const SHOPIFY_API_VERSION = import.meta.env.VITE_SHOPIFY_API_VERSION ?? '2025-07';
+const SHOPIFY_STORE_PERMANENT_DOMAIN = import.meta.env.VITE_SHOPIFY_STORE_DOMAIN as string;
+const SHOPIFY_STOREFRONT_TOKEN = import.meta.env.VITE_SHOPIFY_STOREFRONT_TOKEN as string;
+
+if (!SHOPIFY_STORE_PERMANENT_DOMAIN || !SHOPIFY_STOREFRONT_TOKEN) {
+  // Surface a clear error during dev/build instead of failing silently at runtime.
+  throw new Error(
+    'Missing Shopify env vars. Define VITE_SHOPIFY_STORE_DOMAIN and VITE_SHOPIFY_STOREFRONT_TOKEN in .env.local'
+  );
+}
+
 const SHOPIFY_STOREFRONT_URL = `https://${SHOPIFY_STORE_PERMANENT_DOMAIN}/api/${SHOPIFY_API_VERSION}/graphql.json`;
-const SHOPIFY_STOREFRONT_TOKEN = '3a32ea649e75e4ab203980f8fc490739';
 
 export interface ShopifyProduct {
   node: {
@@ -126,6 +134,84 @@ export const STOREFRONT_PRODUCTS_QUERY = `
     }
   }
 `;
+
+/**
+ * Loads a single collection by handle along with its first N products.
+ * Used by the homepage `CollectionShowcases` block (category × 4 products).
+ */
+export const STOREFRONT_COLLECTION_BY_HANDLE_QUERY = `
+  query GetCollectionByHandle($handle: String!, $first: Int!) {
+    collection(handle: $handle) {
+      id
+      handle
+      title
+      description
+      products(first: $first) {
+        edges {
+          node {
+            id
+            title
+            description
+            handle
+            availableForSale
+            priceRange {
+              minVariantPrice { amount currencyCode }
+            }
+            compareAtPriceRange {
+              minVariantPrice { amount currencyCode }
+            }
+            images(first: 2) {
+              edges { node { url altText } }
+            }
+            variants(first: 1) {
+              edges {
+                node {
+                  id
+                  title
+                  availableForSale
+                  price { amount currencyCode }
+                  selectedOptions { name value }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+`;
+
+export interface ShopifyCollectionWithProducts {
+  id: string;
+  handle: string;
+  title: string;
+  description: string;
+  products: {
+    edges: Array<{
+      node: {
+        id: string;
+        title: string;
+        description: string;
+        handle: string;
+        availableForSale: boolean;
+        priceRange: { minVariantPrice: { amount: string; currencyCode: string } };
+        compareAtPriceRange?: { minVariantPrice: { amount: string; currencyCode: string } };
+        images: { edges: Array<{ node: { url: string; altText: string | null } }> };
+        variants: {
+          edges: Array<{
+            node: {
+              id: string;
+              title: string;
+              availableForSale: boolean;
+              price: { amount: string; currencyCode: string };
+              selectedOptions: Array<{ name: string; value: string }>;
+            };
+          }>;
+        };
+      };
+    }>;
+  };
+}
 
 export const STOREFRONT_PRODUCT_BY_HANDLE_QUERY = `
   query GetProductByHandle($handle: String!) {

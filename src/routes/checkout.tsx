@@ -35,7 +35,7 @@ function CheckoutPage() {
             <p className="text-muted-foreground text-sm mb-8">
               Please wait while we redirect you to our secure payment gateway...
             </p>
-            <div className="flex items-center justify-center gap-6 text-xs text-muted-foreground">
+            <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 sm:gap-6 text-xs text-muted-foreground">
               <span className="flex items-center gap-1.5"><Lock className="w-3.5 h-3.5" /> SSL Secured</span>
               <span className="flex items-center gap-1.5"><Shield className="w-3.5 h-3.5" /> 100% Safe</span>
               <span className="flex items-center gap-1.5"><Truck className="w-3.5 h-3.5" /> Fast Delivery</span>

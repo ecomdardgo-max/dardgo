@@ -16,7 +16,7 @@ export function WhatsAppCTA() {
               Get instant support, fast delivery, and exclusive offers when you order via WhatsApp!
             </p>
             <a
-              href="https://wa.me/918430739932?text=Hi%2C%20I%20want%20to%20order%20DARDGO%20products"
+              href="https://wa.me/919329912659?text=Hi%2C%20I%20want%20to%20order%20DARDGO%20products"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 px-8 py-4 rounded-xl font-bold text-sm transition-all hover:shadow-yellow hover:scale-[1.02] active:scale-[0.98]"

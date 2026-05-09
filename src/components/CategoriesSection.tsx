@@ -12,18 +12,17 @@ const categories = [
 
 export function CategoriesSection() {
   return (
-    <section className="py-14 sm:py-20">
+    <section className="py-16 sm:py-24 lg:py-28">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <ScrollReveal>
-          <div className="text-center mb-10">
-            <span className="inline-flex items-center px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-semibold mb-3">
-              Browse Categories
-            </span>
-            <h2 className="text-2xl sm:text-4xl font-bold text-foreground mb-3">
-              Shop by <span className="text-gradient-green">Category</span>
+          <div className="text-center mb-10 sm:mb-14 max-w-2xl mx-auto">
+            <span className="text-eyebrow text-primary mb-4 block">— Browse categories</span>
+            <h2 className="text-display-2 text-foreground mb-4">
+              Shop by{" "}
+              <span className="text-gradient-green">category</span>
             </h2>
-            <p className="text-muted-foreground text-sm sm:text-base max-w-md mx-auto">
-              Find the perfect Ayurvedic solution for your health needs
+            <p className="text-muted-foreground text-sm sm:text-base leading-relaxed">
+              Find the perfect Ayurvedic solution tailored to your health needs.
             </p>
           </div>
         </ScrollReveal>

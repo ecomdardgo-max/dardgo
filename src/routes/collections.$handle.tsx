@@ -35,7 +35,14 @@ function CollectionPage() {
   useEffect(() => {
     async function load() {
       try {
-        const data = await storefrontApiRequest(STOREFRONT_PRODUCTS_QUERY, { first: 24 });
+        // For category pages we filter by the `category-<handle>` tag that the
+        // CSV importer stamps on every product. The "all" handle returns the
+        // full catalogue (no filter applied).
+        const variables: Record<string, unknown> = { first: 50 };
+        if (handle && handle !== "all") {
+          variables.query = `tag:category-${handle}`;
+        }
+        const data = await storefrontApiRequest(STOREFRONT_PRODUCTS_QUERY, variables);
         setProducts(data?.data?.products?.edges || []);
       } catch (e) {
         console.error(e);
@@ -65,26 +72,38 @@ function CollectionPage() {
   return (
     <div className="min-h-screen">
       <Navbar />
-      <div className="py-8 sm:py-12">
+      <div className="py-6 sm:py-12">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <ScrollReveal>
-            <div className="flex items-center justify-between mb-8">
-              <div>
-                <h1 className="text-2xl sm:text-4xl font-bold text-foreground mb-1">
-                  {handle === "all" ? "All Products" : handle}
+            <div className="flex items-start justify-between gap-3 mb-6 sm:mb-8">
+              <div className="min-w-0 flex-1">
+                <h1 className="text-xl sm:text-4xl font-bold text-foreground mb-1 capitalize break-words">
+                  {handle === "all"
+                    ? "All Products"
+                    : handle === "pain-relief-oils"
+                    ? "Pain Relief Oils & Roll On"
+                    : handle === "ayurvedic-tablets"
+                    ? "Ayurvedic Tablets"
+                    : handle === "ayurvedic-beauty"
+                    ? "Ayurvedic Beauty Products"
+                    : handle === "ayurvedic-halwa"
+                    ? "Ayurvedic Halwa Formation"
+                    : handle === "ayurvedic-powder"
+                    ? "Ayurvedic Powder Formation"
+                    : handle.replace(/-/g, " ")}
                 </h1>
-                <p className="text-sm text-muted-foreground">{products.length} products</p>
+                <p className="text-xs sm:text-sm text-muted-foreground">{products.length} products</p>
               </div>
               <button
                 onClick={() => setFilterOpen(true)}
-                className="lg:hidden flex items-center gap-2 px-4 py-2.5 rounded-xl bg-muted text-sm font-medium"
+                className="lg:hidden flex items-center gap-2 px-3 sm:px-4 py-2.5 rounded-xl bg-muted text-xs sm:text-sm font-medium flex-shrink-0"
               >
                 <SlidersHorizontal className="w-4 h-4" /> Filters
               </button>
             </div>
           </ScrollReveal>
 
-          <div className="flex gap-8">
+          <div className="flex gap-6 lg:gap-8">
             {/* Desktop sidebar */}
             <aside className="hidden lg:block w-60 flex-shrink-0">
               <div className="sticky top-24 space-y-6">
@@ -112,7 +131,7 @@ function CollectionPage() {
             </aside>
 
             {/* Product grid */}
-            <div className="flex-1">
+            <div className="flex-1 min-w-0">
               {loading ? (
                 <div className="flex justify-center py-20">
                   <Loader2 className="w-8 h-8 animate-spin text-primary" />
@@ -123,7 +142,7 @@ function CollectionPage() {
                   <h3 className="text-xl font-semibold mb-2">No products found</h3>
                 </div>
               ) : (
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-5">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-5">
                   {products.map((product, i) => {
                     const image = product.node.images.edges[0]?.node;
                     const price = product.node.priceRange.minVariantPrice;

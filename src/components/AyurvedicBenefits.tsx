@@ -26,23 +26,22 @@ const benefits = [
 
 export function AyurvedicBenefits() {
   return (
-    <section className="py-14 sm:py-20 bg-gradient-cream">
+    <section className="py-16 sm:py-24 lg:py-28 bg-gradient-cream">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <ScrollReveal>
-          <div className="text-center mb-10">
-            <span className="inline-flex items-center px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-semibold mb-3">
-              Why Ayurveda?
-            </span>
-            <h2 className="text-2xl sm:text-4xl font-bold text-foreground mb-3">
-              The <span className="text-gradient-green">Ayurvedic</span> Advantage
+          <div className="text-center mb-10 sm:mb-14 max-w-2xl mx-auto">
+            <span className="text-eyebrow text-primary mb-4 block">— Why Ayurveda</span>
+            <h2 className="text-display-2 text-foreground mb-4">
+              The Ayurvedic{" "}
+              <span className="text-gradient-green">advantage</span>
             </h2>
-            <p className="text-muted-foreground text-sm sm:text-base max-w-md mx-auto">
-              Ancient wisdom meets modern science for your wellbeing
+            <p className="text-muted-foreground text-sm sm:text-base leading-relaxed">
+              Ancient wisdom meets modern science — for your everyday wellbeing.
             </p>
           </div>
         </ScrollReveal>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <div className="grid sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
           {benefits.map((b, i) => (
             <ScrollReveal key={b.title} delay={i * 0.1}>
               <div className="group bg-card rounded-3xl p-6 sm:p-7 shadow-card hover:shadow-card-hover transition-all duration-300 hover:-translate-y-1 border border-border/30 h-full">

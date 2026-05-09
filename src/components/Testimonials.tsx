@@ -38,23 +38,23 @@ const testimonials = [
 
 export function Testimonials() {
   return (
-    <section className="py-14 sm:py-20 bg-gradient-cream">
+    <section className="py-16 sm:py-24 lg:py-28 bg-gradient-cream">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <ScrollReveal>
-          <div className="text-center mb-10">
-            <span className="inline-flex items-center px-3 py-1 rounded-full bg-brand-yellow/10 text-brand-earth text-xs font-semibold mb-3">
-              ⭐ Customer Love
-            </span>
-            <h2 className="text-2xl sm:text-4xl font-bold text-foreground mb-3">
-              What Our <span className="text-gradient-green">Customers</span> Say
+          <div className="text-center mb-10 sm:mb-14 max-w-2xl mx-auto">
+            <span className="text-eyebrow text-brand-earth mb-4 block">— Customer love</span>
+            <h2 className="text-display-2 text-foreground mb-4">
+              What our{" "}
+              <span className="text-gradient-green">customers</span>{" "}
+              say
             </h2>
-            <p className="text-muted-foreground text-sm sm:text-base max-w-md mx-auto">
-              Real reviews from verified customers across India
+            <p className="text-muted-foreground text-sm sm:text-base leading-relaxed">
+              Real reviews from verified customers across India.
             </p>
           </div>
         </ScrollReveal>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+        <div className="grid sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
           {testimonials.map((t, i) => (
             <ScrollReveal key={t.name} delay={i * 0.1}>
               <div className="bg-card rounded-3xl p-5 sm:p-6 shadow-card hover:shadow-card-hover transition-all duration-300 border border-border/30 h-full flex flex-col">

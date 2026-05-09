@@ -35,7 +35,7 @@ function CartPage() {
   return (
     <div className="min-h-screen">
       <Navbar />
-      <div className="py-8 sm:py-12">
+      <div className="py-6 sm:py-12">
         <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
           <ScrollReveal>
             <h1 className="text-2xl sm:text-4xl font-bold text-foreground mb-2">Shopping Cart</h1>
@@ -67,32 +67,32 @@ function CartPage() {
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, x: -100 }}
-                      className="flex gap-4 p-4 rounded-3xl bg-card border border-border/30 shadow-card"
+                      className="flex gap-3 sm:gap-4 p-3 sm:p-4 rounded-2xl sm:rounded-3xl bg-card border border-border/30 shadow-card"
                     >
                       <div className="w-20 h-20 sm:w-24 sm:h-24 bg-gradient-cream rounded-2xl overflow-hidden flex-shrink-0">
                         {item.product.node.images?.edges?.[0]?.node && (
                           <img src={item.product.node.images.edges[0].node.url} alt={item.product.node.title} className="w-full h-full object-cover" />
                         )}
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-foreground text-sm sm:text-base truncate">{item.product.node.title}</h3>
-                        <p className="text-xs text-muted-foreground mb-2">{item.selectedOptions.map((o) => o.value).join(" • ")}</p>
-                        <p className="font-bold text-foreground">₹{parseFloat(item.price.amount).toFixed(0)}</p>
-                      </div>
-                      <div className="flex flex-col items-end justify-between flex-shrink-0">
-                        <button onClick={() => removeItem(item.variantId)} className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/5 transition-colors">
-                          <Trash2 className="h-4 w-4" />
-                        </button>
-                        <div className="flex items-center gap-1 bg-muted/60 rounded-xl p-1">
-                          <button onClick={() => updateQuantity(item.variantId, item.quantity - 1)} className="h-8 w-8 rounded-lg flex items-center justify-center hover:bg-card transition-colors">
-                            <Minus className="h-3.5 w-3.5" />
-                          </button>
-                          <span className="w-8 text-center text-sm font-semibold">{item.quantity}</span>
-                          <button onClick={() => updateQuantity(item.variantId, item.quantity + 1)} className="h-8 w-8 rounded-lg flex items-center justify-center hover:bg-card transition-colors">
-                            <Plus className="h-3.5 w-3.5" />
-                          </button>
+                      <div className="flex-1 min-w-0 flex flex-col">
+                        <h3 className="font-semibold text-foreground text-sm sm:text-base line-clamp-2">{item.product.node.title}</h3>
+                        <p className="text-[11px] sm:text-xs text-muted-foreground mb-2 truncate">{item.selectedOptions.map((o) => o.value).join(" • ")}</p>
+                        <div className="mt-auto flex items-center justify-between gap-2">
+                          <p className="font-bold text-foreground text-sm sm:text-base">₹{parseFloat(item.price.amount).toFixed(0)}</p>
+                          <div className="flex items-center gap-1 bg-muted/60 rounded-xl p-1">
+                            <button aria-label="Decrease quantity" onClick={() => updateQuantity(item.variantId, item.quantity - 1)} className="h-7 w-7 sm:h-8 sm:w-8 rounded-lg flex items-center justify-center hover:bg-card transition-colors">
+                              <Minus className="h-3.5 w-3.5" />
+                            </button>
+                            <span className="w-6 sm:w-8 text-center text-sm font-semibold">{item.quantity}</span>
+                            <button aria-label="Increase quantity" onClick={() => updateQuantity(item.variantId, item.quantity + 1)} className="h-7 w-7 sm:h-8 sm:w-8 rounded-lg flex items-center justify-center hover:bg-card transition-colors">
+                              <Plus className="h-3.5 w-3.5" />
+                            </button>
+                          </div>
                         </div>
                       </div>
+                      <button aria-label="Remove item" onClick={() => removeItem(item.variantId)} className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/5 transition-colors self-start flex-shrink-0">
+                        <Trash2 className="h-4 w-4" />
+                      </button>
                     </motion.div>
                   ))}
                 </AnimatePresence>
@@ -100,7 +100,7 @@ function CartPage() {
 
               {/* Order summary */}
               <div>
-                <div className="sticky top-24 bg-card rounded-3xl p-6 shadow-card border border-border/30">
+                <div className="lg:sticky lg:top-24 bg-card rounded-3xl p-5 sm:p-6 shadow-card border border-border/30">
                   <h3 className="font-semibold text-foreground text-lg mb-5">Order Summary</h3>
 
                   {/* Coupon */}

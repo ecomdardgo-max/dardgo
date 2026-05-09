@@ -44,18 +44,17 @@ export function ProductShowcase() {
   };
 
   return (
-    <section id="products" className="py-14 sm:py-20">
+    <section id="products" className="py-16 sm:py-24 lg:py-28 scroll-mt-20">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <ScrollReveal>
-          <div className="text-center mb-10">
-            <span className="inline-flex items-center px-3 py-1 rounded-full bg-brand-orange/10 text-brand-orange text-xs font-semibold mb-3">
-              🔥 Best Sellers
-            </span>
-            <h2 className="text-2xl sm:text-4xl font-bold text-foreground mb-3">
-              Our Most Loved <span className="text-gradient-green">Products</span>
+          <div className="text-center mb-10 sm:mb-14 max-w-2xl mx-auto">
+            <span className="text-eyebrow text-brand-orange mb-4 block">— Best sellers</span>
+            <h2 className="text-display-2 text-foreground mb-4">
+              Our most loved{" "}
+              <span className="text-gradient-green">products</span>
             </h2>
-            <p className="text-muted-foreground text-sm sm:text-base max-w-md mx-auto">
-              Premium Ayurvedic wellness products trusted by thousands across India
+            <p className="text-muted-foreground text-sm sm:text-base leading-relaxed">
+              Premium Ayurvedic wellness products trusted by thousands of families across India.
             </p>
           </div>
         </ScrollReveal>
@@ -78,7 +77,7 @@ export function ProductShowcase() {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-5">
             {products.map((product, i) => {
               const image = product.node.images.edges[0]?.node;
               const price = product.node.priceRange.minVariantPrice;

@@ -30,23 +30,26 @@ const blogPosts = [
 
 export function BlogPreview() {
   return (
-    <section className="py-14 sm:py-20">
+    <section className="py-16 sm:py-24 lg:py-28">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <ScrollReveal>
-          <div className="flex items-end justify-between mb-10">
-            <div>
-              <span className="inline-flex items-center px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-semibold mb-3">
-                📖 Health Blog
-              </span>
-              <h2 className="text-2xl sm:text-4xl font-bold text-foreground">
-                Ayurvedic <span className="text-gradient-green">Insights</span>
+          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-10 sm:mb-14">
+            <div className="max-w-xl">
+              <span className="text-eyebrow text-primary mb-4 block">— Health blog</span>
+              <h2 className="text-display-2 text-foreground mb-3">
+                Ayurvedic{" "}
+                <span className="text-gradient-green">insights</span>
               </h2>
+              <p className="text-muted-foreground text-sm sm:text-base leading-relaxed">
+                Expert tips, natural remedies, and wellness wisdom — distilled.
+              </p>
             </div>
             <Link
               to="/blog"
-              className="hidden sm:inline-flex items-center px-5 py-2.5 rounded-xl text-sm font-semibold text-primary border border-primary/20 hover:bg-primary/5 transition-colors"
+              className="hidden sm:inline-flex items-center gap-1.5 px-5 py-3 rounded-full text-sm font-semibold text-primary border border-primary/25 hover:bg-primary/5 hover:border-primary/40 transition-all flex-shrink-0"
             >
-              View All →
+              View all articles
+              <span aria-hidden>→</span>
             </Link>
           </div>
         </ScrollReveal>

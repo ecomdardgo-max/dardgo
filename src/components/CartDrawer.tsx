@@ -33,7 +33,7 @@ export function CartDrawer() {
           )}
         </button>
       </SheetTrigger>
-      <SheetContent className="w-full sm:max-w-lg flex flex-col h-full">
+      <SheetContent data-lenis-prevent className="w-full sm:max-w-lg flex flex-col h-full">
         <SheetHeader className="flex-shrink-0">
           <SheetTitle className="font-[var(--font-display)]">Shopping Cart</SheetTitle>
           <SheetDescription>
@@ -53,27 +53,27 @@ export function CartDrawer() {
               <div className="flex-1 overflow-y-auto pr-2 min-h-0">
                 <div className="space-y-4">
                   {items.map((item) => (
-                    <div key={item.variantId} className="flex gap-4 p-3 rounded-lg bg-muted/50">
+                    <div key={item.variantId} className="flex gap-3 p-3 rounded-lg bg-muted/50">
                       <div className="w-16 h-16 bg-muted rounded-md overflow-hidden flex-shrink-0">
                         {item.product.node.images?.edges?.[0]?.node && (
                           <img src={item.product.node.images.edges[0].node.url} alt={item.product.node.title} className="w-full h-full object-cover" />
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h4 className="font-medium truncate text-sm">{item.product.node.title}</h4>
-                        <p className="text-xs text-muted-foreground">{item.selectedOptions.map(o => o.value).join(' • ')}</p>
+                        <h4 className="font-medium line-clamp-2 text-sm leading-snug">{item.product.node.title}</h4>
+                        <p className="text-[11px] text-muted-foreground truncate">{item.selectedOptions.map(o => o.value).join(' • ')}</p>
                         <p className="font-semibold text-sm mt-1">₹{parseFloat(item.price.amount).toFixed(0)}</p>
                       </div>
                       <div className="flex flex-col items-end gap-2 flex-shrink-0">
-                        <button onClick={() => removeItem(item.variantId)} className="text-muted-foreground hover:text-destructive transition-colors">
+                        <button aria-label="Remove item" onClick={() => removeItem(item.variantId)} className="text-muted-foreground hover:text-destructive transition-colors">
                           <Trash2 className="h-4 w-4" />
                         </button>
                         <div className="flex items-center gap-1">
-                          <button onClick={() => updateQuantity(item.variantId, item.quantity - 1)} className="h-6 w-6 rounded border border-border flex items-center justify-center text-xs hover:bg-muted">
+                          <button aria-label="Decrease quantity" onClick={() => updateQuantity(item.variantId, item.quantity - 1)} className="h-6 w-6 rounded border border-border flex items-center justify-center text-xs hover:bg-muted">
                             <Minus className="h-3 w-3" />
                           </button>
                           <span className="w-6 text-center text-sm">{item.quantity}</span>
-                          <button onClick={() => updateQuantity(item.variantId, item.quantity + 1)} className="h-6 w-6 rounded border border-border flex items-center justify-center text-xs hover:bg-muted">
+                          <button aria-label="Increase quantity" onClick={() => updateQuantity(item.variantId, item.quantity + 1)} className="h-6 w-6 rounded border border-border flex items-center justify-center text-xs hover:bg-muted">
                             <Plus className="h-3 w-3" />
                           </button>
                         </div>

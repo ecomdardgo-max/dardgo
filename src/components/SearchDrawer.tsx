@@ -50,6 +50,7 @@ export function SearchDrawer({ isOpen, onClose }: SearchDrawerProps) {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
+          data-lenis-prevent
           className="fixed inset-0 z-[60] bg-foreground/40 backdrop-blur-sm"
           onClick={onClose}
         >
@@ -58,7 +59,7 @@ export function SearchDrawer({ isOpen, onClose }: SearchDrawerProps) {
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: -20, opacity: 0 }}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className="bg-card rounded-b-3xl max-w-2xl mx-auto shadow-2xl overflow-hidden"
+            className="bg-card sm:rounded-b-3xl max-w-2xl mx-auto shadow-2xl overflow-hidden max-h-[100dvh] sm:max-h-[80vh] flex flex-col pt-[env(safe-area-inset-top)]"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="p-4 sm:p-6">

@@ -73,18 +73,18 @@ function BlogDetailPage() {
 
           {/* Hero */}
           <ScrollReveal>
-            <div className="aspect-[2/1] bg-gradient-hero rounded-3xl flex items-center justify-center mb-8">
-              <span className="text-6xl">🌿</span>
+            <div className="aspect-[2/1] bg-gradient-hero rounded-3xl flex items-center justify-center mb-6 sm:mb-8">
+              <span className="text-5xl sm:text-6xl">🌿</span>
             </div>
           </ScrollReveal>
 
           <ScrollReveal>
-            <div className="flex items-center gap-3 mb-4">
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-2 mb-4">
               <span className="text-xs font-semibold text-primary bg-primary/8 px-2.5 py-1 rounded-full">{post.category}</span>
               <span className="flex items-center gap-1 text-xs text-muted-foreground"><Clock className="w-3 h-3" />{post.readTime}</span>
               <span className="flex items-center gap-1 text-xs text-muted-foreground"><Calendar className="w-3 h-3" />{post.date}</span>
             </div>
-            <h1 className="text-2xl sm:text-4xl font-bold text-foreground mb-8 leading-tight">{post.title}</h1>
+            <h1 className="text-xl sm:text-4xl font-bold text-foreground mb-6 sm:mb-8 leading-tight break-words">{post.title}</h1>
           </ScrollReveal>
 
           {/* Content */}

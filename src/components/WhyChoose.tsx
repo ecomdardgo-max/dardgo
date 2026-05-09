@@ -12,23 +12,22 @@ const reasons = [
 
 export function WhyChoose() {
   return (
-    <section className="py-14 sm:py-20 bg-gradient-cream">
+    <section className="py-16 sm:py-24 lg:py-28 bg-gradient-cream">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <ScrollReveal>
-          <div className="text-center mb-10">
-            <span className="inline-flex items-center px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-semibold mb-3">
-              Why Us?
-            </span>
-            <h2 className="text-2xl sm:text-4xl font-bold text-foreground mb-3">
-              Why Choose <span className="text-gradient-green">DARDGO?</span>
+          <div className="text-center mb-10 sm:mb-14 max-w-2xl mx-auto">
+            <span className="text-eyebrow text-primary mb-4 block">— Why us</span>
+            <h2 className="text-display-2 text-foreground mb-4">
+              Why choose{" "}
+              <span className="text-gradient-green">DARDGO</span>
             </h2>
-            <p className="text-muted-foreground text-sm sm:text-base max-w-md mx-auto">
-              Trusted by thousands for natural, effective wellness
+            <p className="text-muted-foreground text-sm sm:text-base leading-relaxed">
+              Trusted by thousands of families for natural, effective wellness.
             </p>
           </div>
         </ScrollReveal>
 
-        <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-5">
           {reasons.map((r, i) => (
             <ScrollReveal key={r.title} delay={i * 0.08}>
               <div className="group bg-card rounded-3xl p-5 sm:p-6 shadow-card hover:shadow-card-hover transition-all duration-300 hover:-translate-y-1 border border-border/30 text-center h-full">

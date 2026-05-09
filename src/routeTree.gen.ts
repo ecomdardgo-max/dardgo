@@ -9,6 +9,12 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TermsConditionsRouteImport } from './routes/terms-conditions'
+import { Route as ShippingDeliveryRouteImport } from './routes/shipping-delivery'
+import { Route as ReturnsRefundRouteImport } from './routes/returns-refund'
+import { Route as PrivacyPolicyRouteImport } from './routes/privacy-policy'
+import { Route as PointsOfSaleRouteImport } from './routes/points-of-sale'
+import { Route as FaqsRouteImport } from './routes/faqs'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as CartRouteImport } from './routes/cart'
@@ -19,6 +25,36 @@ import { Route as ProductHandleRouteImport } from './routes/product.$handle'
 import { Route as CollectionsHandleRouteImport } from './routes/collections.$handle'
 import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
 
+const TermsConditionsRoute = TermsConditionsRouteImport.update({
+  id: '/terms-conditions',
+  path: '/terms-conditions',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ShippingDeliveryRoute = ShippingDeliveryRouteImport.update({
+  id: '/shipping-delivery',
+  path: '/shipping-delivery',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReturnsRefundRoute = ReturnsRefundRouteImport.update({
+  id: '/returns-refund',
+  path: '/returns-refund',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyPolicyRoute = PrivacyPolicyRouteImport.update({
+  id: '/privacy-policy',
+  path: '/privacy-policy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PointsOfSaleRoute = PointsOfSaleRouteImport.update({
+  id: '/points-of-sale',
+  path: '/points-of-sale',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FaqsRoute = FaqsRouteImport.update({
+  id: '/faqs',
+  path: '/faqs',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ContactRoute = ContactRouteImport.update({
   id: '/contact',
   path: '/contact',
@@ -72,6 +108,12 @@ export interface FileRoutesByFullPath {
   '/cart': typeof CartRoute
   '/checkout': typeof CheckoutRoute
   '/contact': typeof ContactRoute
+  '/faqs': typeof FaqsRoute
+  '/points-of-sale': typeof PointsOfSaleRoute
+  '/privacy-policy': typeof PrivacyPolicyRoute
+  '/returns-refund': typeof ReturnsRefundRoute
+  '/shipping-delivery': typeof ShippingDeliveryRoute
+  '/terms-conditions': typeof TermsConditionsRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/collections/$handle': typeof CollectionsHandleRoute
   '/product/$handle': typeof ProductHandleRoute
@@ -83,6 +125,12 @@ export interface FileRoutesByTo {
   '/cart': typeof CartRoute
   '/checkout': typeof CheckoutRoute
   '/contact': typeof ContactRoute
+  '/faqs': typeof FaqsRoute
+  '/points-of-sale': typeof PointsOfSaleRoute
+  '/privacy-policy': typeof PrivacyPolicyRoute
+  '/returns-refund': typeof ReturnsRefundRoute
+  '/shipping-delivery': typeof ShippingDeliveryRoute
+  '/terms-conditions': typeof TermsConditionsRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/collections/$handle': typeof CollectionsHandleRoute
   '/product/$handle': typeof ProductHandleRoute
@@ -95,6 +143,12 @@ export interface FileRoutesById {
   '/cart': typeof CartRoute
   '/checkout': typeof CheckoutRoute
   '/contact': typeof ContactRoute
+  '/faqs': typeof FaqsRoute
+  '/points-of-sale': typeof PointsOfSaleRoute
+  '/privacy-policy': typeof PrivacyPolicyRoute
+  '/returns-refund': typeof ReturnsRefundRoute
+  '/shipping-delivery': typeof ShippingDeliveryRoute
+  '/terms-conditions': typeof TermsConditionsRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/collections/$handle': typeof CollectionsHandleRoute
   '/product/$handle': typeof ProductHandleRoute
@@ -108,6 +162,12 @@ export interface FileRouteTypes {
     | '/cart'
     | '/checkout'
     | '/contact'
+    | '/faqs'
+    | '/points-of-sale'
+    | '/privacy-policy'
+    | '/returns-refund'
+    | '/shipping-delivery'
+    | '/terms-conditions'
     | '/blog/$slug'
     | '/collections/$handle'
     | '/product/$handle'
@@ -119,6 +179,12 @@ export interface FileRouteTypes {
     | '/cart'
     | '/checkout'
     | '/contact'
+    | '/faqs'
+    | '/points-of-sale'
+    | '/privacy-policy'
+    | '/returns-refund'
+    | '/shipping-delivery'
+    | '/terms-conditions'
     | '/blog/$slug'
     | '/collections/$handle'
     | '/product/$handle'
@@ -130,6 +196,12 @@ export interface FileRouteTypes {
     | '/cart'
     | '/checkout'
     | '/contact'
+    | '/faqs'
+    | '/points-of-sale'
+    | '/privacy-policy'
+    | '/returns-refund'
+    | '/shipping-delivery'
+    | '/terms-conditions'
     | '/blog/$slug'
     | '/collections/$handle'
     | '/product/$handle'
@@ -142,12 +214,60 @@ export interface RootRouteChildren {
   CartRoute: typeof CartRoute
   CheckoutRoute: typeof CheckoutRoute
   ContactRoute: typeof ContactRoute
+  FaqsRoute: typeof FaqsRoute
+  PointsOfSaleRoute: typeof PointsOfSaleRoute
+  PrivacyPolicyRoute: typeof PrivacyPolicyRoute
+  ReturnsRefundRoute: typeof ReturnsRefundRoute
+  ShippingDeliveryRoute: typeof ShippingDeliveryRoute
+  TermsConditionsRoute: typeof TermsConditionsRoute
   CollectionsHandleRoute: typeof CollectionsHandleRoute
   ProductHandleRoute: typeof ProductHandleRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/terms-conditions': {
+      id: '/terms-conditions'
+      path: '/terms-conditions'
+      fullPath: '/terms-conditions'
+      preLoaderRoute: typeof TermsConditionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/shipping-delivery': {
+      id: '/shipping-delivery'
+      path: '/shipping-delivery'
+      fullPath: '/shipping-delivery'
+      preLoaderRoute: typeof ShippingDeliveryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/returns-refund': {
+      id: '/returns-refund'
+      path: '/returns-refund'
+      fullPath: '/returns-refund'
+      preLoaderRoute: typeof ReturnsRefundRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy-policy': {
+      id: '/privacy-policy'
+      path: '/privacy-policy'
+      fullPath: '/privacy-policy'
+      preLoaderRoute: typeof PrivacyPolicyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/points-of-sale': {
+      id: '/points-of-sale'
+      path: '/points-of-sale'
+      fullPath: '/points-of-sale'
+      preLoaderRoute: typeof PointsOfSaleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/faqs': {
+      id: '/faqs'
+      path: '/faqs'
+      fullPath: '/faqs'
+      preLoaderRoute: typeof FaqsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/contact': {
       id: '/contact'
       path: '/contact'
@@ -231,6 +351,12 @@ const rootRouteChildren: RootRouteChildren = {
   CartRoute: CartRoute,
   CheckoutRoute: CheckoutRoute,
   ContactRoute: ContactRoute,
+  FaqsRoute: FaqsRoute,
+  PointsOfSaleRoute: PointsOfSaleRoute,
+  PrivacyPolicyRoute: PrivacyPolicyRoute,
+  ReturnsRefundRoute: ReturnsRefundRoute,
+  ShippingDeliveryRoute: ShippingDeliveryRoute,
+  TermsConditionsRoute: TermsConditionsRoute,
   CollectionsHandleRoute: CollectionsHandleRoute,
   ProductHandleRoute: ProductHandleRoute,
 }

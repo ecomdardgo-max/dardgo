@@ -5,7 +5,6 @@ import { TrustStrip } from "@/components/TrustStrip";
 import { TrustedBySection } from "@/components/TrustedBySection";
 import { ProductShowcase } from "@/components/ProductShowcase";
 import { CollectionShowcases } from "@/components/CollectionShowcases";
-import { CategoriesSection } from "@/components/CategoriesSection";
 import { AyurvedicBenefits } from "@/components/AyurvedicBenefits";
 import { WhyChoose } from "@/components/WhyChoose";
 import { HowItWorks } from "@/components/HowItWorks";
@@ -37,7 +36,6 @@ function HomePage() {
       <TrustedBySection />
       <ProductShowcase />
       <CollectionShowcases />
-      <CategoriesSection />
       <AyurvedicBenefits />
       <WhyChoose />
       <HowItWorks />

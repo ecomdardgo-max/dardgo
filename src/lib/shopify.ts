@@ -213,6 +213,80 @@ export interface ShopifyCollectionWithProducts {
   };
 }
 
+export interface ShopifyCollection {
+  id: string;
+  handle: string;
+  title: string;
+  description: string;
+  image?: {
+    url: string;
+    altText: string | null;
+  } | null;
+}
+
+/** Handles used by CSV import tags (`category-<handle>`) + homepage category cards (same order as smart collections). */
+export const CATEGORY_COLLECTION_HANDLES = [
+  "pain-relief-oils",
+  "ayurvedic-tablets",
+  "ayurvedic-beauty",
+  "ayurvedic-halwa",
+  "ayurvedic-powder",
+  "ayurvedic-capsules",
+] as const;
+
+/** Loads exactly those collections by handle so the grid matches CSV/category tagging order (not arbitrary first-N). */
+export const STOREFRONT_CATEGORY_CARDS_QUERY = `
+  fragment CategoryCardCollection on Collection {
+    id
+    handle
+    title
+    description
+    image {
+      url
+      altText
+    }
+  }
+  query CategoryCardsCollections {
+    col0: collection(handle: "pain-relief-oils") {
+      ...CategoryCardCollection
+    }
+    col1: collection(handle: "ayurvedic-tablets") {
+      ...CategoryCardCollection
+    }
+    col2: collection(handle: "ayurvedic-beauty") {
+      ...CategoryCardCollection
+    }
+    col3: collection(handle: "ayurvedic-halwa") {
+      ...CategoryCardCollection
+    }
+    col4: collection(handle: "ayurvedic-powder") {
+      ...CategoryCardCollection
+    }
+    col5: collection(handle: "ayurvedic-capsules") {
+      ...CategoryCardCollection
+    }
+  }
+`;
+
+export const STOREFRONT_COLLECTIONS_QUERY = `
+  query GetCollections($first: Int!) {
+    collections(first: $first) {
+      edges {
+        node {
+          id
+          handle
+          title
+          description
+          image {
+            url
+            altText
+          }
+        }
+      }
+    }
+  }
+`;
+
 export const STOREFRONT_PRODUCT_BY_HANDLE_QUERY = `
   query GetProductByHandle($handle: String!) {
     productByHandle(handle: $handle) {

@@ -50,7 +50,11 @@ function CartPage() {
                 </div>
                 <h2 className="text-xl font-semibold mb-2">Your cart is empty</h2>
                 <p className="text-muted-foreground text-sm mb-6">Looks like you haven't added any products yet</p>
-                <Link to="/" className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-primary text-primary-foreground font-semibold text-sm hover:bg-primary/90 transition-colors">
+                <Link
+                  to="/collections/$handle"
+                  params={{ handle: "all" }}
+                  className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-primary text-primary-foreground font-semibold text-sm hover:bg-primary/90 transition-colors"
+                >
                   Continue Shopping <ArrowRight className="w-4 h-4" />
                 </Link>
               </div>

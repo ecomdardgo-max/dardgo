@@ -38,7 +38,8 @@ const __dirname = path.dirname(__filename);
 // -----------------------------------------------------------------------------
 // Env loading (parse `.env.local` so the script runs without extra dev deps).
 // -----------------------------------------------------------------------------
-function loadEnvFile(file) {
+/** If override is true, file values replace existing process.env (so `.env.local` wins over shell). */
+function loadEnvFile(file, override = false) {
   if (!fs.existsSync(file)) return;
   const raw = fs.readFileSync(file, "utf-8");
   for (const line of raw.split(/\r?\n/)) {
@@ -54,12 +55,13 @@ function loadEnvFile(file) {
     ) {
       value = value.slice(1, -1);
     }
-    if (!(key in process.env)) process.env[key] = value;
+    if (override || !(key in process.env)) process.env[key] = value;
   }
 }
 
-loadEnvFile(path.resolve(__dirname, "..", ".env.local"));
-loadEnvFile(path.resolve(__dirname, "..", ".env"));
+const repoRoot = path.resolve(__dirname, "..");
+loadEnvFile(path.join(repoRoot, ".env"), false);
+loadEnvFile(path.join(repoRoot, ".env.local"), true);
 
 const STORE_DOMAIN =
   process.env.SHOPIFY_STORE_DOMAIN ||

@@ -50,6 +50,12 @@ const FEATURED_COLLECTIONS: Array<{
     tagline: "Pure power of Ayurveda — ancient wisdom in every spoon.",
     accent: "primary",
   },
+  {
+    handle: "ayurvedic-capsules",
+    title: "Ayurvedic Capsules",
+    tagline: "Concentrated herbal goodness in every capsule.",
+    accent: "orange",
+  },
 ];
 
 const PRODUCTS_PER_COLLECTION = 4;
@@ -62,9 +68,8 @@ const accentClasses: Record<string, { eyebrow: string; gradient: string }> = {
 };
 
 export function CollectionShowcases() {
-  // Each entry holds the products that match the category's tag (or null while
-  // loading / on error). Driven by Storefront product search using the tag
-  // applied during CSV import — no Shopify collection setup needed.
+  // Each section loads products via Storefront `tag:category-<handle>` — same tags as CSV import.
+  // Shopify smart collections (npm run seed:smart-collections) use the same tags so collection pages stay in sync.
   const [productsByCategory, setProductsByCategory] = useState<
     Array<ShopifyProduct[] | null>
   >([]);

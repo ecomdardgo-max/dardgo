@@ -825,48 +825,14 @@ function ProductPage() {
                   />
                 </div>
 
-                {/* Description with bullet features */}
+                {/* Product description (from Shopify) */}
                 <div className="border-t border-border/50 pt-4 sm:pt-5 mb-2">
                   <h2 className="text-[15px] sm:text-base font-bold text-foreground mb-2.5 sm:mb-3">
                     Why this product?
                   </h2>
-                  <p className="text-[13px] sm:text-sm text-muted-foreground leading-relaxed mb-3 sm:mb-4">
+                  <p className="text-[13px] sm:text-sm text-muted-foreground leading-relaxed">
                     {product.description}
                   </p>
-                  <div className="space-y-2 sm:space-y-2.5">
-                    {[
-                      {
-                        label: "Bone Discomfort Relief:",
-                        text: "Formulated with Shallaki and other Ayurvedic herbs to soothe joint and bone stiffness.",
-                      },
-                      {
-                        label: "Detoxification Support:",
-                        text: "Contains Triphala for mild detoxifying properties.",
-                      },
-                      {
-                        label: "Enhanced Flexibility:",
-                        text: "Helps ease discomfort in bones and joints for smoother daily activities.",
-                      },
-                      {
-                        label: "Natural & Gentle:",
-                        text: "100% herbal ingredients, free from harsh chemicals.",
-                      },
-                      {
-                        label: "Holistic Wellness:",
-                        text: "Combines traditional Ayurvedic principles with modern wellness needs.",
-                      },
-                    ].map((item, i) => (
-                      <div key={i} className="flex items-start gap-2 sm:gap-2.5">
-                        <span className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 sm:mt-2 flex-shrink-0" />
-                        <p className="text-[13px] sm:text-sm text-muted-foreground leading-relaxed">
-                          <span className="font-semibold text-foreground">
-                            {item.label}
-                          </span>{" "}
-                          {item.text}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
                 </div>
               </div>
             </ScrollReveal>

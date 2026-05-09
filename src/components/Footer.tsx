@@ -65,13 +65,13 @@ const categories = [
 ];
 
 const information = [
-  { label: "FAQs", href: "/contact" },
-  { label: "Shipping & Delivery", href: "/contact" },
-  { label: "Returns & Refund", href: "/contact" },
-  { label: "Privacy Policy", href: "/contact" },
-  { label: "Terms & Conditions", href: "/contact" },
-  { label: "Track Order", href: "/contact" },
-  { label: "Points of Sale", href: "/contact" },
+  { label: "FAQs", to: "/faqs" as const },
+  { label: "Shipping & Delivery", to: "/shipping-delivery" as const },
+  { label: "Returns & Refund", to: "/returns-refund" as const },
+  { label: "Privacy Policy", to: "/privacy-policy" as const },
+  { label: "Terms & Conditions", to: "/terms-conditions" as const },
+  { label: "Track Order", to: "/contact" as const },
+  { label: "Points of Sale", to: "/points-of-sale" as const },
 ];
 
 export function Footer() {
@@ -121,8 +121,8 @@ export function Footer() {
       </div>
 
       {/* ===== Main grid ===== */}
-      <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-12 sm:pt-16 pb-8 sm:pb-10">
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-12 gap-8 sm:gap-10 lg:gap-12 mb-10">
+      <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-10 sm:pt-16 pb-8 sm:pb-10">
+        <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-12 gap-5 sm:gap-10 lg:gap-12 mb-10">
           {/* Brand */}
           <div className="col-span-2 sm:col-span-3 lg:col-span-4">
             {/* Brand logo on a soft cream chip so the green/yellow artwork stays
@@ -156,7 +156,7 @@ export function Footer() {
 
             <div>
               <p className="text-eyebrow text-brand-yellow/90 mb-3">Stay Connected</p>
-              <div className="flex gap-2 flex-wrap">
+              <div className="flex gap-2.5 flex-wrap">
                 {socials.map((s) => (
                   <a
                     key={s.label}
@@ -164,7 +164,7 @@ export function Footer() {
                     target="_blank"
                     rel="noopener noreferrer"
                     aria-label={s.label}
-                    className="w-9 h-9 rounded-xl bg-white/10 hover:bg-brand-yellow text-white hover:text-foreground flex items-center justify-center transition-all hover:scale-105 hover:-translate-y-0.5 ring-1 ring-white/15 hover:ring-brand-yellow"
+                    className="w-10 h-10 rounded-xl bg-white/10 hover:bg-brand-yellow text-white hover:text-foreground flex items-center justify-center transition-all hover:scale-105 ring-1 ring-white/15 hover:ring-brand-yellow"
                   >
                     <svg
                       className="w-[15px] h-[15px]"
@@ -180,71 +180,77 @@ export function Footer() {
             </div>
           </div>
 
+          {/* Categories */}
+          <div className="lg:col-span-3">
+            <h4 className="text-eyebrow text-brand-yellow/90 mb-4 sm:mb-5">Categories</h4>
+            <nav className="flex flex-col gap-3">
+              {categories.map((cat, idx) => (
+                <a
+                  key={cat}
+                  href="/#products"
+                  className={`text-sm text-white/80 hover:text-brand-yellow transition-colors inline-block w-fit py-0.5 ${idx > 3 ? "hidden sm:inline-block" : ""}`}
+                >
+                  {cat}
+                </a>
+              ))}
+              <a
+                href="/#products"
+                className="sm:hidden inline-flex items-center justify-center mt-1 rounded-xl border border-brand-yellow/40 bg-brand-yellow/15 px-3 py-2 text-xs font-bold text-brand-yellow"
+              >
+                View all categories
+              </a>
+            </nav>
+          </div>
+
           {/* Quick Links */}
           <div className="lg:col-span-2">
-            <h4 className="text-eyebrow text-brand-yellow/90 mb-5">Quick links</h4>
+            <h4 className="text-eyebrow text-brand-yellow/90 mb-4 sm:mb-5">Quick links</h4>
             <nav className="flex flex-col gap-3">
               <Link
                 to="/"
-                className="text-sm text-white/75 hover:text-brand-yellow transition-colors hover:translate-x-0.5 inline-block w-fit"
+                className="text-sm text-white/80 hover:text-brand-yellow transition-colors inline-block w-fit py-0.5"
               >
                 Home
               </Link>
               <a
                 href="/#products"
-                className="text-sm text-white/75 hover:text-brand-yellow transition-colors hover:translate-x-0.5 inline-block w-fit"
+                className="text-sm text-white/80 hover:text-brand-yellow transition-colors inline-block w-fit py-0.5"
               >
                 Shop Products
               </a>
               <Link
                 to="/about"
-                className="text-sm text-white/75 hover:text-brand-yellow transition-colors hover:translate-x-0.5 inline-block w-fit"
+                className="text-sm text-white/80 hover:text-brand-yellow transition-colors inline-block w-fit py-0.5"
               >
                 About Us
               </Link>
               <Link
                 to="/blog"
-                className="text-sm text-white/75 hover:text-brand-yellow transition-colors hover:translate-x-0.5 inline-block w-fit"
+                className="text-sm text-white/80 hover:text-brand-yellow transition-colors inline-block w-fit py-0.5"
               >
                 Health Blog
               </Link>
               <Link
                 to="/contact"
-                className="text-sm text-white/75 hover:text-brand-yellow transition-colors hover:translate-x-0.5 inline-block w-fit"
+                className="text-sm text-white/80 hover:text-brand-yellow transition-colors inline-block w-fit py-0.5"
               >
                 Contact
               </Link>
             </nav>
           </div>
 
-          {/* Categories */}
-          <div className="lg:col-span-3">
-            <h4 className="text-eyebrow text-brand-yellow/90 mb-5">Categories</h4>
-            <nav className="flex flex-col gap-3">
-              {categories.map((cat) => (
-                <a
-                  key={cat}
-                  href="/#products"
-                  className="text-sm text-white/75 hover:text-brand-yellow transition-colors hover:translate-x-0.5 inline-block w-fit"
-                >
-                  {cat}
-                </a>
-              ))}
-            </nav>
-          </div>
-
           {/* Information */}
           <div className="lg:col-span-3">
-            <h4 className="text-eyebrow text-brand-yellow/90 mb-5">Information</h4>
+            <h4 className="text-eyebrow text-brand-yellow/90 mb-4 sm:mb-5">Information</h4>
             <nav className="flex flex-col gap-3">
-              {information.map((item) => (
-                <a
+              {information.map((item, idx) => (
+                <Link
                   key={item.label}
-                  href={item.href}
-                  className="text-sm text-white/75 hover:text-brand-yellow transition-colors hover:translate-x-0.5 inline-block w-fit"
+                  to={item.to}
+                  className={`text-sm text-white/80 hover:text-brand-yellow transition-colors inline-block w-fit py-0.5 ${idx > 4 ? "hidden sm:inline-block" : ""}`}
                 >
                   {item.label}
-                </a>
+                </Link>
               ))}
             </nav>
           </div>

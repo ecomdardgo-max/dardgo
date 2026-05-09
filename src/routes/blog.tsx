@@ -18,122 +18,15 @@ import { Footer } from "@/components/Footer";
 import { WhatsAppFloat } from "@/components/WhatsAppFloat";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
 import { ScrollReveal } from "@/components/ScrollReveal";
+import {
+  dardgoBlogPostsMeta,
+  type DardgoBlogCategory,
+} from "@/content/dardgoBlogPosts";
 
-interface BlogPost {
-  slug: string;
-  title: string;
-  excerpt: string;
-  category: BlogCategory;
-  author: string;
-  date: string;
-  readTime: string;
-  featured?: boolean;
-  trending?: boolean;
-  tags: string[];
-}
+type BlogCategory = DardgoBlogCategory;
+type BlogPost = (typeof dardgoBlogPostsMeta)[number];
 
-type BlogCategory =
-  | "Wellness"
-  | "Joint Care"
-  | "Lifestyle"
-  | "Pain Relief"
-  | "Immunity"
-  | "Ingredients"
-  | "Beauty";
-
-const blogPosts: BlogPost[] = [
-  {
-    slug: "benefits-of-ayurvedic-pain-relief",
-    title: "5 Benefits of Ayurvedic Pain Relief Over Chemical Painkillers",
-    excerpt:
-      "Discover why millions of Indians are switching to natural Ayurvedic remedies for long-lasting pain relief — without the side effects of NSAIDs.",
-    category: "Wellness",
-    author: "DARDGO Editorial",
-    date: "May 2, 2026",
-    readTime: "5 min",
-    featured: true,
-    trending: true,
-    tags: ["pain relief", "ayurveda", "natural", "healing"],
-  },
-  {
-    slug: "joint-pain-home-remedies",
-    title: "10 Ayurvedic Home Remedies for Joint Pain That Actually Work",
-    excerpt:
-      "From turmeric to ashwagandha — learn how these powerful herbs can transform your joint health naturally and bring lasting comfort.",
-    category: "Joint Care",
-    author: "Dr. Vaidya Sharma",
-    date: "Apr 28, 2026",
-    readTime: "7 min",
-    trending: true,
-    tags: ["joint pain", "home remedies", "turmeric", "ashwagandha"],
-  },
-  {
-    slug: "daily-ayurvedic-routine",
-    title: "The Complete Ayurvedic Daily Routine (Dinacharya) for Better Health",
-    excerpt:
-      "Follow this time-tested routine to boost immunity, reduce pain, and improve overall wellness — one habit at a time.",
-    category: "Lifestyle",
-    author: "DARDGO Editorial",
-    date: "Apr 22, 2026",
-    readTime: "6 min",
-    tags: ["dinacharya", "daily routine", "wellness", "ayurveda"],
-  },
-  {
-    slug: "turmeric-benefits",
-    title: "Turmeric: The Golden Spice of Ayurveda and Its Incredible Benefits",
-    excerpt:
-      "Learn how turmeric has been used for thousands of years in Ayurveda to treat inflammation, pain, and boost immunity.",
-    category: "Ingredients",
-    author: "Dr. Anjali Rao",
-    date: "Apr 15, 2026",
-    readTime: "4 min",
-    tags: ["turmeric", "haldi", "anti-inflammatory", "spices"],
-  },
-  {
-    slug: "back-pain-ayurvedic-treatment",
-    title: "Say Goodbye to Back Pain: Ayurvedic Treatments That Work",
-    excerpt:
-      "A comprehensive guide to treating chronic back pain with Ayurvedic oils, targeted exercises, and lifestyle adjustments.",
-    category: "Pain Relief",
-    author: "DARDGO Editorial",
-    date: "Apr 10, 2026",
-    readTime: "8 min",
-    tags: ["back pain", "ayurvedic oil", "spine", "exercises"],
-  },
-  {
-    slug: "immunity-boosting-herbs",
-    title: "Top 7 Ayurvedic Herbs to Boost Your Immunity Naturally",
-    excerpt:
-      "Strengthen your body's natural defenses with these time-tested Ayurvedic herbs and traditional formulations.",
-    category: "Immunity",
-    author: "Dr. Vaidya Sharma",
-    date: "Apr 5, 2026",
-    readTime: "5 min",
-    tags: ["immunity", "herbs", "tulsi", "giloy"],
-  },
-  {
-    slug: "ayurvedic-skincare-glow",
-    title: "Ayurvedic Skincare Secrets for Naturally Glowing Skin",
-    excerpt:
-      "Ditch the chemicals — discover the herbal recipes Ayurveda uses to nourish skin from within for a lasting healthy glow.",
-    category: "Beauty",
-    author: "Dr. Anjali Rao",
-    date: "Mar 30, 2026",
-    readTime: "6 min",
-    tags: ["skincare", "beauty", "glow", "natural"],
-  },
-  {
-    slug: "ashwagandha-stress-relief",
-    title: "Ashwagandha: The Ultimate Adaptogen for Stress & Sleep",
-    excerpt:
-      "How this ancient root helps the body adapt to stress, improve sleep quality, and support overall vitality.",
-    category: "Ingredients",
-    author: "DARDGO Editorial",
-    date: "Mar 24, 2026",
-    readTime: "5 min",
-    tags: ["ashwagandha", "stress", "sleep", "adaptogen"],
-  },
-];
+const blogPosts: BlogPost[] = dardgoBlogPostsMeta;
 
 // Per-category visual identity — gradient cover + accent colour for chips and
 // category links so each topic has a distinct feel without needing real photos.
@@ -188,7 +81,7 @@ export const Route = createFileRoute("/blog")({
       {
         name: "description",
         content:
-          "Expert Ayurvedic health tips, natural remedies, and wellness guides from DARDGO. Learn about pain relief, immunity, beauty, and holistic health.",
+          "Articles from DARDGO’s Know Ayurvedic Products journal — joint care, blood sugar wellness, energy & stamina, and Ayurvedic pain relief.",
       },
     ],
   }),
@@ -248,8 +141,9 @@ function BlogPage() {
                 Ayurvedic <span className="text-gradient-green">insights</span> for modern living
               </h1>
               <p className="text-sm sm:text-lg text-muted-foreground leading-relaxed mb-5 sm:mb-8 max-w-2xl mx-auto px-2">
-                Expert tips, natural remedies, and wellness guides — written by Ayurvedic doctors and
-                rooted in 5,000 years of healing tradition.
+                Practical guides from our{" "}
+                <span className="text-foreground/90 font-medium">Know Ayurvedic Products</span> journal
+                — joint care, blood sugar wellness, natural energy, and Ayurvedic pain relief.
               </p>
 
               {/* Search bar */}

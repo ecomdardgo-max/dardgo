@@ -5,44 +5,16 @@ import { WhatsAppFloat } from "@/components/WhatsAppFloat";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
 import { ScrollReveal } from "@/components/ScrollReveal";
 import { ChevronLeft, Share2, Clock, Calendar } from "lucide-react";
-
-const blogData: Record<string, { title: string; category: string; date: string; readTime: string; content: string[] }> = {
-  "benefits-of-ayurvedic-pain-relief": {
-    title: "5 Benefits of Ayurvedic Pain Relief Over Chemical Painkillers",
-    category: "Wellness",
-    date: "May 2, 2026",
-    readTime: "5 min read",
-    content: [
-      "In today's fast-paced world, pain has become an unwanted companion for millions. While chemical painkillers offer quick relief, they come with a host of side effects. Ayurvedic pain relief offers a natural, holistic alternative that addresses the root cause of pain.",
-      "1. No Side Effects: Unlike NSAIDs and other chemical painkillers that can cause liver damage, kidney problems, and gastric issues, Ayurvedic remedies use natural herbs that are gentle on your body.",
-      "2. Long-lasting Relief: Ayurvedic treatments work at the root cause of pain, providing sustained relief rather than just masking symptoms temporarily.",
-      "3. Holistic Healing: Ayurveda doesn't just treat pain — it improves overall wellness, strengthening joints, muscles, and the immune system simultaneously.",
-      "4. Safe for All Ages: From children to elderly, Ayurvedic pain relief products are safe for the entire family, making them a versatile healthcare solution.",
-      "5. Cost-Effective: With no recurring prescription costs and no expensive specialist visits, Ayurvedic pain relief is accessible and affordable for every Indian household.",
-    ],
-  },
-  "joint-pain-home-remedies": {
-    title: "10 Ayurvedic Home Remedies for Joint Pain That Actually Work",
-    category: "Joint Care",
-    date: "Apr 28, 2026",
-    readTime: "7 min read",
-    content: [
-      "Joint pain affects millions of Indians, especially as we age. While modern medicine offers temporary solutions, Ayurveda provides time-tested remedies that have been used for centuries.",
-      "Turmeric (Haldi) is one of the most powerful anti-inflammatory herbs in Ayurveda. Mix a teaspoon of turmeric with warm milk and drink daily.",
-      "Ashwagandha strengthens joints and reduces inflammation. It's available in powder and capsule form for easy consumption.",
-      "Regular oil massage with Ayurvedic pain relief oils improves blood circulation and reduces stiffness in joints.",
-    ],
-  },
-};
+import { getDardgoBlogPost } from "@/content/dardgoBlogPosts";
 
 const defaultContent = {
   title: "Ayurvedic Health Article",
   category: "Wellness",
-  date: "2026",
+  date: "—",
   readTime: "5 min read",
   content: [
-    "This article is coming soon. Stay tuned for expert Ayurvedic health insights from DARDGO.",
-    "In the meantime, explore our range of premium Ayurvedic products that are 100% natural and backed by centuries of healing wisdom.",
+    "This article is not available. Browse our Know Ayurvedic Products articles from the blog listing.",
+    "Explore DARDGO’s premium Ayurvedic products — 100% natural and rooted in traditional wisdom.",
   ],
 };
 
@@ -50,15 +22,31 @@ export const Route = createFileRoute("/blog/$slug")({
   component: BlogDetailPage,
   head: ({ params }) => ({
     meta: [
-      { title: `${blogData[params.slug]?.title || "Blog"} — DARDGO` },
-      { name: "description", content: blogData[params.slug]?.content[0] || "Ayurvedic health insights from DARDGO." },
+      {
+        title: `${getDardgoBlogPost(params.slug)?.title || "Blog"} — DARDGO`,
+      },
+      {
+        name: "description",
+        content:
+          getDardgoBlogPost(params.slug)?.excerpt ||
+          "Ayurvedic health insights from DARDGO — Know Ayurvedic Products.",
+      },
     ],
   }),
 });
 
 function BlogDetailPage() {
   const { slug } = Route.useParams();
-  const post = blogData[slug] || defaultContent;
+  const full = getDardgoBlogPost(slug);
+  const post = full
+    ? {
+        title: full.title,
+        category: full.category,
+        date: full.date,
+        readTime: `${full.readTime} read`,
+        content: full.content,
+      }
+    : defaultContent;
 
   return (
     <div className="min-h-screen">

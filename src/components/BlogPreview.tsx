@@ -1,32 +1,16 @@
 import { ScrollReveal } from "@/components/ScrollReveal";
 import { Link } from "@tanstack/react-router";
+import { dardgoBlogPostsMeta } from "@/content/dardgoBlogPosts";
 
-const blogPosts = [
-  {
-    slug: "benefits-of-ayurvedic-pain-relief",
-    title: "5 Benefits of Ayurvedic Pain Relief Over Chemical Painkillers",
-    excerpt: "Discover why millions of Indians are switching to natural Ayurvedic remedies for long-lasting pain relief without side effects.",
-    category: "Wellness",
-    date: "May 2, 2026",
-    readTime: "5 min read",
-  },
-  {
-    slug: "joint-pain-home-remedies",
-    title: "10 Ayurvedic Home Remedies for Joint Pain That Actually Work",
-    excerpt: "From turmeric to ashwagandha — learn how these powerful herbs can transform your joint health naturally.",
-    category: "Joint Care",
-    date: "Apr 28, 2026",
-    readTime: "7 min read",
-  },
-  {
-    slug: "daily-ayurvedic-routine",
-    title: "The Complete Ayurvedic Daily Routine for Better Health",
-    excerpt: "Follow this time-tested Dinacharya routine to boost immunity, reduce pain, and improve overall wellness.",
-    category: "Lifestyle",
-    date: "Apr 22, 2026",
-    readTime: "6 min read",
-  },
-];
+/** Homepage preview: latest three from the Know Ayurvedic Products journal. */
+const blogPosts = dardgoBlogPostsMeta.slice(0, 3).map((p) => ({
+  slug: p.slug,
+  title: p.title,
+  excerpt: p.excerpt,
+  category: p.category,
+  date: p.date,
+  readTime: `${p.readTime} read`,
+}));
 
 export function BlogPreview() {
   return (

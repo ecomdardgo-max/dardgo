@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "@tanstack/react-router";
 import { Menu, X, ChevronDown, Search, Heart, Sparkles } from "lucide-react";
 import { CartDrawer } from "@/components/CartDrawer";
@@ -6,13 +6,18 @@ import { SearchDrawer } from "@/components/SearchDrawer";
 import { motion, AnimatePresence } from "framer-motion";
 import dardgoLogo from "@/assets/dardgo-logo.webp";
 
-const shopCategories = [
-  { label: "Pain Relief Oils", href: "/#products", emoji: "💧", desc: "Targeted relief" },
-  { label: "Joint Care", href: "/#products", emoji: "🦴", desc: "Mobility support" },
-  { label: "Immunity Boosters", href: "/#products", emoji: "🛡️", desc: "Daily defense" },
-  { label: "Digestive Care", href: "/#products", emoji: "🌿", desc: "Gut wellness" },
-  { label: "Beauty & Skin", href: "/#products", emoji: "✨", desc: "Glow naturally" },
-  { label: "Women Wellness", href: "/#products", emoji: "🌸", desc: "Hormonal balance" },
+const shopCategories: Array<{
+  label: string;
+  handle: string;
+  emoji: string;
+  desc: string;
+}> = [
+  { label: "Pain Relief Oils", handle: "pain-relief-oils", emoji: "💧", desc: "Targeted relief" },
+  { label: "Joint Care", handle: "ayurvedic-tablets", emoji: "🦴", desc: "Mobility support" },
+  { label: "Immunity Boosters", handle: "ayurvedic-capsules", emoji: "🛡️", desc: "Daily defense" },
+  { label: "Digestive Care", handle: "ayurvedic-halwa", emoji: "🌿", desc: "Gut wellness" },
+  { label: "Beauty & Skin", handle: "ayurvedic-beauty", emoji: "✨", desc: "Glow naturally" },
+  { label: "Women Wellness", handle: "ayurvedic-powder", emoji: "🌸", desc: "Hormonal balance" },
 ];
 
 const announcements = [
@@ -32,23 +37,14 @@ const navLinks = [
 
 export function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
-  const [isHidden, setIsHidden] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [shopOpen, setShopOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
-  const lastScrollY = useRef(0);
 
   useEffect(() => {
     const handler = () => {
       const y = window.scrollY;
       setIsScrolled(y > 24);
-      // Smart hide: hide when scrolling down past 120px, show when scrolling up
-      if (y > 160 && y > lastScrollY.current + 4) {
-        setIsHidden(true);
-      } else if (y < lastScrollY.current - 4) {
-        setIsHidden(false);
-      }
-      lastScrollY.current = y;
     };
     window.addEventListener("scroll", handler, { passive: true });
     return () => window.removeEventListener("scroll", handler);
@@ -95,15 +91,15 @@ export function Navbar() {
 
       {/* Main Navbar */}
       <motion.header
-        animate={{ y: isHidden ? "-110%" : "0%" }}
-        transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-        className={`sticky top-0 z-50 transition-[background,box-shadow,backdrop-filter,border-color] duration-500 ${
-          isScrolled
-            ? "glass shadow-soft border-b border-border/60"
-            : "bg-card/95 border-b border-border/30"
-        }`}
+        className="sticky top-0 z-[60] w-full transition-[background,box-shadow,backdrop-filter,border-color] duration-500"
       >
-        <div className="mx-auto max-w-7xl px-3 sm:px-6 lg:px-8">
+        <div
+          className={`w-full px-3 sm:px-6 lg:px-8 transition-[background,border,border-radius,box-shadow,backdrop-filter] duration-500 ${
+            isScrolled
+              ? "glass shadow-soft border-b border-border/60"
+              : "bg-card/95 border-b border-border/30"
+          }`}
+        >
           <div
             className={`flex items-center justify-between gap-2 sm:gap-4 transition-[height] duration-300 ${
               isScrolled ? "h-16 sm:h-[72px]" : "h-[72px] sm:h-[84px]"
@@ -142,7 +138,7 @@ export function Navbar() {
             </Link>
 
             {/* Desktop nav — pill style */}
-            <nav className="hidden lg:flex items-center gap-1 bg-muted/40 rounded-full p-1.5 border border-border/40">
+            <nav className="hidden lg:flex items-center gap-1 bg-muted/55 rounded-full p-1.5 border border-border/45 shadow-sm">
               <Link
                 to="/"
                 className="relative px-5 py-2.5 text-[15px] font-semibold text-foreground/70 hover:text-foreground rounded-full transition-colors"
@@ -185,9 +181,11 @@ export function Navbar() {
                       </div>
                       <div className="grid grid-cols-2 gap-1 p-2">
                         {shopCategories.map((cat) => (
-                          <a
+                          <Link
                             key={cat.label}
-                            href={cat.href}
+                            to="/collections/$handle"
+                            params={{ handle: cat.handle }}
+                            onClick={() => setShopOpen(false)}
                             className="flex items-center gap-3 px-3 py-2.5 rounded-2xl hover:bg-primary/5 transition-colors group"
                           >
                             <span className="text-xl flex-shrink-0">{cat.emoji}</span>
@@ -195,11 +193,13 @@ export function Navbar() {
                               <p className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors leading-tight">{cat.label}</p>
                               <p className="text-[11px] text-muted-foreground">{cat.desc}</p>
                             </div>
-                          </a>
+                          </Link>
                         ))}
                       </div>
                       <div className="border-t border-border/50 px-5 py-3 bg-gradient-cream/40">
-                        <a href="#products" className="text-xs font-semibold text-primary hover:underline">View all products →</a>
+                        <Link to="/collections/all" className="text-xs font-semibold text-primary hover:underline">
+                          View all products →
+                        </Link>
                       </div>
                     </motion.div>
                   )}
@@ -232,13 +232,13 @@ export function Navbar() {
             <div className="flex items-center gap-0.5 sm:gap-1 flex-shrink-0">
               <button
                 onClick={() => setSearchOpen(true)}
-                className="p-2 sm:p-2.5 rounded-xl text-foreground/80 hover:bg-muted hover:text-primary active:scale-95 transition-all"
+                className="p-2 sm:p-2.5 rounded-xl text-foreground/80 border border-transparent hover:border-border/60 hover:bg-muted hover:text-primary active:scale-95 transition-all"
                 aria-label="Search products"
               >
                 <Search className="w-[18px] h-[18px]" strokeWidth={2.2} />
               </button>
               <button
-                className="hidden sm:flex p-2.5 rounded-xl text-foreground/80 hover:bg-muted hover:text-primary active:scale-95 transition-all"
+                className="hidden sm:flex p-2.5 rounded-xl text-foreground/80 border border-transparent hover:border-border/60 hover:bg-muted hover:text-primary active:scale-95 transition-all"
                 aria-label="Wishlist"
               >
                 <Heart className="w-[18px] h-[18px]" strokeWidth={2.2} />
@@ -256,7 +256,7 @@ export function Navbar() {
               animate={{ height: "auto", opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
               transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
-              className="lg:hidden bg-card border-t border-border/50 overflow-hidden max-h-[calc(100dvh-4rem)] overflow-y-auto"
+              className="lg:hidden bg-card/95 backdrop-blur-md border-t border-border/50 overflow-hidden max-h-[calc(100dvh-4rem)] overflow-y-auto"
             >
               <nav className="flex flex-col px-4 py-4 gap-0.5 pb-[calc(1rem+env(safe-area-inset-bottom))]">
                 <Link
@@ -270,15 +270,16 @@ export function Navbar() {
                   <p className="text-eyebrow text-muted-foreground mb-3">Shop Categories</p>
                   <div className="grid grid-cols-2 gap-2">
                     {shopCategories.map((cat) => (
-                      <a
+                      <Link
                         key={cat.label}
-                        href={cat.href}
+                        to="/collections/$handle"
+                        params={{ handle: cat.handle }}
                         onClick={() => setMobileOpen(false)}
                         className="flex items-center gap-2.5 py-2.5 px-3 text-foreground/80 hover:text-primary rounded-2xl hover:bg-primary/5 transition-colors border border-border/40"
                       >
                         <span className="text-lg">{cat.emoji}</span>
                         <span className="text-sm font-semibold leading-tight">{cat.label}</span>
-                      </a>
+                      </Link>
                     ))}
                   </div>
                 </div>

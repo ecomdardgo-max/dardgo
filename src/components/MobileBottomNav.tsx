@@ -69,7 +69,7 @@ export function MobileBottomNav() {
     show ? <div className="absolute -top-0.5 left-1/2 -translate-x-1/2 w-6 h-0.5 rounded-full bg-primary" /> : null;
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 lg:hidden glass border-t border-border/50 pb-[env(safe-area-inset-bottom)]">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 lg:hidden border-t border-border bg-background pb-[env(safe-area-inset-bottom)] shadow-[0_-4px_24px_-12px_rgba(0,0,0,0.08)] dark:shadow-[0_-4px_24px_-12px_rgba(0,0,0,0.35)]">
       <div className="flex items-stretch justify-around h-16 px-0.5 sm:px-2">
         <NavLink isActive={isHome} to="/">
           <Home className={`w-5 h-5 ${isHome ? "stroke-[2.5]" : ""}`} />

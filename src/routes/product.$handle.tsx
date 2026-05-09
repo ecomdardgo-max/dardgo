@@ -43,6 +43,13 @@ import { MobileBottomNav } from "@/components/MobileBottomNav";
 import { ScrollReveal } from "@/components/ScrollReveal";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  type CarouselApi,
+} from "@/components/ui/carousel";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/product/$handle")({
   component: ProductPage,
@@ -143,6 +150,9 @@ function ProductPage() {
   const [product, setProduct] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState(0);
+  const [mobileGalleryApi, setMobileGalleryApi] = useState<CarouselApi | null>(
+    null,
+  );
   const [selectedVariant, setSelectedVariant] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState<typeof TABS[number]>("Key Ingredients");
@@ -192,6 +202,30 @@ function ProductPage() {
     obs.observe(el);
     return () => obs.disconnect();
   }, [product]);
+
+  useEffect(() => {
+    setSelectedImage(0);
+  }, [handle]);
+
+  useEffect(() => {
+    if (!mobileGalleryApi) return;
+    const onSelect = () => {
+      setSelectedImage(mobileGalleryApi.selectedScrollSnap());
+    };
+    mobileGalleryApi.on("select", onSelect);
+    mobileGalleryApi.on("reInit", onSelect);
+    return () => {
+      mobileGalleryApi.off("select", onSelect);
+      mobileGalleryApi.off("reInit", onSelect);
+    };
+  }, [mobileGalleryApi]);
+
+  useEffect(() => {
+    if (!mobileGalleryApi) return;
+    if (mobileGalleryApi.selectedScrollSnap() !== selectedImage) {
+      mobileGalleryApi.scrollTo(selectedImage);
+    }
+  }, [selectedImage, mobileGalleryApi]);
 
   useEffect(() => {
     async function load() {
@@ -378,8 +412,8 @@ function ProductPage() {
     <div className="min-h-screen bg-background">
       <Navbar />
 
-      <div className="py-3 sm:py-6 lg:py-8 pb-40 lg:pb-10">
-        <div className="mx-auto max-w-7xl px-3 sm:px-6 lg:px-8">
+      <div className="py-3 sm:py-6 lg:py-8 pb-40 lg:pb-10 overflow-x-hidden">
+        <div className="mx-auto max-w-7xl px-3 sm:px-6 lg:px-8 w-full min-w-0">
           {/* Breadcrumb */}
           <ScrollReveal>
             <nav className="flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-xs text-muted-foreground mb-4 sm:mb-6 min-w-0">
@@ -396,15 +430,14 @@ function ProductPage() {
             </nav>
           </ScrollReveal>
 
-          <div className="grid lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-14">
+          <div className="grid lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-14 min-w-0">
             {/* ===== IMAGE GALLERY ===== */}
             <ScrollReveal>
-              <div className="lg:sticky lg:top-24">
-                <div className="flex gap-3 sm:gap-4">
-                  {/* Vertical thumbnails (desktop) — easier to scan than a strip
-                      below the main image and frees up vertical space. */}
+              <div className="lg:sticky lg:top-24 min-w-0">
+                {/* Desktop: vertical thumbnails + single main image */}
+                <div className="hidden lg:flex gap-3 sm:gap-4 min-w-0">
                   {images.length > 1 && (
-                    <div className="hidden lg:flex flex-col gap-2 max-h-[560px] overflow-y-auto scrollbar-hide pr-1">
+                    <div className="flex flex-col gap-2 max-h-[560px] overflow-y-auto scrollbar-hide pr-1">
                       {images.map((img: any, i: number) => (
                         <button
                           key={i}
@@ -426,12 +459,11 @@ function ProductPage() {
                     </div>
                   )}
 
-                  {/* Main image stage */}
-                  <div className="relative flex-1 group">
+                  <div className="relative min-w-0 flex-1 group">
                     <button
                       type="button"
                       onClick={() => images[selectedImage] && setLightboxOpen(true)}
-                      className="block w-full aspect-square rounded-2xl overflow-hidden bg-gradient-cream shadow-lg border border-border/30 cursor-zoom-in"
+                      className="block w-full max-w-full aspect-square rounded-2xl overflow-hidden bg-gradient-cream shadow-lg border border-border/30 cursor-zoom-in"
                       aria-label="Zoom image"
                     >
                       <AnimatePresence mode="wait">
@@ -454,8 +486,6 @@ function ProductPage() {
                       </AnimatePresence>
                     </button>
 
-                    {/* Floating badges (top-left). On mobile we drop the
-                        AYUSH chip so it doesn't crowd the wishlist column. */}
                     <div className="absolute top-2.5 left-2.5 sm:top-4 sm:left-4 flex flex-col gap-1 sm:gap-1.5 pointer-events-none">
                       {discount > 0 && (
                         <span className="inline-flex items-center gap-1 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full bg-red-500 text-white text-[10px] sm:text-[11px] font-bold shadow-md">
@@ -473,7 +503,6 @@ function ProductPage() {
                       </span>
                     </div>
 
-                    {/* Wishlist + Share floating actions (top-right) */}
                     <div className="absolute top-2.5 right-2.5 sm:top-4 sm:right-4 flex flex-col gap-1.5 sm:gap-2">
                       <button
                         type="button"
@@ -506,46 +535,139 @@ function ProductPage() {
                         type="button"
                         onClick={() => images[selectedImage] && setLightboxOpen(true)}
                         aria-label="Zoom image"
-                        className="hidden sm:flex w-10 h-10 rounded-full bg-white/95 backdrop-blur shadow-md border border-border/40 items-center justify-center hover:scale-110 transition-transform"
+                        className="flex h-9 w-9 sm:h-10 sm:w-10 rounded-full bg-white/95 backdrop-blur shadow-md border border-border/40 items-center justify-center hover:scale-110 transition-transform"
                       >
-                        <ZoomIn className="w-[18px] h-[18px] text-foreground/70" />
+                        <ZoomIn className="w-[16px] h-[16px] sm:w-[18px] sm:h-[18px] text-foreground/70" />
                       </button>
                     </div>
-
-                    {/* Image counter dot indicator (mobile) */}
-                    {images.length > 1 && (
-                      <div className="lg:hidden absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/55 backdrop-blur text-white text-[11px] font-semibold">
-                        <span>
-                          {selectedImage + 1} / {images.length}
-                        </span>
-                      </div>
-                    )}
                   </div>
                 </div>
 
-                {/* Horizontal thumbnails (mobile / tablet) */}
-                {images.length > 1 && (
-                  <div className="lg:hidden flex gap-2 overflow-x-auto scrollbar-hide pb-1 mt-3">
-                    {images.map((img: any, i: number) => (
+                {/* Mobile / tablet: swipe carousel + dots — avoids wide thumbnail strip */}
+                <div className="lg:hidden w-full min-w-0 max-w-full">
+                  <div className="relative w-full min-w-0">
+                    <Carousel
+                      setApi={setMobileGalleryApi}
+                      opts={{ align: "start", loop: false }}
+                      className="w-full min-w-0"
+                    >
+                      <CarouselContent className="-ml-0 ml-0">
+                        {(images.length ? images : [null]).map((img: any, i: number) => (
+                          <CarouselItem
+                            key={img?.node?.id ?? img?.node?.url ?? `gallery-${i}`}
+                            className="basis-full pl-0"
+                          >
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setSelectedImage(i);
+                                setLightboxOpen(true);
+                              }}
+                              className="block w-full max-w-full aspect-square cursor-zoom-in touch-manipulation rounded-2xl border border-border/30 bg-gradient-cream shadow-lg overflow-hidden"
+                              aria-label={`Zoom image ${i + 1}`}
+                            >
+                              {img ? (
+                                <img
+                                  src={img.node.url}
+                                  alt={img.node.altText || product.title}
+                                  draggable={false}
+                                  className="pointer-events-none h-full w-full select-none object-contain p-4"
+                                />
+                              ) : (
+                                <div className="flex h-full w-full items-center justify-center">
+                                  <Package className="h-20 w-20 text-muted-foreground" />
+                                </div>
+                              )}
+                            </button>
+                          </CarouselItem>
+                        ))}
+                      </CarouselContent>
+                    </Carousel>
+
+                    <div className="pointer-events-none absolute left-2.5 top-2.5 z-10 flex flex-col gap-1">
+                      {discount > 0 && (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-red-500 px-2 py-0.5 text-[10px] font-bold text-white shadow-md">
+                          <Zap className="h-2.5 w-2.5" />
+                          {discount}% OFF
+                        </span>
+                      )}
+                      <span className="inline-flex items-center gap-1 rounded-full bg-brand-yellow px-2 py-0.5 text-[10px] font-bold text-foreground shadow-md">
+                        <Sparkles className="h-2.5 w-2.5" />
+                        Bestseller
+                      </span>
+                    </div>
+
+                    <div className="absolute right-2.5 top-2.5 z-10 flex flex-col gap-1.5">
                       <button
-                        key={i}
-                        onClick={() => setSelectedImage(i)}
-                        aria-label={`View image ${i + 1}`}
-                        className={`w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden flex-shrink-0 border-2 transition-all ${
-                          i === selectedImage
-                            ? "border-primary shadow-md ring-2 ring-primary/20"
-                            : "border-border/50 opacity-60 hover:opacity-100 hover:border-primary/40"
-                        }`}
+                        type="button"
+                        onClick={() => {
+                          setWishlisted((v) => !v);
+                          toast.success(
+                            wishlisted ? "Removed from wishlist" : "Added to wishlist",
+                          );
+                        }}
+                        aria-label="Toggle wishlist"
+                        className="flex h-8 w-8 items-center justify-center rounded-full border border-border/40 bg-white/95 shadow-md backdrop-blur transition-transform hover:scale-110 active:scale-95"
                       >
-                        <img
-                          src={img.node.url}
-                          alt=""
-                          className="w-full h-full object-contain p-1"
+                        <Heart
+                          className={`h-3.5 w-3.5 ${
+                            wishlisted ? "fill-red-500 text-red-500" : "text-foreground/70"
+                          }`}
                         />
                       </button>
-                    ))}
+                      <button
+                        type="button"
+                        onClick={handleShare}
+                        aria-label="Share product"
+                        className="flex h-8 w-8 items-center justify-center rounded-full border border-border/40 bg-white/95 shadow-md backdrop-blur transition-transform hover:scale-110 active:scale-95"
+                      >
+                        <Share2 className="h-3.5 w-3.5 text-foreground/70" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => images[selectedImage] && setLightboxOpen(true)}
+                        aria-label="Zoom image"
+                        className="flex h-9 w-9 items-center justify-center rounded-full border border-border/40 bg-white/95 shadow-md backdrop-blur transition-transform hover:scale-110"
+                      >
+                        <ZoomIn className="h-4 w-4 text-foreground/70" />
+                      </button>
+                    </div>
                   </div>
-                )}
+
+                  {images.length > 1 && (
+                    <div
+                      role="tablist"
+                      aria-label="Product images"
+                      className="mt-3 flex max-w-full flex-wrap justify-center gap-x-0.5 gap-y-2 px-1"
+                    >
+                      {images.map((_: any, i: number) => (
+                        <button
+                          key={i}
+                          type="button"
+                          role="tab"
+                          aria-selected={i === selectedImage}
+                          aria-label={`Go to image ${i + 1}`}
+                          onClick={() => {
+                            setSelectedImage(i);
+                            mobileGalleryApi?.scrollTo(i);
+                          }}
+                          className={cn(
+                            "flex min-h-10 min-w-10 touch-manipulation items-center justify-center rounded-full p-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary",
+                          )}
+                        >
+                          <span
+                            className={cn(
+                              "block rounded-full transition-all duration-200",
+                              i === selectedImage
+                                ? "h-2 w-6 bg-primary"
+                                : "h-2 w-2 bg-muted-foreground/40",
+                            )}
+                          />
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
             </ScrollReveal>
 
@@ -572,10 +694,10 @@ function ProductPage() {
                 </div>
 
                 {/* Title & Rating */}
-                <h1 className="text-[22px] sm:text-2xl lg:text-3xl font-bold text-foreground mb-2 font-display leading-tight break-words">
+                <h1 className="text-xl min-[400px]:text-[22px] sm:text-2xl lg:text-3xl font-bold text-foreground mb-2 font-display leading-snug break-words hyphens-auto">
                   {product.title}
                 </h1>
-                <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mb-4">
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-2 mb-4">
                   <div className="flex items-center gap-0.5">
                     {[1, 2, 3, 4, 5].map((s) => (
                       <Star
@@ -604,7 +726,7 @@ function ProductPage() {
                 {/* Price block (with savings + tax line) */}
                 <div className="rounded-2xl bg-gradient-to-br from-primary/5 via-brand-yellow/5 to-transparent border border-primary/10 p-3.5 sm:p-5 mb-4">
                   <div className="flex flex-wrap items-baseline gap-x-2 sm:gap-x-3 gap-y-1">
-                    <p className="text-[28px] sm:text-4xl font-extrabold text-foreground tracking-tight">
+                    <p className="text-2xl min-[400px]:text-3xl sm:text-4xl font-extrabold text-foreground tracking-tight tabular-nums">
                       ₹{price.toFixed(0)}
                     </p>
                     {comparePrice && comparePrice > price && (
@@ -650,7 +772,7 @@ function ProductPage() {
                             setSelectedVariant(i);
                             setQuantity(1);
                           }}
-                          className={`px-4 sm:px-5 py-2 sm:py-2.5 rounded-lg text-sm font-semibold transition-all border ${
+                          className={`max-w-full break-words px-3 sm:px-5 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-semibold transition-all border ${
                             i === selectedVariant
                               ? "bg-primary text-primary-foreground border-primary shadow-md"
                               : "bg-card border-border hover:border-primary/50 text-foreground"
@@ -664,22 +786,22 @@ function ProductPage() {
                 )}
 
                 {/* Quantity + Add to Cart */}
-                <div ref={ctaRef} className="flex items-center gap-2 sm:gap-3 mb-3">
-                  <div className="inline-flex items-center border border-border rounded-xl flex-shrink-0 bg-card">
+                <div ref={ctaRef} className="flex flex-col min-[380px]:flex-row items-stretch min-[380px]:items-center gap-2 sm:gap-3 mb-3">
+                  <div className="inline-flex items-center justify-center border border-border rounded-xl flex-shrink-0 bg-card self-center min-[380px]:self-auto">
                     <button
                       onClick={() => setQuantity(Math.max(1, quantity - 1))}
                       aria-label="Decrease quantity"
-                      className="h-12 w-10 sm:w-12 flex items-center justify-center hover:bg-muted transition-colors rounded-l-xl"
+                      className="h-12 min-h-[48px] w-11 sm:w-12 flex items-center justify-center hover:bg-muted transition-colors rounded-l-xl active:bg-muted"
                     >
                       <Minus className="h-4 w-4" />
                     </button>
-                    <span className="w-10 sm:w-12 text-center font-semibold text-foreground tabular-nums">
+                    <span className="w-11 sm:w-12 text-center font-semibold text-foreground tabular-nums">
                       {quantity}
                     </span>
                     <button
                       onClick={() => setQuantity(quantity + 1)}
                       aria-label="Increase quantity"
-                      className="h-12 w-10 sm:w-12 flex items-center justify-center hover:bg-muted transition-colors rounded-r-xl"
+                      className="h-12 min-h-[48px] w-11 sm:w-12 flex items-center justify-center hover:bg-muted transition-colors rounded-r-xl active:bg-muted"
                     >
                       <Plus className="h-4 w-4" />
                     </button>
@@ -688,7 +810,7 @@ function ProductPage() {
                     whileTap={{ scale: 0.97 }}
                     onClick={handleAddToCart}
                     disabled={isLoading || !variant?.availableForSale}
-                    className="flex-1 min-w-0 inline-flex items-center justify-center gap-2 h-12 rounded-xl bg-primary text-primary-foreground font-bold text-xs sm:text-sm uppercase tracking-wider hover:bg-primary/90 transition-all disabled:opacity-50"
+                    className="flex-1 min-w-0 inline-flex items-center justify-center gap-2 min-h-[48px] h-12 rounded-xl bg-primary text-primary-foreground font-bold text-[11px] sm:text-sm uppercase tracking-wider hover:bg-primary/90 transition-all disabled:opacity-50 px-2"
                   >
                     {isLoading ? (
                       <Loader2 className="w-5 h-5 animate-spin" />
@@ -702,7 +824,7 @@ function ProductPage() {
                 <motion.button
                   whileTap={{ scale: 0.97 }}
                   onClick={handleAddToCart}
-                  className="w-full h-12 rounded-xl bg-foreground text-background font-bold text-xs sm:text-sm uppercase tracking-wider hover:opacity-90 transition-all mb-4 inline-flex items-center justify-center gap-2"
+                  className="w-full min-h-[48px] h-12 rounded-xl bg-foreground text-background font-bold text-xs sm:text-sm uppercase tracking-wider hover:opacity-90 transition-all mb-4 inline-flex items-center justify-center gap-2 px-3"
                 >
                   <Zap className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                   BUY IT NOW
@@ -720,7 +842,7 @@ function ProductPage() {
                       </p>
                       <form
                         onSubmit={handlePincodeCheck}
-                        className="mt-2 flex items-center gap-1.5 sm:gap-2"
+                        className="mt-2 flex flex-col gap-2 sm:flex-row sm:items-stretch sm:gap-2"
                       >
                         <input
                           type="text"
@@ -731,12 +853,12 @@ function ProductPage() {
                             setPincode(e.target.value.replace(/\D/g, "").slice(0, 6))
                           }
                           placeholder="6-digit pincode"
-                          className="flex-1 min-w-0 px-2.5 sm:px-3 py-2 rounded-lg border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/40"
+                          className="w-full min-w-0 flex-1 px-2.5 sm:px-3 py-2.5 min-h-[44px] rounded-lg border border-border bg-background text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/40"
                         />
                         <button
                           type="submit"
                           disabled={pincode.length !== 6}
-                          className="px-3 sm:px-4 py-2 rounded-lg bg-primary text-primary-foreground text-[11px] sm:text-xs font-bold uppercase tracking-wider disabled:opacity-50 hover:bg-primary/90 transition flex-shrink-0"
+                          className="w-full sm:w-auto sm:min-w-[88px] px-4 py-2.5 min-h-[44px] rounded-lg bg-primary text-primary-foreground text-[11px] sm:text-xs font-bold uppercase tracking-wider disabled:opacity-50 hover:bg-primary/90 transition flex-shrink-0"
                         >
                           Check
                         </button>
@@ -791,7 +913,7 @@ function ProductPage() {
                     Crisp 2-tone design with a tinted icon plate, bold label
                     and subtle subtitle. 2 cols on tiny phones, 3 from sm,
                     6 from lg so each card stays roomy and readable. */}
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 sm:gap-3 mb-6">
+                <div className="grid grid-cols-1 min-[380px]:grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 sm:gap-3 mb-6">
                   {TRUST_HIGHLIGHTS.map((h) => (
                     <div
                       key={h.label}
@@ -830,7 +952,7 @@ function ProductPage() {
                   <h2 className="text-[15px] sm:text-base font-bold text-foreground mb-2.5 sm:mb-3">
                     Why this product?
                   </h2>
-                  <p className="text-[13px] sm:text-sm text-muted-foreground leading-relaxed">
+                  <p className="text-[13px] sm:text-sm text-muted-foreground leading-relaxed break-words [overflow-wrap:anywhere]">
                     {product.description}
                   </p>
                 </div>
@@ -1076,14 +1198,14 @@ function ProductPage() {
             <div className="border border-border/50 rounded-2xl overflow-hidden bg-card">
               {/* Tab Headers — horizontal scroll on mobile with smaller pills */}
               <div
-                className="flex overflow-x-auto scrollbar-hide border-b border-border/50"
+                className="flex overflow-x-auto scrollbar-hide border-b border-border/50 snap-x snap-mandatory sm:snap-none -mx-1 px-1 sm:mx-0 sm:px-0"
                 data-lenis-prevent
               >
                 {TABS.map((tab) => (
                   <button
                     key={tab}
                     onClick={() => setActiveTab(tab)}
-                    className={`flex-shrink-0 px-3.5 sm:px-5 py-3 sm:py-3.5 text-[11px] sm:text-sm font-semibold transition-all relative whitespace-nowrap tracking-wider ${
+                    className={`flex-shrink-0 snap-start px-3.5 sm:px-5 py-3 sm:py-3.5 text-[11px] sm:text-sm font-semibold transition-all relative whitespace-nowrap tracking-wider ${
                       activeTab === tab
                         ? "text-primary bg-primary/5"
                         : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
@@ -1469,7 +1591,7 @@ function ProductPage() {
                 </Link>
               </div>
 
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-5">
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5 items-stretch">
                 {recommendedProducts.map((edge: any) => {
                   const p = edge.node;
                   const img = p.images?.edges?.[0]?.node?.url;
@@ -1487,9 +1609,9 @@ function ProductPage() {
                       key={p.id}
                       to="/product/$handle"
                       params={{ handle: p.handle }}
-                      className="group bg-card rounded-xl sm:rounded-2xl border border-border/50 overflow-hidden hover:shadow-card-hover hover:-translate-y-1 transition-all duration-300"
+                      className="group flex h-full min-h-0 flex-col overflow-hidden rounded-xl border-2 border-border/90 bg-card shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/35 hover:shadow-card-hover sm:rounded-2xl"
                     >
-                      <div className="aspect-square bg-gradient-cream overflow-hidden relative">
+                      <div className="relative aspect-square shrink-0 overflow-hidden bg-gradient-cream">
                         {img ? (
                           <img
                             src={img}
@@ -1507,8 +1629,8 @@ function ProductPage() {
                           </span>
                         )}
                       </div>
-                      <div className="p-2.5 sm:p-3.5">
-                        <div className="flex items-center gap-0.5 sm:gap-1 mb-1">
+                      <div className="flex min-h-0 flex-1 flex-col p-2.5 sm:p-3.5">
+                        <div className="flex items-center gap-0.5 sm:gap-1 mb-1 shrink-0">
                           {[1, 2, 3, 4].map((s) => (
                             <Star
                               key={s}
@@ -1520,10 +1642,13 @@ function ProductPage() {
                             (4.5)
                           </span>
                         </div>
-                        <h3 className="text-[12px] sm:text-sm font-semibold text-foreground line-clamp-2 leading-snug min-h-[2.5em] mb-1 sm:mb-1.5 group-hover:text-primary transition-colors">
+                        <h3
+                          title={p.title}
+                          className="mb-1 line-clamp-3 text-[12px] font-semibold leading-snug text-foreground break-words hyphens-auto sm:mb-1.5 sm:text-sm group-hover:text-primary transition-colors"
+                        >
                           {p.title}
                         </h3>
-                        <div className="flex items-baseline gap-1.5 sm:gap-2 flex-wrap">
+                        <div className="mt-auto flex flex-wrap items-baseline gap-1.5 sm:gap-2 pt-1">
                           <p className="text-[13px] sm:text-base font-bold text-foreground">
                             ₹{pPrice.toFixed(0)}
                           </p>
@@ -1548,9 +1673,9 @@ function ProductPage() {
       <div className="fixed bottom-16 lg:hidden left-0 right-0 z-40 glass border-t border-border/50 px-2.5 py-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))]">
         <div className="flex items-center gap-2">
           <div className="w-11 h-11 rounded-lg bg-gradient-cream flex-shrink-0 overflow-hidden border border-border/40">
-            {images[0] ? (
+            {images[selectedImage] ? (
               <img
-                src={images[0].node.url}
+                src={images[selectedImage].node.url}
                 alt={product.title}
                 className="w-full h-full object-contain p-1"
               />
@@ -1600,9 +1725,9 @@ function ProductPage() {
           >
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-3 flex items-center gap-4">
               <div className="w-12 h-12 rounded-lg bg-gradient-cream flex-shrink-0 overflow-hidden border border-border/40">
-                {images[0] ? (
+                {images[selectedImage] ? (
                   <img
-                    src={images[0].node.url}
+                    src={images[selectedImage].node.url}
                     alt={product.title}
                     className="w-full h-full object-contain p-1"
                   />

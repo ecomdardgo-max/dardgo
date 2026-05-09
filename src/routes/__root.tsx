@@ -3,6 +3,7 @@ import { Toaster } from "sonner";
 import { useCartSync } from "@/hooks/useCartSync";
 import { SmoothScrollProvider } from "@/components/SmoothScrollProvider";
 import { ScrollProgress } from "@/components/ScrollProgress";
+import { PwaInstallPrompt } from "@/components/PwaInstallPrompt";
 import appCss from "../styles.css?url";
 
 function NotFoundComponent() {
@@ -82,6 +83,7 @@ function RootComponent() {
       <SmoothScrollProvider />
       <ScrollProgress />
       <Outlet />
+      <PwaInstallPrompt />
       <Toaster position="top-center" richColors />
     </>
   );

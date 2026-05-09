@@ -91,13 +91,13 @@ export function Navbar() {
 
       {/* Main Navbar */}
       <motion.header
-        className="sticky top-0 z-[60] w-full transition-[background,box-shadow,backdrop-filter,border-color] duration-500"
+        className="sticky top-0 z-[60] w-full transition-[background,box-shadow,border-color] duration-500"
       >
         <div
-          className={`w-full px-3 sm:px-6 lg:px-8 transition-[background,border,border-radius,box-shadow,backdrop-filter] duration-500 ${
+          className={`w-full px-3 sm:px-6 lg:px-8 transition-[background,border,border-radius,box-shadow] duration-500 ${
             isScrolled
-              ? "glass shadow-soft border-b border-border/60"
-              : "bg-card/95 border-b border-border/30"
+              ? "bg-background shadow-soft border-b border-border"
+              : "bg-background border-b border-border/40"
           }`}
         >
           <div
@@ -256,7 +256,7 @@ export function Navbar() {
               animate={{ height: "auto", opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
               transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
-              className="lg:hidden bg-card/95 backdrop-blur-md border-t border-border/50 overflow-hidden max-h-[calc(100dvh-4rem)] overflow-y-auto"
+              className="lg:hidden max-h-[calc(100dvh-4rem)] overflow-y-auto overflow-hidden border-t border-border/50 bg-card"
             >
               <nav className="flex flex-col px-4 py-4 gap-0.5 pb-[calc(1rem+env(safe-area-inset-bottom))]">
                 <Link

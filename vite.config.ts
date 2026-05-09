@@ -11,7 +11,11 @@
 // (otherwise the build emits a Cloudflare Worker + assets dir layout that
 // Vercel doesn't know how to map, causing 404s for static files like /favicon.ico).
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
+import { nitro } from "nitro/vite";
 
 export default defineConfig({
   cloudflare: false,
+  vite: {
+    plugins: [nitro()],
+  },
 });

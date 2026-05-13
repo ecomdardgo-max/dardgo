@@ -17,10 +17,7 @@ const termsBody = termsConditionsMd
 
 const markdownComponents: Components = {
   h2: ({ node: _n, children, ...props }) => (
-    <h2
-      className="text-xl font-bold text-foreground mt-10 mb-4 first:mt-0 scroll-mt-24"
-      {...props}
-    >
+    <h2 className="text-xl font-bold text-foreground mt-10 mb-4 first:mt-0 scroll-mt-24" {...props}>
       {children}
     </h2>
   ),

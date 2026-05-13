@@ -22,11 +22,16 @@ export default defineConfig({
       VitePWA({
         registerType: "autoUpdate",
         injectRegister: "auto",
-        includeAssets: ["favicon.svg", "dardgo.png"],
+        devOptions: {
+          /** Avoids dev-worker clashes with Nitro on some setups (503 "nitro env unavailable"). */
+          enabled: false,
+        },
+        includeAssets: ["favicon.svg", "dardgo.png", "dardgo_logo_300x.avif"],
         manifest: {
           name: "DARDGO",
           short_name: "DARDGO",
-          description: "Ayurvedic pain relief products by DARDGO.",
+          description:
+            "DARDGO — Ayurvedic-inspired herbal wellness oils, topicals, and comfort products.",
           theme_color: "#2E7D32",
           background_color: "#F8F5EF",
           display: "standalone",
@@ -48,7 +53,7 @@ export default defineConfig({
           ],
         },
         workbox: {
-          globPatterns: ["**/*.{js,css,html,ico,png,svg,webp,json}"],
+          globPatterns: ["**/*.{js,css,html,ico,png,svg,webp,avif,json}"],
           runtimeCaching: [
             {
               urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,

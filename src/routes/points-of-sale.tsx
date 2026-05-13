@@ -27,8 +27,7 @@ const regions: Array<{
     outlets: [
       {
         name: "DARDGO PHARMA PRIVATE LIMITED",
-        address:
-          "38/K 33, Abdul Jabbar, Ward Number 09, Balaghat, Madhya Pradesh — 481001",
+        address: "38/K 33, Abdul Jabbar, Ward Number 09, Balaghat, Madhya Pradesh — 481001",
         phoneDisplay: "+91 93299 12659",
         phoneTel: "+919329912659",
         mapsUrl: "https://maps.app.goo.gl/2nzr5o2MDN2EJmC36",
@@ -113,7 +112,10 @@ function PointsOfSalePage() {
                           {o.name}
                         </h3>
                         <div className="flex items-start gap-2.5 text-sm text-muted-foreground mb-4">
-                          <MapPin className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" strokeWidth={2.2} />
+                          <MapPin
+                            className="w-4 h-4 text-primary flex-shrink-0 mt-0.5"
+                            strokeWidth={2.2}
+                          />
                           <p className="leading-relaxed">{o.address}</p>
                         </div>
                         <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6">

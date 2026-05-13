@@ -45,13 +45,10 @@ const repoRoot = path.resolve(__dirname, "..");
 loadEnvFile(path.join(repoRoot, ".env"), false);
 loadEnvFile(path.join(repoRoot, ".env.local"), true);
 
-const STORE_DOMAIN =
-  process.env.SHOPIFY_STORE_DOMAIN || process.env.VITE_SHOPIFY_STORE_DOMAIN;
+const STORE_DOMAIN = process.env.SHOPIFY_STORE_DOMAIN || process.env.VITE_SHOPIFY_STORE_DOMAIN;
 const ADMIN_TOKEN = process.env.SHOPIFY_ADMIN_TOKEN;
 const API_VERSION =
-  process.env.SHOPIFY_API_VERSION ||
-  process.env.VITE_SHOPIFY_API_VERSION ||
-  "2025-07";
+  process.env.SHOPIFY_API_VERSION || process.env.VITE_SHOPIFY_API_VERSION || "2025-07";
 
 if (!STORE_DOMAIN || !ADMIN_TOKEN) {
   console.error(
@@ -191,7 +188,12 @@ function inferCollectionHandles({ productCategory, type, title }) {
   if (t.includes("tablet")) return ["ayurvedic-tablets"];
   if (t.includes("malt") || ttl.includes("halwa")) return ["ayurvedic-halwa"];
   if (t.includes("powder")) return ["ayurvedic-powder"];
-  if (t.includes("cream") || t.includes("syrup") || cat.includes("skin care") || cat.includes("oral care")) {
+  if (
+    t.includes("cream") ||
+    t.includes("syrup") ||
+    cat.includes("skin care") ||
+    cat.includes("oral care")
+  ) {
     return ["ayurvedic-beauty"];
   }
   if (t.includes("pain relief oil") || (t.includes("oil") && cat.includes("massage"))) {
@@ -254,7 +256,8 @@ async function ensureCollection(collection) {
     },
   });
   const errs = data.collectionCreate.userErrors;
-  if (errs?.length) throw new Error(`collectionCreate ${collection.handle}: ${JSON.stringify(errs)}`);
+  if (errs?.length)
+    throw new Error(`collectionCreate ${collection.handle}: ${JSON.stringify(errs)}`);
   logStep("collection", `+ created ${collection.handle}`);
   return data.collectionCreate.collection.id;
 }
@@ -298,7 +301,9 @@ function parseProductDetailsCsv(csvPath) {
   const iGrams = idx("Variant Grams");
   const iPrice = idx("Variant Price");
 
-  if ([iTitle, iBrand, iCategory, iType, iOptName, iOptVal, iSku, iGrams, iPrice].some((x) => x < 0)) {
+  if (
+    [iTitle, iBrand, iCategory, iType, iOptName, iOptVal, iSku, iGrams, iPrice].some((x) => x < 0)
+  ) {
     throw new Error("CSV missing expected columns (check header names).");
   }
 

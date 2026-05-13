@@ -18,10 +18,7 @@ import { Footer } from "@/components/Footer";
 import { WhatsAppFloat } from "@/components/WhatsAppFloat";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
 import { ScrollReveal } from "@/components/ScrollReveal";
-import {
-  dardgoBlogPostsMeta,
-  type DardgoBlogCategory,
-} from "@/content/dardgoBlogPosts";
+import { dardgoBlogPostsMeta, type DardgoBlogCategory } from "@/content/dardgoBlogPosts";
 
 type BlogCategory = DardgoBlogCategory;
 type BlogPost = (typeof dardgoBlogPostsMeta)[number];
@@ -30,46 +27,44 @@ const blogPosts: BlogPost[] = dardgoBlogPostsMeta;
 
 // Per-category visual identity — gradient cover + accent colour for chips and
 // category links so each topic has a distinct feel without needing real photos.
-const categoryStyles: Record<
-  BlogCategory,
-  { gradient: string; chip: string; icon: typeof Leaf }
-> = {
-  Wellness: {
-    gradient: "from-emerald-400/30 via-emerald-500/20 to-teal-600/30",
-    chip: "bg-emerald-500/10 text-emerald-700",
-    icon: Leaf,
-  },
-  "Joint Care": {
-    gradient: "from-orange-400/30 via-orange-500/20 to-amber-600/30",
-    chip: "bg-orange-500/10 text-orange-700",
-    icon: Sparkles,
-  },
-  Lifestyle: {
-    gradient: "from-amber-300/30 via-yellow-400/20 to-orange-500/30",
-    chip: "bg-amber-500/10 text-amber-700",
-    icon: BookOpen,
-  },
-  "Pain Relief": {
-    gradient: "from-rose-400/30 via-pink-500/20 to-red-500/30",
-    chip: "bg-rose-500/10 text-rose-700",
-    icon: Sparkles,
-  },
-  Immunity: {
-    gradient: "from-green-500/30 via-emerald-600/20 to-teal-700/30",
-    chip: "bg-green-500/10 text-green-700",
-    icon: Leaf,
-  },
-  Ingredients: {
-    gradient: "from-yellow-400/30 via-amber-500/20 to-orange-600/30",
-    chip: "bg-yellow-500/10 text-yellow-800",
-    icon: Sparkles,
-  },
-  Beauty: {
-    gradient: "from-pink-400/30 via-rose-500/20 to-fuchsia-500/30",
-    chip: "bg-pink-500/10 text-pink-700",
-    icon: Sparkles,
-  },
-};
+const categoryStyles: Record<BlogCategory, { gradient: string; chip: string; icon: typeof Leaf }> =
+  {
+    Wellness: {
+      gradient: "from-emerald-400/30 via-emerald-500/20 to-teal-600/30",
+      chip: "bg-emerald-500/10 text-emerald-700",
+      icon: Leaf,
+    },
+    "Joint Care": {
+      gradient: "from-orange-400/30 via-orange-500/20 to-amber-600/30",
+      chip: "bg-orange-500/10 text-orange-700",
+      icon: Sparkles,
+    },
+    Lifestyle: {
+      gradient: "from-amber-300/30 via-yellow-400/20 to-orange-500/30",
+      chip: "bg-amber-500/10 text-amber-700",
+      icon: BookOpen,
+    },
+    "Pain Relief": {
+      gradient: "from-rose-400/30 via-pink-500/20 to-red-500/30",
+      chip: "bg-rose-500/10 text-rose-700",
+      icon: Sparkles,
+    },
+    Immunity: {
+      gradient: "from-green-500/30 via-emerald-600/20 to-teal-700/30",
+      chip: "bg-green-500/10 text-green-700",
+      icon: Leaf,
+    },
+    Ingredients: {
+      gradient: "from-yellow-400/30 via-amber-500/20 to-orange-600/30",
+      chip: "bg-yellow-500/10 text-yellow-800",
+      icon: Sparkles,
+    },
+    Beauty: {
+      gradient: "from-pink-400/30 via-rose-500/20 to-fuchsia-500/30",
+      chip: "bg-pink-500/10 text-pink-700",
+      icon: Sparkles,
+    },
+  };
 
 const allCategories = ["All", ...Object.keys(categoryStyles)] as Array<"All" | BlogCategory>;
 
@@ -99,13 +94,7 @@ function BlogPage() {
       const matchesCategory = activeCategory === "All" || post.category === activeCategory;
       if (!matchesCategory) return false;
       if (!q) return true;
-      const haystack = [
-        post.title,
-        post.excerpt,
-        post.author,
-        post.category,
-        ...post.tags,
-      ]
+      const haystack = [post.title, post.excerpt, post.author, post.category, ...post.tags]
         .join(" ")
         .toLowerCase();
       return haystack.includes(q);
@@ -121,7 +110,10 @@ function BlogPage() {
   const popularTags = useMemo(() => {
     const counts = new Map<string, number>();
     blogPosts.forEach((p) => p.tags.forEach((t) => counts.set(t, (counts.get(t) ?? 0) + 1)));
-    return [...counts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 12).map(([t]) => t);
+    return [...counts.entries()]
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 12)
+      .map(([t]) => t);
   }, []);
 
   return (
@@ -142,8 +134,9 @@ function BlogPage() {
               </h1>
               <p className="text-sm sm:text-lg text-muted-foreground leading-relaxed mb-5 sm:mb-8 max-w-2xl mx-auto px-2">
                 Practical guides from our{" "}
-                <span className="text-foreground/90 font-medium">Know Ayurvedic Products</span> journal
-                — joint care, blood sugar wellness, natural energy, and Ayurvedic pain relief.
+                <span className="text-foreground/90 font-medium">Know Ayurvedic Products</span>{" "}
+                journal — joint care, blood sugar wellness, natural energy, and Ayurvedic pain
+                relief.
               </p>
 
               {/* Search bar */}
@@ -266,7 +259,9 @@ function BlogPage() {
                 <ScrollReveal>
                   <div className="flex items-end justify-between mb-5 sm:mb-8">
                     <div>
-                      <span className="text-eyebrow text-primary mb-1.5 sm:mb-2 block">— Latest articles</span>
+                      <span className="text-eyebrow text-primary mb-1.5 sm:mb-2 block">
+                        — Latest articles
+                      </span>
                       <h2 className="text-display-3 text-foreground">More to explore</h2>
                     </div>
                   </div>
@@ -292,8 +287,12 @@ function BlogPage() {
                 <Tag className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
               </div>
               <div className="min-w-0">
-                <h3 className="font-semibold text-foreground text-sm sm:text-base">Popular topics</h3>
-                <p className="text-[11px] sm:text-xs text-muted-foreground">Tap a tag to filter the journal</p>
+                <h3 className="font-semibold text-foreground text-sm sm:text-base">
+                  Popular topics
+                </h3>
+                <p className="text-[11px] sm:text-xs text-muted-foreground">
+                  Tap a tag to filter the journal
+                </p>
               </div>
             </div>
             <div className="flex flex-wrap gap-1.5 sm:gap-2">
@@ -362,11 +361,19 @@ function BlogPage() {
 // -----------------------------------------------------------------------------
 // Sub-components
 // -----------------------------------------------------------------------------
-function CategoryCover({ category, height = "h-full" }: { category: BlogCategory; height?: string }) {
+function CategoryCover({
+  category,
+  height = "h-full",
+}: {
+  category: BlogCategory;
+  height?: string;
+}) {
   const style = categoryStyles[category];
   const Icon = style.icon;
   return (
-    <div className={`relative w-full ${height} bg-gradient-to-br ${style.gradient} overflow-hidden`}>
+    <div
+      className={`relative w-full ${height} bg-gradient-to-br ${style.gradient} overflow-hidden`}
+    >
       {/* Subtle pattern */}
       <div className="absolute inset-0 opacity-30 mix-blend-overlay bg-grain" />
       {/* Decorative orb */}
@@ -374,7 +381,10 @@ function CategoryCover({ category, height = "h-full" }: { category: BlogCategory
       <div className="absolute -bottom-12 -left-12 w-40 h-40 rounded-full bg-white/15 blur-3xl pointer-events-none" />
       {/* Centered icon */}
       <div className="relative h-full flex items-center justify-center">
-        <Icon className="w-14 h-14 sm:w-20 sm:h-20 text-white/85 drop-shadow-lg" strokeWidth={1.5} />
+        <Icon
+          className="w-14 h-14 sm:w-20 sm:h-20 text-white/85 drop-shadow-lg"
+          strokeWidth={1.5}
+        />
       </div>
     </div>
   );
@@ -403,7 +413,9 @@ function FeaturedCard({ post }: { post: BlogPost }) {
         {/* Content overlay */}
         <div className="absolute inset-x-0 bottom-0 p-4 sm:p-8 lg:p-10">
           <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-2.5 sm:mb-3">
-            <span className={`text-[10px] font-bold uppercase tracking-wider px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full ${style.chip}`}>
+            <span
+              className={`text-[10px] font-bold uppercase tracking-wider px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full ${style.chip}`}
+            >
               {post.category}
             </span>
             <span className="flex items-center gap-1 text-[11px] sm:text-xs text-white/70">
@@ -470,7 +482,9 @@ function TrendingCard({ post }: { post: BlogPost }) {
       <div className="flex flex-col justify-between min-w-0 flex-1 py-0.5 sm:py-1 gap-2">
         <div className="min-w-0">
           <div className="flex items-center gap-1.5 sm:gap-2 mb-1.5 sm:mb-2 flex-wrap">
-            <span className={`text-[9px] sm:text-[10px] font-bold uppercase tracking-wider px-1.5 sm:px-2 py-0.5 rounded-full ${style.chip}`}>
+            <span
+              className={`text-[9px] sm:text-[10px] font-bold uppercase tracking-wider px-1.5 sm:px-2 py-0.5 rounded-full ${style.chip}`}
+            >
               {post.category}
             </span>
             {post.trending && (
@@ -512,7 +526,9 @@ function ArticleCard({ post }: { post: BlogPost }) {
       </div>
       <div className="p-4 sm:p-6">
         <div className="flex items-center gap-1.5 sm:gap-2 mb-2.5 sm:mb-3 flex-wrap">
-          <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${style.chip}`}>
+          <span
+            className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${style.chip}`}
+          >
             {post.category}
           </span>
           <span className="flex items-center gap-1 text-[11px] text-muted-foreground">
@@ -537,9 +553,13 @@ function ArticleCard({ post }: { post: BlogPost }) {
                   .join("")}
               </span>
             </div>
-            <p className="text-[10px] sm:text-[11px] text-muted-foreground truncate">{post.author}</p>
+            <p className="text-[10px] sm:text-[11px] text-muted-foreground truncate">
+              {post.author}
+            </p>
           </div>
-          <p className="text-[10px] sm:text-[11px] text-muted-foreground flex-shrink-0">{post.date}</p>
+          <p className="text-[10px] sm:text-[11px] text-muted-foreground flex-shrink-0">
+            {post.date}
+          </p>
         </div>
       </div>
     </Link>

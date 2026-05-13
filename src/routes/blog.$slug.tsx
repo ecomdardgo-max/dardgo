@@ -54,7 +54,10 @@ function BlogDetailPage() {
       <article className="py-8 sm:py-12">
         <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
           <ScrollReveal>
-            <Link to="/blog" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-primary mb-6 transition-colors">
+            <Link
+              to="/blog"
+              className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-primary mb-6 transition-colors"
+            >
               <ChevronLeft className="w-4 h-4" /> Back to Blog
             </Link>
           </ScrollReveal>
@@ -68,11 +71,21 @@ function BlogDetailPage() {
 
           <ScrollReveal>
             <div className="flex flex-wrap items-center gap-x-3 gap-y-2 mb-4">
-              <span className="text-xs font-semibold text-primary bg-primary/8 px-2.5 py-1 rounded-full">{post.category}</span>
-              <span className="flex items-center gap-1 text-xs text-muted-foreground"><Clock className="w-3 h-3" />{post.readTime}</span>
-              <span className="flex items-center gap-1 text-xs text-muted-foreground"><Calendar className="w-3 h-3" />{post.date}</span>
+              <span className="text-xs font-semibold text-primary bg-primary/8 px-2.5 py-1 rounded-full">
+                {post.category}
+              </span>
+              <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                <Clock className="w-3 h-3" />
+                {post.readTime}
+              </span>
+              <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                <Calendar className="w-3 h-3" />
+                {post.date}
+              </span>
             </div>
-            <h1 className="text-xl sm:text-4xl font-bold text-foreground mb-6 sm:mb-8 leading-tight break-words">{post.title}</h1>
+            <h1 className="text-xl sm:text-4xl font-bold text-foreground mb-6 sm:mb-8 leading-tight break-words">
+              {post.title}
+            </h1>
           </ScrollReveal>
 
           {/* Content */}

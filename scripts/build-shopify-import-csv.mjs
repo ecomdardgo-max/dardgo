@@ -139,7 +139,9 @@ function parseProductDetailsCsv(csvPath) {
   const iGrams = idx("Variant Grams");
   const iPrice = idx("Variant Price");
 
-  if ([iTitle, iBrand, iCategory, iType, iOptName, iOptVal, iSku, iGrams, iPrice].some((x) => x < 0)) {
+  if (
+    [iTitle, iBrand, iCategory, iType, iOptName, iOptVal, iSku, iGrams, iPrice].some((x) => x < 0)
+  ) {
     throw new Error("Product Details.csv — missing expected columns.");
   }
 

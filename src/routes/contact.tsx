@@ -42,8 +42,8 @@ function ContactPage() {
                 Contact <span className="text-gradient-green">DardGo Pharma</span>
               </h1>
               <p className="text-muted-foreground max-w-xl mx-auto">
-                Have questions about our Ayurvedic products? We&apos;d love to hear from you. Reach out by
-                phone, email, or WhatsApp — we&apos;re here 9:00 AM to 9:00 PM.
+                Have questions about our Ayurvedic products? We&apos;d love to hear from you. Reach
+                out by phone, email, or WhatsApp — we&apos;re here 9:00 AM to 9:00 PM.
               </p>
             </div>
           </ScrollReveal>
@@ -113,7 +113,9 @@ function ContactPage() {
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-foreground mb-1.5">Email</label>
+                      <label className="block text-sm font-medium text-foreground mb-1.5">
+                        Email
+                      </label>
                       <input
                         type="email"
                         className="w-full px-4 py-3 rounded-2xl bg-muted/60 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 text-sm"
@@ -121,7 +123,9 @@ function ContactPage() {
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-foreground mb-1.5">Phone</label>
+                      <label className="block text-sm font-medium text-foreground mb-1.5">
+                        Phone
+                      </label>
                       <input
                         type="tel"
                         className="w-full px-4 py-3 rounded-2xl bg-muted/60 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 text-sm"
@@ -130,7 +134,9 @@ function ContactPage() {
                     </div>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-foreground mb-1.5">Message</label>
+                    <label className="block text-sm font-medium text-foreground mb-1.5">
+                      Message
+                    </label>
                     <textarea
                       rows={5}
                       className="w-full px-4 py-3 rounded-2xl bg-muted/60 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 text-sm resize-none"
@@ -196,7 +202,9 @@ function ContactPage() {
                   </div>
                   <div>
                     <p className="font-semibold text-foreground">Chat on WhatsApp</p>
-                    <p className="text-sm text-muted-foreground">Quick response — usually within minutes</p>
+                    <p className="text-sm text-muted-foreground">
+                      Quick response — usually within minutes
+                    </p>
                   </div>
                 </a>
               </ScrollReveal>
@@ -220,7 +228,9 @@ function ContactPage() {
               <ScrollReveal delay={0.4}>
                 <div className="bg-card rounded-3xl p-6 border border-border/30 shadow-card">
                   <h3 className="font-semibold text-foreground mb-1">Stay Connected</h3>
-                  <p className="text-xs text-muted-foreground mb-4">Follow us for tips, offers, and stories.</p>
+                  <p className="text-xs text-muted-foreground mb-4">
+                    Follow us for tips, offers, and stories.
+                  </p>
                   <div className="flex gap-2.5 flex-wrap">
                     {socials.map((s) => (
                       <a

@@ -2,10 +2,10 @@ import { ScrollReveal } from "@/components/ScrollReveal";
 import { Shield, Star, Users, Stethoscope } from "lucide-react";
 
 const trustItems = [
-  { icon: Users, value: "10,00,000+", label: "Happy Customers", color: "text-primary" },
-  { icon: Star, value: "4.8/5", label: "Average Rating", color: "text-brand-yellow" },
-  { icon: Stethoscope, value: "500+", label: "Doctor Recommended", color: "text-brand-orange" },
-  { icon: Shield, value: "100%", label: "Natural & Safe", color: "text-brand-green-light" },
+  { icon: Users, value: "10,00,000+", label: "Community orders", color: "text-primary" },
+  { icon: Star, value: "4.8/5", label: "Avg. store rating", color: "text-brand-yellow" },
+  { icon: Stethoscope, value: "Since 2006", label: "Heritage brand", color: "text-brand-orange" },
+  { icon: Shield, value: "Herbal", label: "Wellness focus", color: "text-brand-green-light" },
 ];
 
 /**

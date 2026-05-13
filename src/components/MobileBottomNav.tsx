@@ -1,5 +1,5 @@
 import { Link, useLocation } from "@tanstack/react-router";
-import { Home, LayoutGrid, ShoppingCart, Store, Users } from "lucide-react";
+import { Home, LayoutGrid, ShoppingCart, Store, User } from "lucide-react";
 import { useSyncExternalStore, type ReactNode } from "react";
 import { useCartStore } from "@/stores/cartStore";
 
@@ -12,7 +12,11 @@ function NavLink({
     isActive ? "text-primary" : "text-muted-foreground"
   }`;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return <Link {...(rest as any)} className={cls}>{children}</Link>;
+  return (
+    <Link {...(rest as any)} className={cls}>
+      {children}
+    </Link>
+  );
 }
 
 function NavAnchor({
@@ -60,13 +64,15 @@ export function MobileBottomNav() {
   const isProducts = path.startsWith("/collections") || path.startsWith("/product");
   const isCart = path.startsWith("/cart");
   const isCategory = path === "/" && hash === "#products";
-  const isAbout = path.startsWith("/about");
+  const isAccount = path.startsWith("/account");
 
   const labelCls = (active: boolean) =>
     `text-[10px] font-medium truncate max-w-full ${active ? "font-semibold" : ""}`;
 
   const ActiveBar = ({ show }: { show: boolean }) =>
-    show ? <div className="absolute -top-0.5 left-1/2 -translate-x-1/2 w-6 h-0.5 rounded-full bg-primary" /> : null;
+    show ? (
+      <div className="absolute -top-0.5 left-1/2 -translate-x-1/2 w-6 h-0.5 rounded-full bg-primary" />
+    ) : null;
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 lg:hidden border-t border-border bg-background pb-[env(safe-area-inset-bottom)] shadow-[0_-4px_24px_-12px_rgba(0,0,0,0.08)] dark:shadow-[0_-4px_24px_-12px_rgba(0,0,0,0.35)]">
@@ -102,10 +108,10 @@ export function MobileBottomNav() {
           <ActiveBar show={isCategory} />
         </NavAnchor>
 
-        <NavLink isActive={isAbout} to="/about">
-          <Users className={`w-5 h-5 ${isAbout ? "stroke-[2.5]" : ""}`} />
-          <span className={labelCls(isAbout)}>About Us</span>
-          <ActiveBar show={isAbout} />
+        <NavLink isActive={isAccount} to="/account">
+          <User className={`w-5 h-5 ${isAccount ? "stroke-[2.5]" : ""}`} />
+          <span className={labelCls(isAccount)}>Account</span>
+          <ActiveBar show={isAccount} />
         </NavLink>
       </div>
     </nav>

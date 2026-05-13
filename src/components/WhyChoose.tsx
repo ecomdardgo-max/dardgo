@@ -2,12 +2,24 @@ import { ScrollReveal } from "@/components/ScrollReveal";
 import { Truck, Shield, IndianRupee, Leaf, Award, Headphones } from "lucide-react";
 
 const reasons = [
-  { icon: Leaf, title: "100% Ayurvedic", desc: "Pure natural ingredients from ancient formulas" },
-  { icon: Shield, title: "No Side Effects", desc: "Safe for daily use, zero harmful chemicals" },
-  { icon: Award, title: "Certified Quality", desc: "AYUSH, GMP & FDA approved products" },
-  { icon: Truck, title: "Free Shipping", desc: "Free delivery on prepaid orders above ₹249" },
-  { icon: IndianRupee, title: "COD Available", desc: "Cash on delivery across India" },
-  { icon: Headphones, title: "24/7 Support", desc: "WhatsApp & call support anytime" },
+  {
+    icon: Leaf,
+    title: "Ayurvedic-inspired",
+    desc: "Classical herbs and transparent sourcing where the format allows",
+  },
+  {
+    icon: Shield,
+    title: "Label-first safety",
+    desc: "Clear directions; consult your clinician if you take medications",
+  },
+  {
+    icon: Award,
+    title: "Quality systems",
+    desc: "AYUSH-oriented range with GMP-focused manufacturing partners",
+  },
+  { icon: Truck, title: "Free shipping", desc: "Prepaid orders above ₹249 across most of India" },
+  { icon: IndianRupee, title: "COD available", desc: "Cash on delivery in eligible pincodes" },
+  { icon: Headphones, title: "Care team", desc: "Phone & WhatsApp support during staffed hours" },
 ];
 
 export function WhyChoose() {
@@ -18,11 +30,10 @@ export function WhyChoose() {
           <div className="text-center mb-10 sm:mb-14 max-w-2xl mx-auto">
             <span className="text-eyebrow text-primary mb-4 block">— Why us</span>
             <h2 className="text-display-2 text-foreground mb-4">
-              Why choose{" "}
-              <span className="text-gradient-green">DARDGO</span>
+              Why choose <span className="text-gradient-green">DARDGO</span>
             </h2>
             <p className="text-muted-foreground text-sm sm:text-base leading-relaxed">
-              Trusted by thousands of families for natural, effective wellness.
+              Honest herbal wellness with premium packaging and responsive service.
             </p>
           </div>
         </ScrollReveal>
@@ -34,8 +45,12 @@ export function WhyChoose() {
                 <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-primary/8 mx-auto mb-3 flex items-center justify-center group-hover:bg-primary/15 group-hover:scale-110 transition-all">
                   <r.icon className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
                 </div>
-                <h3 className="font-semibold text-sm sm:text-base text-foreground mb-1">{r.title}</h3>
-                <p className="text-[11px] sm:text-xs text-muted-foreground leading-relaxed">{r.desc}</p>
+                <h3 className="font-semibold text-sm sm:text-base text-foreground mb-1">
+                  {r.title}
+                </h3>
+                <p className="text-[11px] sm:text-xs text-muted-foreground leading-relaxed">
+                  {r.desc}
+                </p>
               </div>
             </ScrollReveal>
           ))}

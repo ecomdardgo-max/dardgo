@@ -24,11 +24,11 @@ The types of personal information we obtain about you depends on how you interac
 
 Information that you directly submit to us through our Services may include:
 
-* **Basic contact details** including your name, address, phone number, email.
-* **Order information** including your name, billing address, shipping address, payment confirmation, email address, phone number.
-* **Account information** including your username, password, security questions.
-* **Shopping information** including the items you view, put in your cart or add to your wishlist.
-* **Customer support information** including the information you choose to include in communications with us, for example, when sending a message through the Services.
+- **Basic contact details** including your name, address, phone number, email.
+- **Order information** including your name, billing address, shipping address, payment confirmation, email address, phone number.
+- **Account information** including your username, password, security questions.
+- **Shopping information** including the items you view, put in your cart or add to your wishlist.
+- **Customer support information** including the information you choose to include in communications with us, for example, when sending a message through the Services.
 
 Some features of the Services may require you to directly provide us with certain information about yourself. You may elect not to provide this information, but doing so may prevent you from using or accessing these features.
 
@@ -40,18 +40,18 @@ We also automatically collect certain information about your interaction with th
 
 Finally, we may obtain information about you from third parties, including from vendors and service providers who may collect information on our behalf, such as:
 
-* Companies who support our Site and Services, such as Shopify.
-* Our payment processors, who collect payment information (e.g., bank account, credit or debit card information, billing address) to process your payment in order to fulfill your orders and provide you with products or services you have requested, in order to perform our contract with you.
-* When you visit our Site, open or click on emails we send you, or interact with our Services or advertisements, we, or third parties we work with, may automatically collect certain information using online tracking technologies such as pixels, web beacons, software developer kits, third-party libraries, and cookies.
+- Companies who support our Site and Services, such as Shopify.
+- Our payment processors, who collect payment information (e.g., bank account, credit or debit card information, billing address) to process your payment in order to fulfill your orders and provide you with products or services you have requested, in order to perform our contract with you.
+- When you visit our Site, open or click on emails we send you, or interact with our Services or advertisements, we, or third parties we work with, may automatically collect certain information using online tracking technologies such as pixels, web beacons, software developer kits, third-party libraries, and cookies.
 
 Any information we obtain from third parties will be treated in accordance with this Privacy Policy. We are not responsible or liable for the accuracy of the information provided to us by third parties and are not responsible for any third party's policies or practices. For more information, see the section below, _Third Party Websites and Links_.
 
 ### How We Use Your Personal Information
 
-* **Providing Products and Services.** We use your personal information to provide you with the Services in order to perform our contract with you, including to process your payments, fulfill your orders, to send notifications to you related to you account, purchases, returns, exchanges or other transactions, to create, maintain and otherwise manage your account, to arrange for shipping, facilitate any returns and exchanges and to enable you to post reviews.
-* **Marketing and Advertising.** We use your personal information for marketing and promotional purposes, such as to send marketing, advertising and promotional communications by email, text message or postal mail, and to show you advertisements for products or services. This may include using your personal information to better tailor the Services and advertising on our Site and other websites.
-* **Security and Fraud Prevention.** We use your personal information to detect, investigate or take action regarding possible fraudulent, illegal or malicious activity. If you choose to use the Services and register an account, you are responsible for keeping your account credentials safe. We highly recommend that you do not share your username, password, or other access details with anyone else. If you believe your account has been compromised, please contact us immediately.
-* **Communicating with you.** We use your personal information to provide you with customer support and improve our Services. This is in our legitimate interests in order to be responsive to you, to provide effective services to you, and to maintain our business relationship with you.
+- **Providing Products and Services.** We use your personal information to provide you with the Services in order to perform our contract with you, including to process your payments, fulfill your orders, to send notifications to you related to you account, purchases, returns, exchanges or other transactions, to create, maintain and otherwise manage your account, to arrange for shipping, facilitate any returns and exchanges and to enable you to post reviews.
+- **Marketing and Advertising.** We use your personal information for marketing and promotional purposes, such as to send marketing, advertising and promotional communications by email, text message or postal mail, and to show you advertisements for products or services. This may include using your personal information to better tailor the Services and advertising on our Site and other websites.
+- **Security and Fraud Prevention.** We use your personal information to detect, investigate or take action regarding possible fraudulent, illegal or malicious activity. If you choose to use the Services and register an account, you are responsible for keeping your account credentials safe. We highly recommend that you do not share your username, password, or other access details with anyone else. If you believe your account has been compromised, please contact us immediately.
+- **Communicating with you.** We use your personal information to provide you with customer support and improve our Services. This is in our legitimate interests in order to be responsive to you, to provide effective services to you, and to maintain our business relationship with you.
 
 ## Cookies
 
@@ -63,27 +63,27 @@ Most browsers automatically accept Cookies by default, but you can choose to set
 
 In certain circumstances, we may disclose your personal information to third parties for legitimate purposes subject to this Privacy Policy. Such circumstances may include:
 
-* With vendors or other third parties who perform services on our behalf (e.g., IT management, payment processing, data analytics, customer support, cloud storage, fulfillment and shipping).
-* With business and marketing partners, including Shopify, to provide services and advertise to you. Our business and marketing partners will use your information in accordance with their own privacy notices.
-* When you direct, request us or otherwise consent to our disclosure of certain information to third parties, such as to ship you products or through your use of social media widgets or login integrations, with your consent.
-* With our affiliates or otherwise within our corporate group, in our legitimate interests to run a successful business.
-* In connection with a business transaction such as a merger or bankruptcy, to comply with any applicable legal obligations (including to respond to subpoenas, search warrants and similar requests), to enforce any applicable terms of service, and to protect or defend the Services, our rights, and the rights of our users or others.
+- With vendors or other third parties who perform services on our behalf (e.g., IT management, payment processing, data analytics, customer support, cloud storage, fulfillment and shipping).
+- With business and marketing partners, including Shopify, to provide services and advertise to you. Our business and marketing partners will use your information in accordance with their own privacy notices.
+- When you direct, request us or otherwise consent to our disclosure of certain information to third parties, such as to ship you products or through your use of social media widgets or login integrations, with your consent.
+- With our affiliates or otherwise within our corporate group, in our legitimate interests to run a successful business.
+- In connection with a business transaction such as a merger or bankruptcy, to comply with any applicable legal obligations (including to respond to subpoenas, search warrants and similar requests), to enforce any applicable terms of service, and to protect or defend the Services, our rights, and the rights of our users or others.
 
 We have, in the past 12 months disclosed the following categories of personal information and sensitive personal information (denoted by \*) about users for the purposes set out above in _"How we Collect and Use your Personal Information"_ and _"How we Disclose Personal Information"_:
 
-| Category | Categories of Recipients |
-| --- | --- |
+| Category                                                                                                                                                                                                                                                   | Categories of Recipients                                                                                                                                                                                                                       |
+| ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Identifiers such as basic contact details and certain order and account information Commercial information such as order information, shopping information and customer support information Internet or other similar network activity, such as Usage Data | Vendors and third parties who perform services on our behalf (such as Internet service providers, payment processors, fulfillment partners, customer support partners and data analytics providers) Business and marketing partners Affiliates |
 
 We do not use or disclose sensitive personal information for the purposes of inferring characteristics about you.
 
 We have “sold” and “shared” (as those terms are defined in applicable law) personal information over the preceding 12 months for the purpose of engaging in advertising and marketing activities, as follows.
 
-| Category of Personal Information | Categories of Recipients |
-| --- | --- |
-| Identifiers such as basic contact details and certain order and account information | Business and marketing partners |
+| Category of Personal Information                                                                  | Categories of Recipients        |
+| ------------------------------------------------------------------------------------------------- | ------------------------------- |
+| Identifiers such as basic contact details and certain order and account information               | Business and marketing partners |
 | Commercial information such as records of products or services purchased and shopping information | Business and marketing partners |
-| Internet or other similar network activity, such as Usage Data | Business and marketing partners |
+| Internet or other similar network activity, such as Usage Data                                    | Business and marketing partners |
 
 ## User Generated Content
 
@@ -111,16 +111,16 @@ How long we retain your personal information depends on different factors, such 
 
 Depending on where you live, you may have some or all of the rights listed below in relation to your personal information. However, these rights are not absolute, may apply only in certain circumstances and, in certain cases, we may decline your request as permitted by law.
 
-* **Right to Access / Know.** You may have a right to request access to personal information that we hold about you, including details relating to the ways in which we use and share your information.
-* **Right to Delete.** You may have a right to request that we delete personal information we maintain about you.
-* **Right to Correct.** You may have a right to request that we correct inaccurate personal information we maintain about you.
-* **Right of Portability.** You may have a right to receive a copy of the personal information we hold about you and to request that we transfer it to a third party, in certain circumstances and with certain exceptions.
+- **Right to Access / Know.** You may have a right to request access to personal information that we hold about you, including details relating to the ways in which we use and share your information.
+- **Right to Delete.** You may have a right to request that we delete personal information we maintain about you.
+- **Right to Correct.** You may have a right to request that we correct inaccurate personal information we maintain about you.
+- **Right of Portability.** You may have a right to receive a copy of the personal information we hold about you and to request that we transfer it to a third party, in certain circumstances and with certain exceptions.
 
-* **Right to Limit and/or Opt out of Use and Disclosure of Sensitive Personal Information.** You may have a right to direct us to limit our use and/or disclosure of sensitive personal information to only what is necessary to perform the Services or provide the goods reasonably expected by an average individual.
-* **Restriction of Processing:** You may have the right to ask us to stop or restrict our processing of personal information.
-* **Withdrawal of Consent:** Where we rely on consent to process your personal information, you may have the right to withdraw this consent.
-* **Appeal:** You may have a right to appeal our decision if we decline to process your request. You can do so by replying directly to our denial.
-* **Managing Communication Preferences:** We may send you promotional emails, and you may opt out of receiving these at any time by using the unsubscribe option displayed in our emails to you. If you opt out, we may still send you non-promotional emails, such as those about your account or orders that you have made.
+- **Right to Limit and/or Opt out of Use and Disclosure of Sensitive Personal Information.** You may have a right to direct us to limit our use and/or disclosure of sensitive personal information to only what is necessary to perform the Services or provide the goods reasonably expected by an average individual.
+- **Restriction of Processing:** You may have the right to ask us to stop or restrict our processing of personal information.
+- **Withdrawal of Consent:** Where we rely on consent to process your personal information, you may have the right to withdraw this consent.
+- **Appeal:** You may have a right to appeal our decision if we decline to process your request. You can do so by replying directly to our denial.
+- **Managing Communication Preferences:** We may send you promotional emails, and you may opt out of receiving these at any time by using the unsubscribe option displayed in our emails to you. If you opt out, we may still send you non-promotional emails, such as those about your account or orders that you have made.
 
 You may exercise any of these rights where indicated on our Site or by contacting us using the contact details provided below.
 

@@ -63,14 +63,10 @@ const repoRoot = path.resolve(__dirname, "..");
 loadEnvFile(path.join(repoRoot, ".env"), false);
 loadEnvFile(path.join(repoRoot, ".env.local"), true);
 
-const STORE_DOMAIN =
-  process.env.SHOPIFY_STORE_DOMAIN ||
-  process.env.VITE_SHOPIFY_STORE_DOMAIN;
+const STORE_DOMAIN = process.env.SHOPIFY_STORE_DOMAIN || process.env.VITE_SHOPIFY_STORE_DOMAIN;
 const ADMIN_TOKEN = process.env.SHOPIFY_ADMIN_TOKEN;
 const API_VERSION =
-  process.env.SHOPIFY_API_VERSION ||
-  process.env.VITE_SHOPIFY_API_VERSION ||
-  "2025-07";
+  process.env.SHOPIFY_API_VERSION || process.env.VITE_SHOPIFY_API_VERSION || "2025-07";
 
 if (!STORE_DOMAIN || !ADMIN_TOKEN) {
   console.error(
@@ -147,8 +143,15 @@ const FIND_COLLECTION_BY_HANDLE = /* GraphQL */ `
 const CREATE_COLLECTION = /* GraphQL */ `
   mutation CreateCollection($input: CollectionInput!) {
     collectionCreate(input: $input) {
-      collection { id handle title }
-      userErrors { field message }
+      collection {
+        id
+        handle
+        title
+      }
+      userErrors {
+        field
+        message
+      }
     }
   }
 `;
@@ -167,7 +170,8 @@ async function ensureCollection(collection) {
     },
   });
   const errs = data.collectionCreate.userErrors;
-  if (errs.length) throw new Error(`collectionCreate ${collection.handle}: ${JSON.stringify(errs)}`);
+  if (errs.length)
+    throw new Error(`collectionCreate ${collection.handle}: ${JSON.stringify(errs)}`);
   logStep("collection", `+ created ${collection.handle}`);
   return data.collectionCreate.collection.id;
 }
@@ -189,8 +193,13 @@ const FIND_PRODUCT_BY_HANDLE = /* GraphQL */ `
 const COLLECTION_ADD_PRODUCTS = /* GraphQL */ `
   mutation AddProducts($id: ID!, $productIds: [ID!]!) {
     collectionAddProducts(id: $id, productIds: $productIds) {
-      collection { id }
-      userErrors { field message }
+      collection {
+        id
+      }
+      userErrors {
+        field
+        message
+      }
     }
   }
 `;
@@ -216,18 +225,14 @@ async function ensureProduct(product) {
       variants: [
         {
           price: product.price.toFixed(2),
-          compare_at_price: product.compareAtPrice
-            ? product.compareAtPrice.toFixed(2)
-            : null,
+          compare_at_price: product.compareAtPrice ? product.compareAtPrice.toFixed(2) : null,
           inventory_management: "shopify",
           inventory_quantity: product.inventoryQuantity ?? 50,
           requires_shipping: true,
           taxable: true,
         },
       ],
-      images: (product.imageUrls || [])
-        .filter(Boolean)
-        .map((src) => ({ src })),
+      images: (product.imageUrls || []).filter(Boolean).map((src) => ({ src })),
     },
   };
 
@@ -264,9 +269,7 @@ async function main() {
 
   console.log(`\n→ Seeding store: ${STORE_DOMAIN}`);
   console.log(`→ API version : ${API_VERSION}`);
-  console.log(
-    `→ ${data.collections.length} collections, ${data.products.length} products\n`,
-  );
+  console.log(`→ ${data.collections.length} collections, ${data.products.length} products\n`);
 
   // 1. Collections
   const collectionGidByHandle = {};

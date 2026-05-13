@@ -18,7 +18,6 @@ import {
   Heart,
   Share2,
   MapPin,
-  Eye,
   Award,
   RotateCcw,
   Zap,
@@ -35,12 +34,28 @@ import {
   STOREFRONT_PRODUCT_BY_HANDLE_QUERY,
   STOREFRONT_PRODUCTS_QUERY,
 } from "@/lib/shopify";
+import { parseProductReviewState } from "@/lib/shopify-product-reviews";
 import { useCartStore } from "@/stores/cartStore";
+import {
+  buildShiprocketProductPayload,
+  isShiprocketCheckoutConfigured,
+  shiprocketBuyDirect,
+  shopifyVariantGidToNumericId,
+} from "@/lib/shiprocket-checkout";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { WhatsAppFloat } from "@/components/WhatsAppFloat";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
 import { ScrollReveal } from "@/components/ScrollReveal";
+import {
+  getJudgeMeConfig,
+  JudgeMePreviewBadge,
+  JudgeMeReviewWidget,
+  useJudgeMeLoader,
+} from "@/components/JudgeMe";
+import { BuyNowShiprocketBar } from "@/components/BuyNowShiprocketBar";
+import { ProductStructuredData } from "@/components/ProductStructuredData";
+import { FDA_STRUCTURED_CLAIM_DISCLAIMER } from "@/lib/compliance";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -53,89 +68,153 @@ import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/product/$handle")({
   component: ProductPage,
-  head: () => ({
-    meta: [
-      { title: "Product — DARDGO Ayurvedic Pain Relief" },
-      { name: "description", content: "Premium Ayurvedic pain relief product by DARDGO. 100% natural, no side effects." },
-    ],
+  validateSearch: (search: Record<string, unknown>) => ({
+    variant: typeof search.variant === "string" ? search.variant : undefined,
+    pb: typeof search.pb === "string" ? search.pb : undefined,
   }),
+  head: ({ params }) => {
+    const readable = params.handle
+      .split("-")
+      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+      .join(" ");
+    return {
+      meta: [
+        { title: `${readable} — DARDGO herbal wellness | dardgo.in` },
+        {
+          name: "description",
+          content: `Shop ${readable} at DARDGO — Ayurvedic-inspired herbal wellness, secure checkout, and India-wide delivery. Not intended to diagnose, treat, cure, or prevent disease.`,
+        },
+      ],
+    };
+  },
 });
 
 // --- Static data for tabs ---
 const KEY_INGREDIENTS = [
-  { name: "Ashwagandha", emoji: "🌿", desc: "Reduces inflammation, supports joint health, and enhances bone strength for natural comfort." },
-  { name: "Gandhak", emoji: "🔶", desc: "Promotes anti-inflammatory effects, reduces pain, and supports joint health." },
-  { name: "Shallaki", emoji: "🍃", desc: "Helps soothe joint and bone stiffness, promoting mobility and comfort." },
-  { name: "Triphala", emoji: "🫐", desc: "Known for mild detoxifying properties, supporting your body's natural cleansing processes." },
+  {
+    name: "Ashwagandha",
+    emoji: "🌿",
+    desc: "Traditionally valued in Ayurveda for adaptogenic wellness support and general vitality when used as directed.",
+  },
+  {
+    name: "Gandhak",
+    emoji: "🔶",
+    desc: "Mineral component used in classical formulations; intended for external or internal formats per label only.",
+  },
+  {
+    name: "Shallaki",
+    emoji: "🍃",
+    desc: "Herb often chosen in mobility-focused traditional formulas to complement massage and movement routines.",
+  },
+  {
+    name: "Triphala",
+    emoji: "🫐",
+    desc: "Blend of three fruits traditionally associated with gentle digestive balance in Ayurvedic lifestyle texts.",
+  },
 ];
 
 const BENEFITS_LIST = [
-  { title: "Bone Discomfort Relief", desc: "Crafted with natural Ayurvedic herbs to alleviate bone discomfort, stiffness, and minor aches." },
-  { title: "Enhanced Joint Flexibility", desc: "Supports healthy joints and promotes ease of movement for daily activities." },
-  { title: "Detoxification Support", desc: "Contains Triphala to gently purify the body and support natural detox processes." },
-  { title: "100% Natural Formula", desc: "Free from harsh chemicals and synthetic additives, supporting safe, natural use." },
-  { title: "Holistic Wellness", desc: "Combines traditional Ayurvedic principles with modern wellness needs." },
-  { title: "Improved Mobility", desc: "Eases bone discomfort and supports overall joint health for better mobility." },
+  {
+    title: "Comfort-forward routine",
+    desc: "Crafted to support everyday ease of movement and relaxation when paired with sensible activity and rest.",
+  },
+  {
+    title: "Joint-friendly habits",
+    desc: "Designed to align with stretching, hydration, and professional guidance — not as a substitute for care.",
+  },
+  {
+    title: "Mindful formulation",
+    desc: "Herb selection reflects traditional texts and modern quality checks; individual response may vary.",
+  },
+  {
+    title: "Botanical-first formula",
+    desc: "Prioritises herbal actives and avoids unnecessary synthetic fillers where the format allows.",
+  },
+  {
+    title: "Holistic wellness lens",
+    desc: "Encourages balanced nutrition, sleep, and stress care alongside any supplement or topical.",
+  },
+  {
+    title: "Mobility support mindset",
+    desc: "Supports active lifestyles with transparent expectations — results are personal and not guaranteed.",
+  },
 ];
 
 const HOW_TO_USE_STEPS = [
-  "Follow the recommended dosage on the product label or as advised by a healthcare professional.",
-  "Swallow the tablets with a full glass of warm water for better absorption.",
-  "Take after meals to enhance digestion and nutrient uptake.",
-  "Use consistently for optimal results — Ayurvedic supplements work best with regular use.",
-  "Consult a healthcare professional if you have existing health conditions or are on medications.",
+  "Read the entire product label before first use.",
+  "Follow the directions for amount, frequency, and route (oral vs external) printed on the pack.",
+  "If the product is a tablet or capsule, swallow with water unless the label states otherwise.",
+  "For oils and roll-ons, apply only to intact skin; wash hands after use unless applying to hands.",
+  "Discontinue use and consult a healthcare professional if irritation occurs or if you are pregnant, nursing, or on medication.",
 ];
 
 const SUITABLE_FOR = [
-  "Adults experiencing mild bone or joint discomfort",
-  "Individuals seeking natural Ayurvedic solutions for joint and bone wellness",
-  "Those looking to support detoxification and overall vitality",
-  "People interested in herbal, chemical-free supplements for long-term support",
+  "Adults seeking traditional-format herbal wellness as part of a balanced lifestyle",
+  "Shoppers who read labels carefully and follow directions",
+  "Households combining movement, rest, and professional guidance for comfort",
+  "Those looking for transparent Ayurvedic-inspired options without disease-cure messaging",
 ];
 
 const FAQS = [
-  { q: "What are the key ingredients?", a: "Key ingredients include Ashwagandha, Gandhak, Shallaki, and Triphala, known for their healing and soothing properties." },
-  { q: "How should I take these tablets?", a: "Take 1-2 tablets twice a day with warm water, preferably after meals, or as directed by a healthcare professional." },
-  { q: "Are there any side effects?", a: "Generally well-tolerated. Consult a healthcare professional if you have existing health conditions or are on medications." },
-  { q: "How soon can I expect results?", a: "Results vary. Consistent use for 2-4 weeks is recommended to experience the full benefits." },
-  { q: "Can these replace prescribed medications?", a: "These tablets are complementary and not a substitute for prescribed medications. Consult your healthcare provider." },
-  { q: "Is it safe for long-term use?", a: "Extended use may be beneficial for sustained results, but consult a healthcare provider for personalized advice." },
+  {
+    q: "What are the key ingredients?",
+    a: "Representative herbs may include Ashwagandha, Gandhak, Shallaki, and Triphala depending on the SKU. Always confirm the exact list on your product label.",
+  },
+  {
+    q: "How should I use this product?",
+    a: "Follow the printed label for dose, timing, and whether the product is for external or internal use. When in doubt, ask a qualified professional.",
+  },
+  {
+    q: "Are side effects possible?",
+    a: "Any wellness product can cause sensitivity in some individuals. Stop use if you notice irritation or discomfort and seek medical advice if symptoms persist.",
+  },
+  {
+    q: "When might I notice a difference?",
+    a: "Experiences vary widely. Consistency, sleep, nutrition, and activity all influence outcomes — we do not promise timelines.",
+  },
+  {
+    q: "Can this replace my prescription?",
+    a: "No. Our products are not substitutes for prescribed therapy. Never change medications without your prescriber’s guidance.",
+  },
+  {
+    q: "Is long-term use appropriate?",
+    a: "That depends on your health profile. Periodic review with a healthcare provider is the safest approach for any ongoing supplement or topical.",
+  },
 ];
 
-const MOCK_REVIEWS = [
-  { name: "Mohan Nair", date: "21 Nov 2024", rating: 5, title: "Problem Gone", text: "Excellent for joint stiffness and bone discomfort. The herbal ingredients are gentle and effective. I feel healthier overall." },
-  { name: "Smita Gupta", date: "09 Nov 2024", rating: 5, title: "Best for use", text: "The best Ayurvedic supplement I've found for bone health. It helps relieve discomfort, and I feel lighter and more active." },
-  { name: "Amit Sharma", date: "08 Nov 2024", rating: 5, title: "Best for me", text: "After trying different supplements, these work wonders! The bone discomfort has reduced, and my joints feel more flexible." },
-  { name: "Meera Nair", date: "03 Nov 2024", rating: 4, title: "Good Product", text: "These tablets are a blessing for my knee pain! I feel much more flexible, and the Triphala ingredient gives a gentle detox as well." },
-  { name: "Rajesh Kumar", date: "28 Oct 2024", rating: 4, title: "Dardgo Tablet", text: "I've been taking these for a month, and I feel a noticeable difference in my joints. Great for anyone seeking a natural solution." },
+const STORAGE_SAFETY = [
+  {
+    title: "Storage",
+    body: "Keep the container tightly closed in a cool, dry place away from direct sunlight and out of reach of children unless supervising an adult application.",
+  },
+  {
+    title: "Safety",
+    body: "For external products, avoid eyes, mucosa, and broken skin. For ingestible formats, do not exceed the stated dose. This product is not intended to diagnose, treat, cure, or prevent any disease.",
+  },
+  {
+    title: "Allergies",
+    body: "Review the full ingredient list for personal allergens. Discontinue if rash or swelling occurs and seek urgent care for breathing difficulty.",
+  },
 ];
 
-const TABS = ["Key Ingredients", "How to Use", "Benefits", "Suitable For", "FAQs"] as const;
+const TABS = [
+  "Key Ingredients",
+  "How to Use",
+  "Benefits",
+  "Suitable For",
+  "Storage & safety",
+  "FAQs",
+] as const;
 
 // Visual highlights row shown right under the description — quick-glance USPs.
 const TRUST_HIGHLIGHTS = [
-  { icon: Truck, label: "Free Shipping", sub: "Above ₹249" },
-  { icon: CreditCard, label: "Cash on Delivery", sub: "All over India" },
-  { icon: RotateCcw, label: "7-Day Returns", sub: "Hassle-free" },
-  { icon: Shield, label: "Secure Checkout", sub: "100% safe" },
-  { icon: Award, label: "AYUSH Certified", sub: "Govt. approved" },
-  { icon: Leaf, label: "100% Natural", sub: "Zero chemicals" },
+  { icon: Truck, label: "Free Shipping", sub: "Prepaid ₹249+" },
+  { icon: CreditCard, label: "Cash on Delivery", sub: "Where available" },
+  { icon: RotateCcw, label: "7-Day Returns", sub: "See policy" },
+  { icon: Shield, label: "Secure checkout", sub: "Encrypted pay" },
+  { icon: Award, label: "AYUSH range", sub: "Quality-first" },
+  { icon: Leaf, label: "Herbal-first", sub: "Label transparency" },
 ] as const;
-
-// Names used by the rotating "Recently bought by ..." social proof toast strip.
-const RECENT_BUYERS = [
-  "Priya from Mumbai",
-  "Rahul from Delhi",
-  "Anjali from Bengaluru",
-  "Vikram from Pune",
-  "Sneha from Hyderabad",
-  "Arjun from Jaipur",
-  "Kavita from Lucknow",
-  "Manish from Indore",
-] as const;
-
-// Helpful counts seeded per review (mock — looks lived-in, not all zeroes).
-const REVIEW_HELPFUL_SEED = [12, 8, 15, 5, 3];
 
 // Pincode checker — purely client-side mock. Any 6-digit pincode is "deliverable",
 // 4-5 days lead time. We highlight a couple of metro pincodes as 1-2 days.
@@ -147,15 +226,14 @@ function checkPincode(pin: string): { available: boolean; days: number } {
 
 function ProductPage() {
   const { handle } = Route.useParams();
+  const { variant: variantFromUrl } = Route.useSearch();
   const [product, setProduct] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState(0);
-  const [mobileGalleryApi, setMobileGalleryApi] = useState<CarouselApi | null>(
-    null,
-  );
+  const [mobileGalleryApi, setMobileGalleryApi] = useState<CarouselApi | null>(null);
   const [selectedVariant, setSelectedVariant] = useState(0);
   const [quantity, setQuantity] = useState(1);
-  const [activeTab, setActiveTab] = useState<typeof TABS[number]>("Key Ingredients");
+  const [activeTab, setActiveTab] = useState<(typeof TABS)[number]>("Key Ingredients");
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [recommendedProducts, setRecommendedProducts] = useState<any[]>([]);
 
@@ -170,21 +248,12 @@ function ProductPage() {
   }>(null);
   const [reviewFilter, setReviewFilter] = useState<number | "all">("all");
   const [reviewSort, setReviewSort] = useState<"recent" | "helpful">("recent");
-  const [recentBuyerIdx, setRecentBuyerIdx] = useState(0);
   const [fbtSelection, setFbtSelection] = useState<Record<string, boolean>>({});
   const [showStickyCta, setShowStickyCta] = useState(false);
   const ctaRef = useRef<HTMLDivElement | null>(null);
 
   const addItem = useCartStore((s) => s.addItem);
   const isLoading = useCartStore((s) => s.isLoading);
-
-  // Rotate the "Recently bought by ..." chip every few seconds.
-  useEffect(() => {
-    const id = window.setInterval(() => {
-      setRecentBuyerIdx((i) => (i + 1) % RECENT_BUYERS.length);
-    }, 3500);
-    return () => window.clearInterval(id);
-  }, []);
 
   // Show a slim desktop sticky CTA when the user scrolls past the in-page ATC.
   useEffect(() => {
@@ -254,6 +323,19 @@ function ProductPage() {
     loadRecommended();
   }, [handle]);
 
+  useEffect(() => {
+    if (!product?.variants?.edges?.length || !variantFromUrl) return;
+    const numeric = variantFromUrl.replace(/\D/g, "");
+    if (!numeric) return;
+    const idx = product.variants.edges.findIndex(
+      (e: { node: { id: string } }) => shopifyVariantGidToNumericId(e.node.id) === numeric,
+    );
+    if (idx >= 0) {
+      setSelectedVariant(idx);
+      setQuantity(1);
+    }
+  }, [product, variantFromUrl]);
+
   const handleAddToCart = async () => {
     if (!product) return;
     const variant = product.variants.edges[selectedVariant]?.node;
@@ -267,6 +349,22 @@ function ProductPage() {
       selectedOptions: variant.selectedOptions || [],
     });
     toast.success("Added to cart!", { description: product.title });
+  };
+
+  const handleBuyNow = async () => {
+    if (!product) return;
+    const v = product.variants.edges[selectedVariant]?.node;
+    if (!v || v.availableForSale === false) return;
+    if (isShiprocketCheckoutConfigured()) {
+      try {
+        await shiprocketBuyDirect(buildShiprocketProductPayload(v.id, quantity));
+      } catch (e) {
+        toast.error(e instanceof Error ? e.message : "Checkout failed");
+        await handleAddToCart();
+      }
+      return;
+    }
+    await handleAddToCart();
   };
 
   // Add the FBT bundle (this product + every selected recommended product)
@@ -339,9 +437,7 @@ function ProductPage() {
   // -------------------------------------------------------------------------
   const images: any[] = product?.images?.edges ?? [];
   const variant = product?.variants?.edges?.[selectedVariant]?.node;
-  const comparePrice = variant?.compareAtPrice
-    ? parseFloat(variant.compareAtPrice.amount)
-    : null;
+  const comparePrice = variant?.compareAtPrice ? parseFloat(variant.compareAtPrice.amount) : null;
   const price = variant ? parseFloat(variant.price.amount) : 0;
   const discount =
     comparePrice && comparePrice > price
@@ -361,10 +457,7 @@ function ProductPage() {
 
   // FBT companions = first 2 recommended products. Memoised so the array
   // identity is stable for the bundle-total useMemo below.
-  const fbtCompanions = useMemo(
-    () => recommendedProducts.slice(0, 2),
-    [recommendedProducts],
-  );
+  const fbtCompanions = useMemo(() => recommendedProducts.slice(0, 2), [recommendedProducts]);
   const fbtBundleTotal = useMemo(() => {
     let sum = price;
     fbtCompanions.forEach((edge: any) => {
@@ -375,6 +468,37 @@ function ProductPage() {
     });
     return sum;
   }, [price, fbtCompanions, fbtSelection]);
+
+  const reviewState = useMemo(() => parseProductReviewState(product), [product]);
+  const histogramTotal = useMemo(
+    () => reviewState.histogram.reduce((a, h) => a + h.count, 0),
+    [reviewState.histogram],
+  );
+  const histogramDenom = Math.max(1, histogramTotal);
+
+  const summaryStarFill = useMemo(
+    () =>
+      reviewState.averageRating != null
+        ? Math.min(5, Math.max(0, Math.round(reviewState.averageRating)))
+        : 0,
+    [reviewState.averageRating],
+  );
+
+  const judgemeCfg = useMemo(() => getJudgeMeConfig(), []);
+  useJudgeMeLoader(product?.id);
+
+  const productFaqJsonLd = useMemo(
+    () => ({
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      mainEntity: FAQS.map((f) => ({
+        "@type": "Question",
+        name: f.q,
+        acceptedAnswer: { "@type": "Answer", text: f.a },
+      })),
+    }),
+    [],
+  );
 
   // -------------------------------------------------------------------------
   // Early returns (loading / not found) — declared *after* all hooks above
@@ -410,6 +534,11 @@ function ProductPage() {
 
   return (
     <div className="min-h-screen bg-background">
+      <ProductStructuredData product={product} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(productFaqJsonLd) }}
+      />
       <Navbar />
 
       <div className="py-3 sm:py-6 lg:py-8 pb-40 lg:pb-10 overflow-x-hidden">
@@ -417,16 +546,11 @@ function ProductPage() {
           {/* Breadcrumb */}
           <ScrollReveal>
             <nav className="flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-xs text-muted-foreground mb-4 sm:mb-6 min-w-0">
-              <Link
-                to="/"
-                className="hover:text-primary transition-colors flex-shrink-0"
-              >
+              <Link to="/" className="hover:text-primary transition-colors flex-shrink-0">
                 Home
               </Link>
               <span className="flex-shrink-0">/</span>
-              <span className="text-foreground font-medium truncate min-w-0">
-                {product.title}
-              </span>
+              <span className="text-foreground font-medium truncate min-w-0">{product.title}</span>
             </nav>
           </ScrollReveal>
 
@@ -508,18 +632,14 @@ function ProductPage() {
                         type="button"
                         onClick={() => {
                           setWishlisted((v) => !v);
-                          toast.success(
-                            wishlisted ? "Removed from wishlist" : "Added to wishlist",
-                          );
+                          toast.success(wishlisted ? "Removed from wishlist" : "Added to wishlist");
                         }}
                         aria-label="Toggle wishlist"
                         className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white/95 backdrop-blur shadow-md border border-border/40 flex items-center justify-center hover:scale-110 active:scale-95 transition-transform"
                       >
                         <Heart
                           className={`w-3.5 h-3.5 sm:w-[18px] sm:h-[18px] ${
-                            wishlisted
-                              ? "fill-red-500 text-red-500"
-                              : "text-foreground/70"
+                            wishlisted ? "fill-red-500 text-red-500" : "text-foreground/70"
                           }`}
                         />
                       </button>
@@ -602,9 +722,7 @@ function ProductPage() {
                         type="button"
                         onClick={() => {
                           setWishlisted((v) => !v);
-                          toast.success(
-                            wishlisted ? "Removed from wishlist" : "Added to wishlist",
-                          );
+                          toast.success(wishlisted ? "Removed from wishlist" : "Added to wishlist");
                         }}
                         aria-label="Toggle wishlist"
                         className="flex h-8 w-8 items-center justify-center rounded-full border border-border/40 bg-white/95 shadow-md backdrop-blur transition-transform hover:scale-110 active:scale-95"
@@ -698,29 +816,39 @@ function ProductPage() {
                   {product.title}
                 </h1>
                 <div className="flex flex-wrap items-center gap-x-3 gap-y-2 mb-4">
-                  <div className="flex items-center gap-0.5">
-                    {[1, 2, 3, 4, 5].map((s) => (
-                      <Star
-                        key={s}
-                        className={`w-4 h-4 ${
-                          s <= 4
-                            ? "text-brand-yellow fill-brand-yellow"
-                            : "text-brand-yellow/40 fill-brand-yellow/40"
-                        }`}
-                      />
-                    ))}
-                  </div>
-                  <span className="text-sm text-primary font-semibold">4.48</span>
+                  {judgemeCfg ? (
+                    <JudgeMePreviewBadge productId={product.id} />
+                  ) : (
+                    <div className="flex items-center gap-0.5">
+                      {[1, 2, 3, 4, 5].map((s) => (
+                        <Star
+                          key={s}
+                          className={`w-4 h-4 ${
+                            s <= summaryStarFill
+                              ? "text-brand-yellow fill-brand-yellow"
+                              : "text-brand-yellow/40 fill-brand-yellow/40"
+                          }`}
+                        />
+                      ))}
+                    </div>
+                  )}
+                  {!judgemeCfg && (
+                    <span className="text-sm text-primary font-semibold tabular-nums">
+                      {reviewState.averageRating != null
+                        ? reviewState.averageRating.toFixed(2)
+                        : "—"}
+                    </span>
+                  )}
                   <a
                     href="#reviews"
                     className="text-xs text-muted-foreground hover:text-primary underline-offset-4 hover:underline"
                   >
-                    (25 verified reviews)
+                    {judgemeCfg
+                      ? "(Reviews below)"
+                      : reviewState.totalCount > 0
+                        ? `(${reviewState.totalCount} review${reviewState.totalCount === 1 ? "" : "s"})`
+                        : "(No reviews yet)"}
                   </a>
-                  <span className="hidden sm:inline-flex items-center gap-1 text-[11px] text-muted-foreground ml-auto">
-                    <Eye className="w-3.5 h-3.5" />
-                    {12 + (selectedVariant + recentBuyerIdx) * 3} viewing now
-                  </span>
                 </div>
 
                 {/* Price block (with savings + tax line) */}
@@ -760,9 +888,7 @@ function ProductPage() {
                   <div className="mb-5">
                     <h3 className="text-sm font-semibold text-foreground mb-2">
                       Pack:{" "}
-                      <span className="text-muted-foreground font-normal">
-                        {variant?.title}
-                      </span>
+                      <span className="text-muted-foreground font-normal">{variant?.title}</span>
                     </h3>
                     <div className="flex flex-wrap gap-2">
                       {product.variants.edges.map((v: any, i: number) => (
@@ -786,7 +912,10 @@ function ProductPage() {
                 )}
 
                 {/* Quantity + Add to Cart */}
-                <div ref={ctaRef} className="flex flex-col min-[380px]:flex-row items-stretch min-[380px]:items-center gap-2 sm:gap-3 mb-3">
+                <div
+                  ref={ctaRef}
+                  className="flex flex-col min-[380px]:flex-row items-stretch min-[380px]:items-center gap-2 sm:gap-3 mb-3"
+                >
                   <div className="inline-flex items-center justify-center border border-border rounded-xl flex-shrink-0 bg-card self-center min-[380px]:self-auto">
                     <button
                       onClick={() => setQuantity(Math.max(1, quantity - 1))}
@@ -812,23 +941,16 @@ function ProductPage() {
                     disabled={isLoading || !variant?.availableForSale}
                     className="flex-1 min-w-0 inline-flex items-center justify-center gap-2 min-h-[48px] h-12 rounded-xl bg-primary text-primary-foreground font-bold text-[11px] sm:text-sm uppercase tracking-wider hover:bg-primary/90 transition-all disabled:opacity-50 px-2"
                   >
-                    {isLoading ? (
-                      <Loader2 className="w-5 h-5 animate-spin" />
-                    ) : (
-                      <>ADD TO CART</>
-                    )}
+                    {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <>ADD TO CART</>}
                   </motion.button>
                 </div>
 
-                {/* Buy Now */}
-                <motion.button
-                  whileTap={{ scale: 0.97 }}
-                  onClick={handleAddToCart}
-                  className="w-full min-h-[48px] h-12 rounded-xl bg-foreground text-background font-bold text-xs sm:text-sm uppercase tracking-wider hover:opacity-90 transition-all mb-4 inline-flex items-center justify-center gap-2 px-3"
-                >
-                  <Zap className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                  BUY IT NOW
-                </motion.button>
+                <div className="mb-4">
+                  <BuyNowShiprocketBar
+                    onClick={() => void handleBuyNow()}
+                    disabled={!variant?.availableForSale}
+                  />
+                </div>
 
                 {/* Pincode checker + estimated delivery */}
                 <div className="rounded-2xl border border-border/50 bg-card p-3 sm:p-4 mb-4">
@@ -887,48 +1009,27 @@ function ProductPage() {
                   </div>
                 </div>
 
-                {/* Live "recently bought" social-proof toast strip */}
-                <div className="rounded-xl bg-green-50 border border-green-200/70 px-3 py-2 mb-5 overflow-hidden">
-                  <AnimatePresence mode="wait">
-                    <motion.div
-                      key={recentBuyerIdx}
-                      initial={{ y: 8, opacity: 0 }}
-                      animate={{ y: 0, opacity: 1 }}
-                      exit={{ y: -8, opacity: 0 }}
-                      transition={{ duration: 0.35 }}
-                      className="flex items-center gap-2 text-[12px] sm:text-xs text-green-800"
-                    >
-                      <span className="relative flex h-2 w-2 flex-shrink-0">
-                        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-500 opacity-75" />
-                        <span className="relative inline-flex h-2 w-2 rounded-full bg-green-600" />
-                      </span>
-                      <span className="font-medium truncate">
-                        {RECENT_BUYERS[recentBuyerIdx]} just bought this · a few minutes ago
-                      </span>
-                    </motion.div>
-                  </AnimatePresence>
-                </div>
-
-                {/* Visual trust highlights — premium bordered cards.
-                    Crisp 2-tone design with a tinted icon plate, bold label
-                    and subtle subtitle. 2 cols on tiny phones, 3 from sm,
-                    6 from lg so each card stays roomy and readable. */}
-                <div className="grid grid-cols-1 min-[380px]:grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 sm:gap-3 mb-6">
+                {/* Trust highlights — 2×2 on mobile, 3×2 from sm+ so desktop cells stay wide enough (no overflow) */}
+                <div className="mb-4 grid grid-cols-2 gap-2 sm:mb-5 sm:grid-cols-3 sm:gap-2.5 lg:gap-3">
                   {TRUST_HIGHLIGHTS.map((h) => (
                     <div
                       key={h.label}
-                      className="group relative flex flex-col items-center justify-center text-center px-2 py-3 sm:px-2.5 sm:py-3.5 rounded-xl bg-card border border-border/60 shadow-sm hover:shadow-md hover:border-primary/40 hover:-translate-y-0.5 transition-all duration-200 min-h-[88px] sm:min-h-[96px]"
+                      className="group flex min-h-0 min-w-0 flex-row items-start gap-2 rounded-xl border border-border/60 bg-gradient-to-b from-card to-card/95 px-2.5 py-2 shadow-sm transition-[border-color,box-shadow] hover:border-primary/30 hover:shadow-md sm:px-3 sm:py-2.5"
                     >
-                      {/* Icon plate — subtle gradient that intensifies on hover */}
-                      <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-gradient-to-br from-primary/10 to-brand-yellow/10 flex items-center justify-center mb-2 group-hover:from-primary/20 group-hover:to-brand-yellow/20 transition-colors">
-                        <h.icon className="w-4 h-4 sm:w-[18px] sm:h-[18px] text-primary" strokeWidth={2.2} />
+                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-primary/12 to-brand-yellow/10 ring-1 ring-primary/10 sm:h-9 sm:w-9">
+                        <h.icon
+                          className="h-3.5 w-3.5 text-primary sm:h-4 sm:w-4"
+                          strokeWidth={2.2}
+                        />
                       </div>
-                      <span className="text-[11px] sm:text-xs font-bold text-foreground leading-tight">
-                        {h.label}
-                      </span>
-                      <span className="text-[9.5px] sm:text-[10.5px] text-muted-foreground leading-tight mt-0.5">
-                        {h.sub}
-                      </span>
+                      <div className="min-w-0 flex-1 overflow-hidden text-left">
+                        <span className="block text-[10px] font-bold leading-snug text-foreground sm:text-[11px] break-words [overflow-wrap:anywhere] hyphens-auto">
+                          {h.label}
+                        </span>
+                        <span className="mt-0.5 block text-[8.5px] leading-snug text-muted-foreground sm:text-[9.5px] break-words [overflow-wrap:anywhere]">
+                          {h.sub}
+                        </span>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -945,12 +1046,21 @@ function ProductPage() {
                     width={1024}
                     height={120}
                   />
+                  <p className="text-[10px] sm:text-[11px] text-muted-foreground text-center mt-3 max-w-lg mx-auto leading-relaxed">
+                    {FDA_STRUCTURED_CLAIM_DISCLAIMER}{" "}
+                    <Link
+                      to="/medical-disclaimer"
+                      className="text-primary font-medium hover:underline"
+                    >
+                      Medical disclaimer
+                    </Link>
+                  </p>
                 </div>
 
                 {/* Product description (from Shopify) */}
                 <div className="border-t border-border/50 pt-4 sm:pt-5 mb-2">
                   <h2 className="text-[15px] sm:text-base font-bold text-foreground mb-2.5 sm:mb-3">
-                    Why this product?
+                    About this product
                   </h2>
                   <p className="text-[13px] sm:text-sm text-muted-foreground leading-relaxed break-words [overflow-wrap:anywhere]">
                     {product.description}
@@ -1010,9 +1120,7 @@ function ProductPage() {
                   {fbtCompanions.map((edge: any) => {
                     const p = edge.node;
                     const img = p.images?.edges?.[0]?.node?.url;
-                    const pPrice = parseFloat(
-                      p.variants?.edges?.[0]?.node?.price?.amount ?? "0",
-                    );
+                    const pPrice = parseFloat(p.variants?.edges?.[0]?.node?.price?.amount ?? "0");
                     const checked = !!fbtSelection[p.id];
                     return (
                       <label
@@ -1025,11 +1133,7 @@ function ProductPage() {
                       >
                         <div className="w-14 h-14 rounded-lg bg-gradient-cream border border-border/40 overflow-hidden p-1 flex-shrink-0">
                           {img ? (
-                            <img
-                              src={img}
-                              alt={p.title}
-                              className="w-full h-full object-contain"
-                            />
+                            <img src={img} alt={p.title} className="w-full h-full object-contain" />
                           ) : (
                             <Package className="w-6 h-6 text-muted-foreground m-auto" />
                           )}
@@ -1115,9 +1219,7 @@ function ProductPage() {
                     {fbtCompanions.map((edge: any) => {
                       const p = edge.node;
                       const img = p.images?.edges?.[0]?.node?.url;
-                      const pPrice = parseFloat(
-                        p.variants?.edges?.[0]?.node?.price?.amount ?? "0",
-                      );
+                      const pPrice = parseFloat(p.variants?.edges?.[0]?.node?.price?.amount ?? "0");
                       const checked = !!fbtSelection[p.id];
                       return (
                         <div key={p.id} className="flex items-center flex-shrink-0 gap-3">
@@ -1156,9 +1258,7 @@ function ProductPage() {
                             <p className="mt-2 text-xs font-semibold text-foreground line-clamp-2 group-hover:text-primary transition-colors">
                               {p.title}
                             </p>
-                            <p className="text-xs text-primary font-bold">
-                              ₹{pPrice.toFixed(0)}
-                            </p>
+                            <p className="text-xs text-primary font-bold">₹{pPrice.toFixed(0)}</p>
                           </label>
                         </div>
                       );
@@ -1239,9 +1339,7 @@ function ProductPage() {
                           key={ing.name}
                           className="flex items-start gap-3 sm:gap-4 p-3 sm:p-4 rounded-xl bg-primary/5 border border-primary/10"
                         >
-                          <span className="text-2xl sm:text-3xl flex-shrink-0">
-                            {ing.emoji}
-                          </span>
+                          <span className="text-2xl sm:text-3xl flex-shrink-0">{ing.emoji}</span>
                           <div className="min-w-0">
                             <h4 className="font-bold text-foreground text-sm sm:text-base mb-1">
                               {ing.name}
@@ -1313,8 +1411,35 @@ function ProductPage() {
                         </div>
                       ))}
                       <p className="text-[11px] sm:text-xs text-muted-foreground italic mt-3 leading-relaxed">
-                        ⚕️ Consult a qualified healthcare professional to ensure
-                        suitability based on individual health conditions.
+                        Consult a qualified healthcare professional to confirm suitability for your
+                        situation.
+                      </p>
+                    </div>
+                  )}
+
+                  {activeTab === "Storage & safety" && (
+                    <div className="grid sm:grid-cols-1 gap-4">
+                      {STORAGE_SAFETY.map((row) => (
+                        <div
+                          key={row.title}
+                          className="rounded-xl border border-border/50 bg-muted/20 p-4 sm:p-5"
+                        >
+                          <h4 className="font-semibold text-foreground text-sm sm:text-base mb-2">
+                            {row.title}
+                          </h4>
+                          <p className="text-[13px] sm:text-sm text-muted-foreground leading-relaxed">
+                            {row.body}
+                          </p>
+                        </div>
+                      ))}
+                      <p className="text-[11px] sm:text-xs text-muted-foreground">
+                        {FDA_STRUCTURED_CLAIM_DISCLAIMER}{" "}
+                        <Link
+                          to="/medical-disclaimer"
+                          className="font-medium text-primary hover:underline"
+                        >
+                          Full disclaimer
+                        </Link>
                       </p>
                     </div>
                   )}
@@ -1322,10 +1447,7 @@ function ProductPage() {
                   {activeTab === "FAQs" && (
                     <div className="space-y-2">
                       {FAQS.map((faq, i) => (
-                        <div
-                          key={i}
-                          className="border border-border/50 rounded-xl overflow-hidden"
-                        >
+                        <div key={i} className="border border-border/50 rounded-xl overflow-hidden">
                           <button
                             onClick={() => setOpenFaq(openFaq === i ? null : i)}
                             className="w-full flex items-center justify-between gap-3 p-3.5 sm:p-4 text-left hover:bg-muted/30 transition-colors"
@@ -1364,212 +1486,323 @@ function ProductPage() {
           </ScrollReveal>
 
           {/* ===== CUSTOMER REVIEWS ===== */}
-          <ScrollReveal className="mt-8 sm:mt-12">
-            <div
-              id="reviews"
-              className="bg-card rounded-2xl border border-border/50 p-4 sm:p-6 lg:p-8 scroll-mt-24"
-            >
-              <div className="flex flex-wrap items-center justify-between gap-2 sm:gap-3 mb-5 sm:mb-6">
-                <div className="min-w-0">
-                  <span className="text-eyebrow text-primary">— Real users, real results</span>
-                  <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-foreground font-display">
-                    Customer reviews
-                  </h2>
+          {judgemeCfg ? (
+            <ScrollReveal className="mt-8 sm:mt-12">
+              <div
+                id="reviews"
+                className="bg-card rounded-2xl border border-border/50 p-4 sm:p-6 lg:p-8 scroll-mt-24"
+              >
+                <div className="flex flex-wrap items-center justify-between gap-2 sm:gap-3 mb-4">
+                  <div className="min-w-0">
+                    <span className="text-eyebrow text-primary">— Judge.me</span>
+                    <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-foreground font-display">
+                      Customer reviews
+                    </h2>
+                  </div>
+                  {product.onlineStoreUrl ? (
+                    <a
+                      href={String(product.onlineStoreUrl)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 sm:gap-2 px-3.5 sm:px-5 py-2 sm:py-2.5 rounded-full bg-foreground text-background text-[11px] sm:text-sm font-bold uppercase tracking-wider hover:opacity-90 transition flex-shrink-0"
+                    >
+                      <span className="hidden sm:inline">Write a review</span>
+                      <span className="sm:hidden">Write</span>
+                      <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                    </a>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() =>
+                        toast.info(
+                          "Open this product on your Shopify storefront to leave a review.",
+                        )
+                      }
+                      className="inline-flex items-center gap-1.5 sm:gap-2 px-3.5 sm:px-5 py-2 sm:py-2.5 rounded-full bg-foreground text-background text-[11px] sm:text-sm font-bold uppercase tracking-wider hover:opacity-90 transition flex-shrink-0"
+                    >
+                      <span className="hidden sm:inline">Write a review</span>
+                      <span className="sm:hidden">Write</span>
+                      <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                    </button>
+                  )}
                 </div>
-                <button
-                  type="button"
-                  onClick={() => toast.info("Review form coming soon!")}
-                  className="inline-flex items-center gap-1.5 sm:gap-2 px-3.5 sm:px-5 py-2 sm:py-2.5 rounded-full bg-foreground text-background text-[11px] sm:text-sm font-bold uppercase tracking-wider hover:opacity-90 transition flex-shrink-0"
-                >
-                  <span className="hidden sm:inline">Write a review</span>
-                  <span className="sm:hidden">Write</span>
-                  <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                </button>
+                <p className="text-[11px] sm:text-xs text-muted-foreground mb-3 leading-relaxed">
+                  Reviews reflect individual experiences only and are not medical endorsements.{" "}
+                  {FDA_STRUCTURED_CLAIM_DISCLAIMER}
+                </p>
+                <p className="text-[11px] sm:text-xs text-muted-foreground mb-4 leading-relaxed">
+                  Widget loads from Judge.me (same reviews as your Shopify theme). Add{" "}
+                  <code className="rounded bg-muted px-1 py-0.5 text-[10px]">
+                    VITE_JUDGEME_PUBLIC_TOKEN
+                  </code>{" "}
+                  in <code className="rounded bg-muted px-1 py-0.5 text-[10px]">.env.local</code> —
+                  token from Judge.me → Settings → Integrations → Developers.
+                </p>
+                <JudgeMeReviewWidget productId={product.id} productTitle={product.title} />
               </div>
+            </ScrollReveal>
+          ) : (
+            <ScrollReveal className="mt-8 sm:mt-12">
+              <div
+                id="reviews"
+                className="bg-card rounded-2xl border border-border/50 p-4 sm:p-6 lg:p-8 scroll-mt-24"
+              >
+                <div className="flex flex-wrap items-center justify-between gap-2 sm:gap-3 mb-5 sm:mb-6">
+                  <div className="min-w-0">
+                    <span className="text-eyebrow text-primary">— Customer reviews</span>
+                    <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-foreground font-display">
+                      Customer reviews
+                    </h2>
+                  </div>
+                  {product.onlineStoreUrl ? (
+                    <a
+                      href={String(product.onlineStoreUrl)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 sm:gap-2 px-3.5 sm:px-5 py-2 sm:py-2.5 rounded-full bg-foreground text-background text-[11px] sm:text-sm font-bold uppercase tracking-wider hover:opacity-90 transition flex-shrink-0"
+                    >
+                      <span className="hidden sm:inline">Write a review</span>
+                      <span className="sm:hidden">Write</span>
+                      <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                    </a>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() =>
+                        toast.info(
+                          "Open this product on your Shopify storefront to leave a review.",
+                        )
+                      }
+                      className="inline-flex items-center gap-1.5 sm:gap-2 px-3.5 sm:px-5 py-2 sm:py-2.5 rounded-full bg-foreground text-background text-[11px] sm:text-sm font-bold uppercase tracking-wider hover:opacity-90 transition flex-shrink-0"
+                    >
+                      <span className="hidden sm:inline">Write a review</span>
+                      <span className="sm:hidden">Write</span>
+                      <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                    </button>
+                  )}
+                </div>
 
-              {/* Rating summary */}
-              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-8 mb-5 sm:mb-7 pb-5 sm:pb-7 border-b border-border/50">
-                <div className="flex sm:flex-col items-center sm:items-start gap-3 sm:gap-0 flex-shrink-0">
-                  <p className="text-4xl sm:text-6xl font-extrabold text-foreground tabular-nums leading-none">
-                    4.48
-                  </p>
-                  <div className="flex flex-col gap-0.5 sm:gap-0 items-start sm:items-start">
-                    <div className="flex items-center gap-0.5 sm:mt-2">
-                      {[1, 2, 3, 4, 5].map((s) => (
-                        <Star
-                          key={s}
-                          className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${
-                            s <= 4
-                              ? "text-brand-yellow fill-brand-yellow"
-                              : "text-brand-yellow/40 fill-brand-yellow/40"
-                          }`}
-                        />
-                      ))}
-                    </div>
-                    <p className="text-[10px] sm:text-[11px] text-muted-foreground mt-0.5 sm:mt-1">
-                      Based on 25 verified reviews
+                {/* Rating summary — data from Shopify metafields (see shopify-product-reviews.ts) */}
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-8 mb-5 sm:mb-7 pb-5 sm:pb-7 border-b border-border/50">
+                  <div className="flex sm:flex-col items-center sm:items-start gap-3 sm:gap-0 flex-shrink-0">
+                    <p className="text-4xl sm:text-6xl font-extrabold text-foreground tabular-nums leading-none">
+                      {reviewState.averageRating != null
+                        ? reviewState.averageRating.toFixed(2)
+                        : "—"}
                     </p>
+                    <div className="flex flex-col gap-0.5 sm:gap-0 items-start sm:items-start">
+                      <div className="flex items-center gap-0.5 sm:mt-2">
+                        {[1, 2, 3, 4, 5].map((s) => (
+                          <Star
+                            key={s}
+                            className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${
+                              s <= summaryStarFill
+                                ? "text-brand-yellow fill-brand-yellow"
+                                : "text-brand-yellow/40 fill-brand-yellow/40"
+                            }`}
+                          />
+                        ))}
+                      </div>
+                      <p className="text-[10px] sm:text-[11px] text-muted-foreground mt-0.5 sm:mt-1">
+                        {reviewState.totalCount > 0
+                          ? `Based on ${reviewState.totalCount} customer review${reviewState.totalCount === 1 ? "" : "s"}`
+                          : "No reviews yet"}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex-1 space-y-1 sm:space-y-1.5 w-full">
+                    {histogramTotal > 0 ? (
+                      reviewState.histogram.map((r) => (
+                        <button
+                          key={r.stars}
+                          type="button"
+                          onClick={() =>
+                            setReviewFilter(reviewFilter === r.stars ? "all" : r.stars)
+                          }
+                          className={`flex items-center gap-2 w-full text-left rounded-lg px-1.5 py-1 transition-colors ${
+                            reviewFilter === r.stars ? "bg-primary/10" : "hover:bg-muted/50"
+                          }`}
+                        >
+                          <span className="text-[11px] sm:text-xs text-muted-foreground w-3">
+                            {r.stars}
+                          </span>
+                          <Star className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-brand-yellow fill-brand-yellow flex-shrink-0" />
+                          <div className="flex-1 h-1.5 sm:h-2 bg-muted rounded-full overflow-hidden">
+                            <div
+                              className="h-full bg-brand-yellow rounded-full transition-all"
+                              style={{ width: `${(r.count / histogramDenom) * 100}%` }}
+                            />
+                          </div>
+                          <span className="text-[11px] sm:text-xs text-muted-foreground w-5 text-right">
+                            {r.count}
+                          </span>
+                        </button>
+                      ))
+                    ) : (
+                      <p className="text-[11px] sm:text-xs text-muted-foreground leading-relaxed">
+                        {reviewState.totalCount > 0
+                          ? "Star breakdown shows when individual reviews are synced via the custom.dardgo_reviews metafield. Overall score above comes from Shopify."
+                          : "Connect reviews in Shopify (see metafields in Admin) or add a JSON list at custom.dardgo_reviews on the product."}
+                      </p>
+                    )}
                   </div>
                 </div>
-                <div className="flex-1 space-y-1 sm:space-y-1.5 w-full">
-                  {[
-                    { stars: 5, count: 14 },
-                    { stars: 4, count: 9 },
-                    { stars: 3, count: 2 },
-                    { stars: 2, count: 0 },
-                    { stars: 1, count: 0 },
-                  ].map((r) => (
-                    <button
-                      key={r.stars}
-                      onClick={() =>
-                        setReviewFilter(reviewFilter === r.stars ? "all" : r.stars)
-                      }
-                      className={`flex items-center gap-2 w-full text-left rounded-lg px-1.5 py-1 transition-colors ${
-                        reviewFilter === r.stars
-                          ? "bg-primary/10"
-                          : "hover:bg-muted/50"
-                      }`}
-                    >
-                      <span className="text-[11px] sm:text-xs text-muted-foreground w-3">
-                        {r.stars}
-                      </span>
-                      <Star className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-brand-yellow fill-brand-yellow flex-shrink-0" />
-                      <div className="flex-1 h-1.5 sm:h-2 bg-muted rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-brand-yellow rounded-full transition-all"
-                          style={{ width: `${(r.count / 25) * 100}%` }}
-                        />
-                      </div>
-                      <span className="text-[11px] sm:text-xs text-muted-foreground w-5 text-right">
-                        {r.count}
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              </div>
 
-              {/* Filter + sort row — split into two flex rows on mobile so the
+                {/* Filter + sort row — split into two flex rows on mobile so the
                   filter pills can scroll horizontally without crowding the
                   sort dropdown. Single row on tablet+. */}
-              <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-2 sm:gap-2 mb-4 sm:mb-5">
-                <div
-                  className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto scrollbar-hide -mx-1 px-1 sm:mx-0 sm:px-0"
-                  data-lenis-prevent
-                >
-                  <span className="text-[10px] sm:text-[11px] uppercase tracking-wider font-bold text-muted-foreground mr-1 flex-shrink-0">
-                    Filter:
-                  </span>
-                  {(["all", 5, 4, 3] as Array<number | "all">).map((f) => (
-                    <button
-                      key={String(f)}
-                      onClick={() => setReviewFilter(f)}
-                      className={`px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-[10px] sm:text-[11px] font-semibold transition flex-shrink-0 ${
-                        reviewFilter === f
-                          ? "bg-foreground text-background"
-                          : "bg-muted/60 text-muted-foreground hover:bg-primary/10 hover:text-primary"
-                      }`}
-                    >
-                      {f === "all" ? "All" : `${f}★`}
-                    </button>
-                  ))}
-                </div>
-                <span className="sm:ml-auto text-[10px] sm:text-[11px] text-muted-foreground flex items-center gap-1.5 sm:gap-2">
-                  Sort by
-                  <select
-                    value={reviewSort}
-                    onChange={(e) =>
-                      setReviewSort(e.target.value as "recent" | "helpful")
-                    }
-                    className="px-2 py-1 rounded-md border border-border/50 bg-background text-[10px] sm:text-[11px] font-semibold focus:outline-none focus:ring-2 focus:ring-primary/30"
+                <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-2 sm:gap-2 mb-4 sm:mb-5">
+                  <div
+                    className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto scrollbar-hide -mx-1 px-1 sm:mx-0 sm:px-0"
+                    data-lenis-prevent
                   >
-                    <option value="recent">Most recent</option>
-                    <option value="helpful">Most helpful</option>
-                  </select>
-                </span>
-              </div>
+                    <span className="text-[10px] sm:text-[11px] uppercase tracking-wider font-bold text-muted-foreground mr-1 flex-shrink-0">
+                      Filter:
+                    </span>
+                    {(["all", 5, 4, 3] as Array<number | "all">).map((f) => (
+                      <button
+                        key={String(f)}
+                        type="button"
+                        onClick={() => setReviewFilter(f)}
+                        className={`px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-[10px] sm:text-[11px] font-semibold transition flex-shrink-0 ${
+                          reviewFilter === f
+                            ? "bg-foreground text-background"
+                            : "bg-muted/60 text-muted-foreground hover:bg-primary/10 hover:text-primary"
+                        }`}
+                      >
+                        {f === "all" ? "All" : `${f}★`}
+                      </button>
+                    ))}
+                  </div>
+                  <span className="sm:ml-auto text-[10px] sm:text-[11px] text-muted-foreground flex items-center gap-1.5 sm:gap-2">
+                    Sort by
+                    <select
+                      value={reviewSort}
+                      onChange={(e) => setReviewSort(e.target.value as "recent" | "helpful")}
+                      className="px-2 py-1 rounded-md border border-border/50 bg-background text-[10px] sm:text-[11px] font-semibold focus:outline-none focus:ring-2 focus:ring-primary/30"
+                    >
+                      <option value="recent">Most recent</option>
+                      <option value="helpful">Most helpful</option>
+                    </select>
+                  </span>
+                </div>
 
-              {/* Individual reviews — filtered + sorted */}
-              <div className="space-y-3 sm:space-y-5">
-                {(() => {
-                  const list = MOCK_REVIEWS.map((r, i) => ({
-                    ...r,
-                    helpful: REVIEW_HELPFUL_SEED[i] ?? 0,
-                  }))
-                    .filter((r) => reviewFilter === "all" || r.rating === reviewFilter)
-                    .sort((a, b) =>
-                      reviewSort === "helpful" ? b.helpful - a.helpful : 0,
-                    );
-                  if (list.length === 0) {
+                {/* Individual reviews — from Shopify custom.dardgo_reviews JSON when present */}
+                <div className="space-y-3 sm:space-y-5">
+                  {(() => {
+                    const list = reviewState.reviews
+                      .filter((r) => reviewFilter === "all" || r.rating === reviewFilter)
+                      .sort((a, b) => {
+                        if (reviewSort === "helpful") return b.helpful - a.helpful;
+                        const da = Date.parse(a.date);
+                        const db = Date.parse(b.date);
+                        if (Number.isFinite(da) && Number.isFinite(db)) return db - da;
+                        return String(b.date).localeCompare(String(a.date));
+                      });
+                    if (list.length > 0) {
+                      return list.map((review, i) => (
+                        <motion.div
+                          key={`${review.name}-${review.date}-${i}`}
+                          initial={{ opacity: 0, y: 10 }}
+                          whileInView={{ opacity: 1, y: 0 }}
+                          viewport={{ once: true }}
+                          transition={{ delay: i * 0.05 }}
+                          className="p-3 sm:p-4 rounded-xl bg-muted/30 border border-border/30"
+                        >
+                          <div className="flex items-start justify-between gap-2 mb-2">
+                            <div className="flex items-center gap-2 min-w-0">
+                              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                                <User className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary" />
+                              </div>
+                              <div className="min-w-0">
+                                <div className="flex items-center gap-1.5 flex-wrap">
+                                  <p className="text-[13px] sm:text-sm font-semibold text-foreground truncate">
+                                    {review.name}
+                                  </p>
+                                  {review.verified && (
+                                    <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-green-100 text-green-700 text-[8.5px] sm:text-[9px] font-bold uppercase">
+                                      <BadgeCheck className="w-2.5 h-2.5" />
+                                      Verified
+                                    </span>
+                                  )}
+                                </div>
+                                <p className="text-[10px] text-muted-foreground">{review.date}</p>
+                              </div>
+                            </div>
+                            <div className="flex gap-0.5 flex-shrink-0">
+                              {[1, 2, 3, 4, 5].map((s) => (
+                                <Star
+                                  key={s}
+                                  className={`w-3 h-3 sm:w-3.5 sm:h-3.5 ${
+                                    s <= review.rating
+                                      ? "text-brand-yellow fill-brand-yellow"
+                                      : "text-border"
+                                  }`}
+                                />
+                              ))}
+                            </div>
+                          </div>
+                          <p className="text-[13px] sm:text-sm font-semibold text-foreground mb-1">
+                            {review.title}
+                          </p>
+                          <p className="text-[12.5px] sm:text-sm text-muted-foreground leading-relaxed mb-2.5 sm:mb-3">
+                            {review.text}
+                          </p>
+                          <div className="flex items-center gap-2 sm:gap-3 text-[11px] text-muted-foreground">
+                            <button
+                              type="button"
+                              onClick={() => toast.success("Thanks for your feedback!")}
+                              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full hover:bg-primary/10 hover:text-primary transition"
+                            >
+                              <ThumbsUp className="w-3 h-3" />
+                              Helpful · {review.helpful}
+                            </button>
+                          </div>
+                        </motion.div>
+                      ));
+                    }
+                    if (reviewState.reviews.length > 0) {
+                      return (
+                        <p className="text-center text-xs sm:text-sm text-muted-foreground py-8">
+                          No reviews match this filter yet.
+                        </p>
+                      );
+                    }
+                    if (reviewState.totalCount > 0 && product.onlineStoreUrl) {
+                      return (
+                        <p className="text-center text-xs sm:text-sm text-muted-foreground py-8 leading-relaxed px-2">
+                          Shopify has {reviewState.totalCount} rating
+                          {reviewState.totalCount === 1 ? "" : "s"} for this product.{" "}
+                          <a
+                            href={String(product.onlineStoreUrl)}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="font-semibold text-primary underline-offset-4 hover:underline"
+                          >
+                            Open the storefront listing
+                          </a>{" "}
+                          to read full reviews, or sync review text via the{" "}
+                          <code className="rounded bg-muted px-1 py-0.5 text-[10px]">
+                            custom.dardgo_reviews
+                          </code>{" "}
+                          metafield.
+                        </p>
+                      );
+                    }
                     return (
                       <p className="text-center text-xs sm:text-sm text-muted-foreground py-8">
-                        No reviews match this filter yet.
+                        No reviews yet. Add reviews in Shopify or populate the{" "}
+                        <code className="rounded bg-muted px-1 py-0.5 text-[10px]">
+                          custom.dardgo_reviews
+                        </code>{" "}
+                        JSON metafield on this product.
                       </p>
                     );
-                  }
-                  return list.map((review, i) => (
-                    <motion.div
-                      key={review.name + review.date}
-                      initial={{ opacity: 0, y: 10 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      viewport={{ once: true }}
-                      transition={{ delay: i * 0.05 }}
-                      className="p-3 sm:p-4 rounded-xl bg-muted/30 border border-border/30"
-                    >
-                      <div className="flex items-start justify-between gap-2 mb-2">
-                        <div className="flex items-center gap-2 min-w-0">
-                          <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                            <User className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary" />
-                          </div>
-                          <div className="min-w-0">
-                            <div className="flex items-center gap-1.5 flex-wrap">
-                              <p className="text-[13px] sm:text-sm font-semibold text-foreground truncate">
-                                {review.name}
-                              </p>
-                              <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-green-100 text-green-700 text-[8.5px] sm:text-[9px] font-bold uppercase">
-                                <BadgeCheck className="w-2.5 h-2.5" />
-                                Verified
-                              </span>
-                            </div>
-                            <p className="text-[10px] text-muted-foreground">
-                              {review.date}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="flex gap-0.5 flex-shrink-0">
-                          {[1, 2, 3, 4, 5].map((s) => (
-                            <Star
-                              key={s}
-                              className={`w-3 h-3 sm:w-3.5 sm:h-3.5 ${
-                                s <= review.rating
-                                  ? "text-brand-yellow fill-brand-yellow"
-                                  : "text-border"
-                              }`}
-                            />
-                          ))}
-                        </div>
-                      </div>
-                      <p className="text-[13px] sm:text-sm font-semibold text-foreground mb-1">
-                        {review.title}
-                      </p>
-                      <p className="text-[12.5px] sm:text-sm text-muted-foreground leading-relaxed mb-2.5 sm:mb-3">
-                        {review.text}
-                      </p>
-                      <div className="flex items-center gap-2 sm:gap-3 text-[11px] text-muted-foreground">
-                        <button
-                          type="button"
-                          onClick={() => toast.success("Thanks for your feedback!")}
-                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full hover:bg-primary/10 hover:text-primary transition"
-                        >
-                          <ThumbsUp className="w-3 h-3" />
-                          Helpful · {review.helpful}
-                        </button>
-                      </div>
-                    </motion.div>
-                  ));
-                })()}
+                  })()}
+                </div>
               </div>
-            </div>
-          </ScrollReveal>
+            </ScrollReveal>
+          )}
 
           {/* ===== RECOMMENDED PRODUCTS ===== */}
           {recommendedProducts.length > 0 && (
@@ -1630,18 +1863,9 @@ function ProductPage() {
                         )}
                       </div>
                       <div className="flex min-h-0 flex-1 flex-col p-2.5 sm:p-3.5">
-                        <div className="flex items-center gap-0.5 sm:gap-1 mb-1 shrink-0">
-                          {[1, 2, 3, 4].map((s) => (
-                            <Star
-                              key={s}
-                              className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-brand-yellow fill-brand-yellow"
-                            />
-                          ))}
-                          <Star className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-brand-yellow/40 fill-brand-yellow/40" />
-                          <span className="text-[9px] sm:text-[10px] text-muted-foreground ml-0.5 sm:ml-1">
-                            (4.5)
-                          </span>
-                        </div>
+                        <p className="text-[9px] font-semibold uppercase tracking-wide text-muted-foreground mb-1">
+                          DARDGO
+                        </p>
                         <h3
                           title={p.title}
                           className="mb-1 line-clamp-3 text-[12px] font-semibold leading-snug text-foreground break-words hyphens-auto sm:mb-1.5 sm:text-sm group-hover:text-primary transition-colors"
@@ -1668,10 +1892,9 @@ function ProductPage() {
         </div>
       </div>
 
-      {/* Sticky mobile CTA — adds product thumb + price + ATC.
-          Uses tight spacing so it works comfortably even at 320px width. */}
+      {/* Sticky mobile CTA — thumb + price + qty (same as desktop strip) + Add to cart */}
       <div className="fixed bottom-16 lg:hidden left-0 right-0 z-40 glass border-t border-border/50 px-2.5 py-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))]">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 min-w-0">
           <div className="w-11 h-11 rounded-lg bg-gradient-cream flex-shrink-0 overflow-hidden border border-border/40">
             {images[selectedImage] ? (
               <img
@@ -1690,9 +1913,7 @@ function ProductPage() {
               ₹{price.toFixed(0)}
             </p>
             {discount > 0 ? (
-              <p className="text-[9.5px] text-red-500 font-bold mt-0.5">
-                {discount}% OFF
-              </p>
+              <p className="text-[9.5px] text-red-500 font-bold mt-0.5">{discount}% OFF</p>
             ) : (
               comparePrice &&
               comparePrice > price && (
@@ -1702,7 +1923,29 @@ function ProductPage() {
               )
             )}
           </div>
+          <div className="inline-flex shrink-0 items-center rounded-xl border border-border bg-card overflow-hidden">
+            <button
+              type="button"
+              onClick={() => setQuantity(Math.max(1, quantity - 1))}
+              aria-label="Decrease quantity"
+              className="h-11 w-8 flex items-center justify-center hover:bg-muted active:bg-muted/80 transition-colors rounded-l-xl"
+            >
+              <Minus className="h-3.5 w-3.5" />
+            </button>
+            <span className="w-7 text-center text-sm font-semibold text-foreground tabular-nums sm:w-8">
+              {quantity}
+            </span>
+            <button
+              type="button"
+              onClick={() => setQuantity(quantity + 1)}
+              aria-label="Increase quantity"
+              className="h-11 w-8 flex items-center justify-center hover:bg-muted active:bg-muted/80 transition-colors rounded-r-xl"
+            >
+              <Plus className="h-3.5 w-3.5" />
+            </button>
+          </div>
           <motion.button
+            type="button"
             whileTap={{ scale: 0.95 }}
             onClick={handleAddToCart}
             disabled={isLoading || !inStock}
@@ -1738,9 +1981,7 @@ function ProductPage() {
                 )}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-foreground truncate">
-                  {product.title}
-                </p>
+                <p className="text-sm font-semibold text-foreground truncate">{product.title}</p>
                 <div className="flex items-center gap-2">
                   <span className="text-sm font-bold text-foreground tabular-nums">
                     ₹{price.toFixed(0)}
@@ -1782,20 +2023,7 @@ function ProductPage() {
                 disabled={isLoading || !inStock}
                 className="h-10 px-6 rounded-xl bg-primary text-primary-foreground font-bold text-xs uppercase tracking-wider hover:bg-primary/90 disabled:opacity-50 inline-flex items-center justify-center gap-2"
               >
-                {isLoading ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  <>Add to cart</>
-                )}
-              </motion.button>
-              <motion.button
-                whileTap={{ scale: 0.97 }}
-                onClick={handleAddToCart}
-                disabled={!inStock}
-                className="h-10 px-6 rounded-xl bg-foreground text-background font-bold text-xs uppercase tracking-wider hover:opacity-90 disabled:opacity-50 inline-flex items-center justify-center gap-2"
-              >
-                <Zap className="w-3.5 h-3.5" />
-                Buy now
+                {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <>Add to cart</>}
               </motion.button>
             </div>
           </motion.div>
@@ -1827,9 +2055,7 @@ function ProductPage() {
                   type="button"
                   onClick={(e) => {
                     e.stopPropagation();
-                    setSelectedImage(
-                      (selectedImage - 1 + images.length) % images.length,
-                    );
+                    setSelectedImage((selectedImage - 1 + images.length) % images.length);
                   }}
                   aria-label="Previous image"
                   className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/15 hover:bg-white/25 backdrop-blur text-white flex items-center justify-center transition"

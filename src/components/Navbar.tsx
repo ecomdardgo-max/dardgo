@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "@tanstack/react-router";
-import { Menu, X, ChevronDown, Search, Heart, Sparkles } from "lucide-react";
+import { Menu, X, ChevronDown, Search, Heart, Sparkles, User } from "lucide-react";
 import { CartDrawer } from "@/components/CartDrawer";
 import { SearchDrawer } from "@/components/SearchDrawer";
 import { motion, AnimatePresence } from "framer-motion";
@@ -12,20 +12,20 @@ const shopCategories: Array<{
   emoji: string;
   desc: string;
 }> = [
-  { label: "Pain Relief Oils", handle: "pain-relief-oils", emoji: "💧", desc: "Targeted relief" },
-  { label: "Joint Care", handle: "ayurvedic-tablets", emoji: "🦴", desc: "Mobility support" },
-  { label: "Immunity Boosters", handle: "ayurvedic-capsules", emoji: "🛡️", desc: "Daily defense" },
-  { label: "Digestive Care", handle: "ayurvedic-halwa", emoji: "🌿", desc: "Gut wellness" },
-  { label: "Beauty & Skin", handle: "ayurvedic-beauty", emoji: "✨", desc: "Glow naturally" },
-  { label: "Women Wellness", handle: "ayurvedic-powder", emoji: "🌸", desc: "Hormonal balance" },
+  { label: "Wellness oils", handle: "pain-relief-oils", emoji: "💧", desc: "Massage & comfort" },
+  { label: "Joint care", handle: "ayurvedic-tablets", emoji: "🦴", desc: "Mobility routines" },
+  { label: "Immunity support", handle: "ayurvedic-capsules", emoji: "🛡️", desc: "Daily balance" },
+  { label: "Digestive care", handle: "ayurvedic-halwa", emoji: "🌿", desc: "Gentle wellness" },
+  { label: "Beauty & skin", handle: "ayurvedic-beauty", emoji: "✨", desc: "Botanical care" },
+  { label: "Women's wellness", handle: "ayurvedic-powder", emoji: "🌸", desc: "Holistic support" },
 ];
 
 const announcements = [
-  "FREE Shipping on Prepaid Orders Above ₹249",
-  "100% Ayurvedic & Natural — No Side Effects",
-  "AYUSH Certified · GMP · FDA Approved",
-  "COD Available @ ₹30 Per Order",
-  "Trusted by 10 Lakh+ Happy Customers",
+  "Free shipping on prepaid orders above ₹249",
+  "Ayurvedic-inspired herbal wellness · transparent labels",
+  "AYUSH-oriented range · GMP-focused manufacturing",
+  "COD available @ ₹30 per order where offered",
+  "Serving families since 2006",
 ];
 
 const navLinks = [
@@ -80,7 +80,10 @@ export function Navbar() {
       <div className="bg-gradient-hero text-primary-foreground overflow-hidden whitespace-nowrap pt-[env(safe-area-inset-top)] relative">
         <div className="py-2 animate-marquee inline-flex gap-12 sm:gap-16">
           {[...announcements, ...announcements, ...announcements].map((a, i) => (
-            <span key={i} className="text-[11px] sm:text-xs font-medium inline-flex items-center gap-3 tracking-wide">
+            <span
+              key={i}
+              className="text-[11px] sm:text-xs font-medium inline-flex items-center gap-3 tracking-wide"
+            >
               <Sparkles className="w-3 h-3 text-brand-yellow" />
               {a}
               <span className="w-1 h-1 rounded-full bg-brand-yellow-light/60 inline-block" />
@@ -90,9 +93,7 @@ export function Navbar() {
       </div>
 
       {/* Main Navbar */}
-      <motion.header
-        className="sticky top-0 z-[60] w-full transition-[background,box-shadow,border-color] duration-500"
-      >
+      <motion.header className="sticky top-0 z-[60] w-full transition-[background,box-shadow,border-color] duration-500">
         <div
           className={`w-full px-3 sm:px-6 lg:px-8 transition-[background,border,border-radius,box-shadow] duration-500 ${
             isScrolled
@@ -127,7 +128,11 @@ export function Navbar() {
             </button>
 
             {/* Logo */}
-            <Link to="/" className="flex items-center flex-shrink-0 min-w-0 group" aria-label="DARDGO home">
+            <Link
+              to="/"
+              className="flex items-center flex-shrink-0 min-w-0 group"
+              aria-label="DARDGO home"
+            >
               <img
                 src={dardgoLogo}
                 alt="DARDGO"
@@ -142,7 +147,10 @@ export function Navbar() {
               <Link
                 to="/"
                 className="relative px-5 py-2.5 text-[15px] font-semibold text-foreground/70 hover:text-foreground rounded-full transition-colors"
-                activeProps={{ className: "relative px-5 py-2.5 text-[15px] font-semibold text-primary-foreground rounded-full" }}
+                activeProps={{
+                  className:
+                    "relative px-5 py-2.5 text-[15px] font-semibold text-primary-foreground rounded-full",
+                }}
                 activeOptions={{ exact: true }}
               >
                 {({ isActive }) => (
@@ -165,7 +173,9 @@ export function Navbar() {
               >
                 <button className="px-5 py-2.5 text-[15px] font-semibold text-foreground/70 hover:text-foreground rounded-full transition-colors flex items-center gap-1.5">
                   Shop
-                  <ChevronDown className={`w-4 h-4 transition-transform duration-300 ${shopOpen ? "rotate-180" : ""}`} />
+                  <ChevronDown
+                    className={`w-4 h-4 transition-transform duration-300 ${shopOpen ? "rotate-180" : ""}`}
+                  />
                 </button>
                 <AnimatePresence>
                   {shopOpen && (
@@ -190,14 +200,19 @@ export function Navbar() {
                           >
                             <span className="text-xl flex-shrink-0">{cat.emoji}</span>
                             <div className="min-w-0">
-                              <p className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors leading-tight">{cat.label}</p>
+                              <p className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors leading-tight">
+                                {cat.label}
+                              </p>
                               <p className="text-[11px] text-muted-foreground">{cat.desc}</p>
                             </div>
                           </Link>
                         ))}
                       </div>
                       <div className="border-t border-border/50 px-5 py-3 bg-gradient-cream/40">
-                        <Link to="/collections/all" className="text-xs font-semibold text-primary hover:underline">
+                        <Link
+                          to="/collections/all"
+                          className="text-xs font-semibold text-primary hover:underline"
+                        >
                           View all products →
                         </Link>
                       </div>
@@ -210,7 +225,10 @@ export function Navbar() {
                   key={link.to}
                   to={link.to}
                   className="relative px-5 py-2.5 text-[15px] font-semibold text-foreground/70 hover:text-foreground rounded-full transition-colors"
-                  activeProps={{ className: "relative px-5 py-2.5 text-[15px] font-semibold text-primary-foreground rounded-full" }}
+                  activeProps={{
+                    className:
+                      "relative px-5 py-2.5 text-[15px] font-semibold text-primary-foreground rounded-full",
+                  }}
                 >
                   {({ isActive }) => (
                     <>
@@ -243,6 +261,13 @@ export function Navbar() {
               >
                 <Heart className="w-[18px] h-[18px]" strokeWidth={2.2} />
               </button>
+              <Link
+                to="/account"
+                className="p-2 sm:p-2.5 rounded-xl text-foreground/80 border border-transparent hover:border-border/60 hover:bg-muted hover:text-primary active:scale-95 transition-all"
+                aria-label="My account"
+              >
+                <User className="w-[18px] h-[18px]" strokeWidth={2.2} />
+              </Link>
               <CartDrawer />
             </div>
           </div>
@@ -294,14 +319,30 @@ export function Navbar() {
                   </Link>
                 ))}
 
+                <Link
+                  to="/account"
+                  onClick={() => setMobileOpen(false)}
+                  className="text-base font-semibold py-3 px-4 text-foreground rounded-2xl hover:bg-primary/5 hover:text-primary transition-colors flex items-center gap-2"
+                >
+                  <User className="w-4 h-4" />
+                  My account
+                </Link>
                 {/* Mobile-only quick contact strip */}
                 <div className="mt-3 mx-1 p-4 rounded-2xl bg-gradient-cream border border-border/40">
                   <p className="text-eyebrow text-foreground/60 mb-2">Need help?</p>
                   <div className="flex items-center gap-2">
-                    <a href="https://wa.me/919329912659" target="_blank" rel="noopener noreferrer" className="flex-1 text-center py-2.5 rounded-xl bg-primary text-primary-foreground text-xs font-bold">
+                    <a
+                      href="https://wa.me/919329912659"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex-1 text-center py-2.5 rounded-xl bg-primary text-primary-foreground text-xs font-bold"
+                    >
                       WhatsApp
                     </a>
-                    <a href="tel:+919329912659" className="flex-1 text-center py-2.5 rounded-xl bg-card border border-border text-foreground text-xs font-bold">
+                    <a
+                      href="tel:+919329912659"
+                      className="flex-1 text-center py-2.5 rounded-xl bg-card border border-border text-foreground text-xs font-bold"
+                    >
                       Call us
                     </a>
                   </div>

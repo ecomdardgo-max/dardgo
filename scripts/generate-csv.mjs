@@ -129,4 +129,4 @@ console.log(`  → ${outPath}\n`);
 console.log("Next steps:");
 console.log("  1. Open  https://admin.shopify.com/store/dardgo-aura-lsiqw/products");
 console.log('  2. Click "Import" → "Add file" → choose dardgo-products.csv');
-console.log("  3. Click \"Upload and continue\" → Confirm import\n");
+console.log('  3. Click "Upload and continue" → Confirm import\n');

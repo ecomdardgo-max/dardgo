@@ -22,7 +22,7 @@ const FEATURED_COLLECTIONS: Array<{
 }> = [
   {
     handle: "pain-relief-oils",
-    title: "Pain Relief Oils & Roll On",
+    title: "Wellness oils & roll-ons",
     tagline: "Natural comfort support for everyday wellness and relaxation.",
     accent: "primary",
   },
@@ -70,9 +70,7 @@ const accentClasses: Record<string, { eyebrow: string; gradient: string }> = {
 export function CollectionShowcases() {
   // Each section loads products via Storefront `tag:category-<handle>` — same tags as CSV import.
   // Shopify smart collections (npm run seed:smart-collections) use the same tags so collection pages stay in sync.
-  const [productsByCategory, setProductsByCategory] = useState<
-    Array<ShopifyProduct[] | null>
-  >([]);
+  const [productsByCategory, setProductsByCategory] = useState<Array<ShopifyProduct[] | null>>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -134,7 +132,8 @@ export function CollectionShowcases() {
           </div>
           <h3 className="text-xl font-semibold text-foreground mb-2">No products yet</h3>
           <p className="text-muted-foreground text-sm">
-            Make sure the imported products carry the <code className="px-1.5 py-0.5 rounded bg-muted text-xs">category-*</code> tags.
+            Make sure the imported products carry the{" "}
+            <code className="px-1.5 py-0.5 rounded bg-muted text-xs">category-*</code> tags.
           </p>
         </div>
       </section>
@@ -173,7 +172,9 @@ function CollectionBlock({ meta, products, alternate }: CollectionBlockProps) {
               <h2 className="text-display-3 text-foreground mb-3">
                 Discover our <span className={accent.gradient}>{shortTitle(meta.title)}</span>
               </h2>
-              <p className="text-muted-foreground text-sm sm:text-base leading-relaxed">{meta.tagline}</p>
+              <p className="text-muted-foreground text-sm sm:text-base leading-relaxed">
+                {meta.tagline}
+              </p>
             </div>
             <Link
               to="/collections/$handle"

@@ -34,13 +34,9 @@ const repoRoot = path.resolve(__dirname, "..");
 loadEnvFile(path.join(repoRoot, ".env"), false);
 loadEnvFile(path.join(repoRoot, ".env.local"), true);
 
-const STORE =
-  process.env.SHOPIFY_STORE_DOMAIN || process.env.VITE_SHOPIFY_STORE_DOMAIN;
+const STORE = process.env.SHOPIFY_STORE_DOMAIN || process.env.VITE_SHOPIFY_STORE_DOMAIN;
 const TOKEN = process.env.SHOPIFY_ADMIN_TOKEN;
-const VER =
-  process.env.SHOPIFY_API_VERSION ||
-  process.env.VITE_SHOPIFY_API_VERSION ||
-  "2025-07";
+const VER = process.env.SHOPIFY_API_VERSION || process.env.VITE_SHOPIFY_API_VERSION || "2025-07";
 
 if (!STORE || !TOKEN) {
   console.error("Missing SHOPIFY_STORE_DOMAIN or SHOPIFY_ADMIN_TOKEN");

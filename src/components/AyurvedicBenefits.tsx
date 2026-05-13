@@ -4,23 +4,23 @@ import { Leaf, FlaskConical, HeartPulse, BadgeCheck } from "lucide-react";
 const benefits = [
   {
     icon: Leaf,
-    title: "100% Natural Ingredients",
-    desc: "Every product uses pure herbs and botanical extracts sourced from trusted Ayurvedic farms across India.",
+    title: "Botanical-first formulas",
+    desc: "Herbal actives chosen for traditional relevance and modern quality checks — always read your pack.",
   },
   {
     icon: FlaskConical,
-    title: "No Chemicals or Side Effects",
-    desc: "Free from parabens, sulfates, and synthetic additives. Safe for daily use by all age groups.",
+    title: "Mindful excipients",
+    desc: "We prioritise clean labels and avoid unnecessary fillers where the product format allows.",
   },
   {
     icon: BadgeCheck,
-    title: "Certified & Lab Tested",
-    desc: "AYUSH certified, GMP compliant, and FDA approved. Every batch undergoes rigorous quality testing.",
+    title: "Tested batches",
+    desc: "AYUSH-oriented documentation and laboratory checks help us keep specifications consistent.",
   },
   {
     icon: HeartPulse,
-    title: "Doctor Recommended",
-    desc: "Formulated with guidance from Ayurvedic physicians with decades of clinical experience.",
+    title: "Professional guidance",
+    desc: "We encourage pairing supplements and topicals with sleep, movement, and advice from your clinician.",
   },
 ];
 
@@ -32,8 +32,7 @@ export function AyurvedicBenefits() {
           <div className="text-center mb-10 sm:mb-14 max-w-2xl mx-auto">
             <span className="text-eyebrow text-primary mb-4 block">— Why Ayurveda</span>
             <h2 className="text-display-2 text-foreground mb-4">
-              The Ayurvedic{" "}
-              <span className="text-gradient-green">advantage</span>
+              The Ayurvedic <span className="text-gradient-green">advantage</span>
             </h2>
             <p className="text-muted-foreground text-sm sm:text-base leading-relaxed">
               Ancient wisdom meets modern science — for your everyday wellbeing.

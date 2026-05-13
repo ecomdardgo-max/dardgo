@@ -105,10 +105,7 @@ export const MastercardIcon = ({ className, title = "Mastercard" }: IconProps) =
       {/* Two overlapping discs — red + yellow with orange overlap */}
       <circle cx="20" cy="14" r="9" fill="#EB001B" />
       <circle cx="30" cy="14" r="9" fill="#F79E1B" />
-      <path
-        d="M25 7.2a9 9 0 0 1 0 13.6A9 9 0 0 1 25 7.2Z"
-        fill="#FF5F00"
-      />
+      <path d="M25 7.2a9 9 0 0 1 0 13.6A9 9 0 0 1 25 7.2Z" fill="#FF5F00" />
     </svg>
   </Wrap>
 );

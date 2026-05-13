@@ -2,12 +2,12 @@ import { Shield, Leaf, FlaskConical, BadgeCheck, Award, Beaker } from "lucide-re
 import { motion } from "framer-motion";
 
 const badges = [
-  { icon: Leaf, label: "AYUSH Certified" },
+  { icon: Leaf, label: "AYUSH-oriented" },
   { icon: BadgeCheck, label: "ISO 9001" },
-  { icon: FlaskConical, label: "GMP Certified" },
-  { icon: Shield, label: "FDA Approved" },
-  { icon: Award, label: "100% Natural" },
-  { icon: Beaker, label: "Lab Tested" },
+  { icon: FlaskConical, label: "GMP-focused" },
+  { icon: Shield, label: "Lab tested" },
+  { icon: Award, label: "Herbal-first" },
+  { icon: Beaker, label: "Batch QC" },
 ];
 
 export function TrustStrip() {
@@ -32,7 +32,11 @@ export function TrustStrip() {
               key={b.label}
               variants={{
                 hidden: { opacity: 0, y: 8 },
-                visible: { opacity: 1, y: 0, transition: { duration: 0.35, ease: [0.22, 1, 0.36, 1] } },
+                visible: {
+                  opacity: 1,
+                  y: 0,
+                  transition: { duration: 0.35, ease: [0.22, 1, 0.36, 1] },
+                },
               }}
               className="flex items-center justify-center gap-1 sm:gap-1.5 min-w-0"
             >

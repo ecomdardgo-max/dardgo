@@ -1,13 +1,13 @@
 import { toast } from "sonner";
 
-const SHOPIFY_API_VERSION = import.meta.env.VITE_SHOPIFY_API_VERSION ?? '2025-07';
+const SHOPIFY_API_VERSION = import.meta.env.VITE_SHOPIFY_API_VERSION ?? "2025-07";
 const SHOPIFY_STORE_PERMANENT_DOMAIN = import.meta.env.VITE_SHOPIFY_STORE_DOMAIN as string;
 const SHOPIFY_STOREFRONT_TOKEN = import.meta.env.VITE_SHOPIFY_STOREFRONT_TOKEN as string;
 
 if (!SHOPIFY_STORE_PERMANENT_DOMAIN || !SHOPIFY_STOREFRONT_TOKEN) {
   // Surface a clear error during dev/build instead of failing silently at runtime.
   throw new Error(
-    'Missing Shopify env vars. Define VITE_SHOPIFY_STORE_DOMAIN and VITE_SHOPIFY_STOREFRONT_TOKEN in .env.local'
+    "Missing Shopify env vars. Define VITE_SHOPIFY_STORE_DOMAIN and VITE_SHOPIFY_STOREFRONT_TOKEN in .env.local",
   );
 }
 
@@ -59,10 +59,10 @@ export interface ShopifyProduct {
 
 export async function storefrontApiRequest(query: string, variables: Record<string, unknown> = {}) {
   const response = await fetch(SHOPIFY_STOREFRONT_URL, {
-    method: 'POST',
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
-      'X-Shopify-Storefront-Access-Token': SHOPIFY_STOREFRONT_TOKEN,
+      "Content-Type": "application/json",
+      "X-Shopify-Storefront-Access-Token": SHOPIFY_STOREFRONT_TOKEN,
     },
     body: JSON.stringify({ query, variables }),
   });
@@ -80,7 +80,9 @@ export async function storefrontApiRequest(query: string, variables: Record<stri
 
   const data = await response.json();
   if (data.errors) {
-    throw new Error(`Error calling Shopify: ${data.errors.map((e: { message: string }) => e.message).join(', ')}`);
+    throw new Error(
+      `Error calling Shopify: ${data.errors.map((e: { message: string }) => e.message).join(", ")}`,
+    );
   }
   return data;
 }
@@ -330,6 +332,19 @@ export const STOREFRONT_PRODUCT_BY_HANDLE_QUERY = `
         name
         values
       }
+      onlineStoreUrl
+      metafields(
+        identifiers: [
+          { namespace: "reviews", key: "rating" },
+          { namespace: "reviews", key: "rating_count" },
+          { namespace: "custom", key: "dardgo_reviews" }
+        ]
+      ) {
+        namespace
+        key
+        value
+        type
+      }
     }
   }
 `;
@@ -397,23 +412,31 @@ export interface CartItem {
 function formatCheckoutUrl(checkoutUrl: string): string {
   try {
     const url = new URL(checkoutUrl);
-    url.searchParams.set('channel', 'online_store');
+    url.searchParams.set("channel", "online_store");
     return url.toString();
   } catch {
     return checkoutUrl;
   }
 }
 
-function isCartNotFoundError(userErrors: Array<{ field: string[] | null; message: string }>): boolean {
-  return userErrors.some(e => e.message.toLowerCase().includes('cart not found') || e.message.toLowerCase().includes('does not exist'));
+function isCartNotFoundError(
+  userErrors: Array<{ field: string[] | null; message: string }>,
+): boolean {
+  return userErrors.some(
+    (e) =>
+      e.message.toLowerCase().includes("cart not found") ||
+      e.message.toLowerCase().includes("does not exist"),
+  );
 }
 
-export async function createShopifyCart(item: CartItem): Promise<{ cartId: string; checkoutUrl: string; lineId: string } | null> {
+export async function createShopifyCart(
+  item: CartItem,
+): Promise<{ cartId: string; checkoutUrl: string; lineId: string } | null> {
   const data = await storefrontApiRequest(CART_CREATE_MUTATION, {
     input: { lines: [{ quantity: item.quantity, merchandiseId: item.variantId }] },
   });
   if (data?.data?.cartCreate?.userErrors?.length > 0) {
-    console.error('Cart creation failed:', data.data.cartCreate.userErrors);
+    console.error("Cart creation failed:", data.data.cartCreate.userErrors);
     return null;
   }
   const cart = data?.data?.cartCreate?.cart;
@@ -423,7 +446,10 @@ export async function createShopifyCart(item: CartItem): Promise<{ cartId: strin
   return { cartId: cart.id, checkoutUrl: formatCheckoutUrl(cart.checkoutUrl), lineId };
 }
 
-export async function addLineToShopifyCart(cartId: string, item: CartItem): Promise<{ success: boolean; lineId?: string; cartNotFound?: boolean }> {
+export async function addLineToShopifyCart(
+  cartId: string,
+  item: CartItem,
+): Promise<{ success: boolean; lineId?: string; cartNotFound?: boolean }> {
   const data = await storefrontApiRequest(CART_LINES_ADD_MUTATION, {
     cartId,
     lines: [{ quantity: item.quantity, merchandiseId: item.variantId }],
@@ -432,11 +458,18 @@ export async function addLineToShopifyCart(cartId: string, item: CartItem): Prom
   if (isCartNotFoundError(userErrors)) return { success: false, cartNotFound: true };
   if (userErrors.length > 0) return { success: false };
   const lines = data?.data?.cartLinesAdd?.cart?.lines?.edges || [];
-  const newLine = lines.find((l: { node: { id: string; merchandise: { id: string } } }) => l.node.merchandise.id === item.variantId);
+  const newLine = lines.find(
+    (l: { node: { id: string; merchandise: { id: string } } }) =>
+      l.node.merchandise.id === item.variantId,
+  );
   return { success: true, lineId: newLine?.node?.id };
 }
 
-export async function updateShopifyCartLine(cartId: string, lineId: string, quantity: number): Promise<{ success: boolean; cartNotFound?: boolean }> {
+export async function updateShopifyCartLine(
+  cartId: string,
+  lineId: string,
+  quantity: number,
+): Promise<{ success: boolean; cartNotFound?: boolean }> {
   const data = await storefrontApiRequest(CART_LINES_UPDATE_MUTATION, {
     cartId,
     lines: [{ id: lineId, quantity }],
@@ -447,7 +480,10 @@ export async function updateShopifyCartLine(cartId: string, lineId: string, quan
   return { success: true };
 }
 
-export async function removeLineFromShopifyCart(cartId: string, lineId: string): Promise<{ success: boolean; cartNotFound?: boolean }> {
+export async function removeLineFromShopifyCart(
+  cartId: string,
+  lineId: string,
+): Promise<{ success: boolean; cartNotFound?: boolean }> {
   const data = await storefrontApiRequest(CART_LINES_REMOVE_MUTATION, {
     cartId,
     lineIds: [lineId],

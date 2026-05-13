@@ -5,9 +5,9 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  --font-display: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
-  --font-body: 'DM Sans', 'Inter', system-ui, sans-serif;
-  --font-accent: 'Inter', system-ui, sans-serif;
+  --font-display: "Plus Jakarta Sans", "Inter", system-ui, sans-serif;
+  --font-body: "DM Sans", "Inter", system-ui, sans-serif;
+  --font-accent: "Inter", system-ui, sans-serif;
 
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
@@ -68,31 +68,31 @@
   --radius: 0.75rem;
 
   /* DARDGO Premium Ayurvedic Palette */
-  --brand-green: oklch(0.45 0.15 145);        /* #2E7D32 - Ayurvedic Green */
-  --brand-green-light: oklch(0.62 0.14 145);   /* #66BB6A - Herbal Light Green */
-  --brand-green-dark: oklch(0.32 0.12 145);    /* Deep forest green */
-  --brand-yellow: oklch(0.87 0.16 90);         /* Gold highlight */
-  --brand-yellow-light: oklch(0.93 0.08 90);   /* Soft gold */
-  --brand-cream: oklch(0.97 0.01 85);          /* #F8F5EF - Warm cream */
-  --brand-beige: oklch(0.94 0.02 75);          /* #EFE7DA - Soft beige */
-  --brand-earth: oklch(0.45 0.06 60);          /* Earthy brown */
-  --brand-orange: oklch(0.72 0.16 55);         /* Soft orange CTA */
-  --brand-gold: oklch(0.78 0.14 80);           /* Premium gold */
+  --brand-green: oklch(0.45 0.15 145); /* #2E7D32 - Ayurvedic Green */
+  --brand-green-light: oklch(0.62 0.14 145); /* #66BB6A - Herbal Light Green */
+  --brand-green-dark: oklch(0.32 0.12 145); /* Deep forest green */
+  --brand-yellow: oklch(0.87 0.16 90); /* Gold highlight */
+  --brand-yellow-light: oklch(0.93 0.08 90); /* Soft gold */
+  --brand-cream: oklch(0.97 0.01 85); /* #F8F5EF - Warm cream */
+  --brand-beige: oklch(0.94 0.02 75); /* #EFE7DA - Soft beige */
+  --brand-earth: oklch(0.45 0.06 60); /* Earthy brown */
+  --brand-orange: oklch(0.72 0.16 55); /* Soft orange CTA */
+  --brand-gold: oklch(0.78 0.14 80); /* Premium gold */
 
   /* Semantic tokens */
-  --background: oklch(0.98 0.005 85);          /* Warm off-white */
-  --foreground: oklch(0.15 0.02 50);           /* #1E1E1E Dark text */
+  --background: oklch(0.98 0.005 85); /* Warm off-white */
+  --foreground: oklch(0.15 0.02 50); /* #1E1E1E Dark text */
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.15 0.02 50);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.15 0.02 50);
-  --primary: oklch(0.45 0.15 145);             /* Ayurvedic Green */
+  --primary: oklch(0.45 0.15 145); /* Ayurvedic Green */
   --primary-foreground: oklch(0.99 0.005 90);
-  --secondary: oklch(0.97 0.01 85);            /* Warm cream */
+  --secondary: oklch(0.97 0.01 85); /* Warm cream */
   --secondary-foreground: oklch(0.25 0.04 50);
   --muted: oklch(0.96 0.01 85);
-  --muted-foreground: oklch(0.50 0.03 50);
-  --accent: oklch(0.72 0.16 55);               /* Soft orange */
+  --muted-foreground: oklch(0.5 0.03 50);
+  --accent: oklch(0.72 0.16 55); /* Soft orange */
   --accent-foreground: oklch(0.99 0.005 90);
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.984 0.003 247.858);
@@ -137,15 +137,24 @@
     text-rendering: optimizeLegibility;
   }
   /* Prevent iOS Safari from auto-zooming when focusing inputs (<16px font) */
-  input, textarea, select {
+  input,
+  textarea,
+  select {
     font-size: 16px;
   }
   @media (min-width: 640px) {
-    input, textarea, select {
+    input,
+    textarea,
+    select {
       font-size: inherit;
     }
   }
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     font-family: var(--font-display);
     font-weight: 700;
     letter-spacing: -0.02em;
@@ -153,10 +162,17 @@
     overflow-wrap: break-word;
     word-wrap: break-word;
   }
-  h1 { letter-spacing: -0.035em; }
-  h2 { letter-spacing: -0.03em; }
-  p { line-height: 1.6; }
-  img, video {
+  h1 {
+    letter-spacing: -0.035em;
+  }
+  h2 {
+    letter-spacing: -0.03em;
+  }
+  p {
+    line-height: 1.6;
+  }
+  img,
+  video {
     max-width: 100%;
     height: auto;
   }
@@ -275,14 +291,20 @@
     box-shadow: 0 8px 30px -8px oklch(0.87 0.16 90 / 0.35);
   }
   .shadow-card {
-    box-shadow: 0 1px 3px oklch(0 0 0 / 0.04), 0 6px 16px oklch(0 0 0 / 0.04);
+    box-shadow:
+      0 1px 3px oklch(0 0 0 / 0.04),
+      0 6px 16px oklch(0 0 0 / 0.04);
   }
   .shadow-card-hover {
-    box-shadow: 0 4px 12px oklch(0 0 0 / 0.06), 0 12px 28px oklch(0 0 0 / 0.08);
+    box-shadow:
+      0 4px 12px oklch(0 0 0 / 0.06),
+      0 12px 28px oklch(0 0 0 / 0.08);
   }
   /* Inner highlight for premium glass / dark cards */
   .shadow-inset-light {
-    box-shadow: inset 0 1px 0 0 oklch(1 0 0 / 0.08), inset 0 -1px 0 0 oklch(0 0 0 / 0.1);
+    box-shadow:
+      inset 0 1px 0 0 oklch(1 0 0 / 0.08),
+      inset 0 -1px 0 0 oklch(0 0 0 / 0.1);
   }
   .ring-soft {
     box-shadow: 0 0 0 1px oklch(0 0 0 / 0.04);
@@ -333,40 +355,86 @@
 
 /* Animations */
 @keyframes marquee {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
 }
 @keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-12px); }
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-12px);
+  }
 }
 @keyframes float-slow {
-  0%, 100% { transform: translate(0, 0) rotate(0deg); }
-  50% { transform: translate(8px, -16px) rotate(2deg); }
+  0%,
+  100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  50% {
+    transform: translate(8px, -16px) rotate(2deg);
+  }
 }
 @keyframes orb-drift {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  50% { transform: translate(20px, -30px) scale(1.08); }
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(20px, -30px) scale(1.08);
+  }
 }
 @keyframes scroll-hint {
-  0%, 100% { transform: translateY(0); opacity: 0.6; }
-  50% { transform: translateY(6px); opacity: 1; }
+  0%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.6;
+  }
+  50% {
+    transform: translateY(6px);
+    opacity: 1;
+  }
 }
 @keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 0 0 oklch(0.45 0.15 145 / 0.4); }
-  50% { box-shadow: 0 0 20px 8px oklch(0.45 0.15 145 / 0); }
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 oklch(0.45 0.15 145 / 0.4);
+  }
+  50% {
+    box-shadow: 0 0 20px 8px oklch(0.45 0.15 145 / 0);
+  }
 }
 @keyframes whatsapp-pulse {
-  0%, 100% { box-shadow: 0 0 0 0 oklch(0.65 0.2 150 / 0.4); }
-  50% { box-shadow: 0 0 0 12px oklch(0.65 0.2 150 / 0); }
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 oklch(0.65 0.2 150 / 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 12px oklch(0.65 0.2 150 / 0);
+  }
 }
 @keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
 }
 @keyframes slide-up {
-  0% { transform: translateY(20px); opacity: 0; }
-  100% { transform: translateY(0); opacity: 1; }
+  0% {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 .animate-marquee {

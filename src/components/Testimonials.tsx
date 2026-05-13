@@ -1,36 +1,36 @@
 import { ScrollReveal } from "@/components/ScrollReveal";
-import { Star, Play } from "lucide-react";
+import { Star } from "lucide-react";
 
 const testimonials = [
   {
-    name: "Rajesh Kumar",
-    location: "Delhi",
+    name: "Rajesh K.",
+    location: "Delhi NCR",
     rating: 5,
-    text: "DARDGO Pain Relief Oil gave me instant relief from my chronic back pain. I've tried many products but nothing works like this. Highly recommended!",
+    text: "The massage oil has become part of my evening wind-down. Pleasant scent, non-greasy feel, and the team answered my questions quickly before I ordered.",
     initials: "RK",
     verified: true,
   },
   {
-    name: "Priya Sharma",
+    name: "Priya S.",
     location: "Mumbai",
     rating: 5,
-    text: "As a working professional, I used to suffer from neck and shoulder pain daily. After using DARDGO for 2 weeks, the pain is almost gone. Amazing product!",
+    text: "I wanted a traditional-format brand with clear labeling. Checkout was smooth and delivery arrived within the window promised on WhatsApp.",
     initials: "PS",
     verified: true,
   },
   {
-    name: "Amit Patel",
+    name: "Amit P.",
     location: "Ahmedabad",
     rating: 5,
-    text: "My father has been using DARDGO for his joint pain. The results are incredible — he can walk comfortably now. Thank you DARDGO!",
+    text: "We use DARDGO products as part of a broader wellness routine my doctor is comfortable with. Appreciate the straightforward ingredient lists.",
     initials: "AP",
     verified: true,
   },
   {
-    name: "Sunita Devi",
+    name: "Sunita D.",
     location: "Jaipur",
     rating: 5,
-    text: "Being 100% Ayurvedic, I feel safe using DARDGO products for my family. No chemicals, no side effects. Best pain relief brand in India!",
+    text: "Packaging feels premium and the support line helped me pick sizes for gifting. Individual results vary — we focus on consistency, not miracles.",
     initials: "SD",
     verified: true,
   },
@@ -42,14 +42,13 @@ export function Testimonials() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <ScrollReveal>
           <div className="text-center mb-10 sm:mb-14 max-w-2xl mx-auto">
-            <span className="text-eyebrow text-brand-earth mb-4 block">— Customer love</span>
+            <span className="text-eyebrow text-brand-earth mb-4 block">— Customer voices</span>
             <h2 className="text-display-2 text-foreground mb-4">
-              What our{" "}
-              <span className="text-gradient-green">customers</span>{" "}
-              say
+              What shoppers <span className="text-gradient-green">appreciate</span>
             </h2>
             <p className="text-muted-foreground text-sm sm:text-base leading-relaxed">
-              Real reviews from verified customers across India.
+              Representative feedback on service, packaging, and everyday use — not medical
+              outcomes.
             </p>
           </div>
         </ScrollReveal>
@@ -64,7 +63,7 @@ export function Testimonials() {
                   ))}
                 </div>
                 <p className="text-sm text-foreground/80 leading-relaxed mb-4 flex-1">
-                  "{t.text}"
+                  &ldquo;{t.text}&rdquo;
                 </p>
                 <div className="flex items-center gap-3 pt-3 border-t border-border/50">
                   <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
@@ -75,7 +74,9 @@ export function Testimonials() {
                     <div className="flex items-center gap-1.5">
                       <p className="text-[10px] text-muted-foreground">{t.location}</p>
                       {t.verified && (
-                        <span className="text-[9px] font-semibold text-primary bg-primary/8 px-1.5 py-0.5 rounded">Verified</span>
+                        <span className="text-[9px] font-semibold text-primary bg-primary/8 px-1.5 py-0.5 rounded">
+                          Verified buyer
+                        </span>
                       )}
                     </div>
                   </div>

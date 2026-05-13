@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { Truck, Wallet, ShieldCheck, Calendar, Mail, Phone, MapPin, Clock } from "lucide-react";
+import { ComplianceFooterBlock } from "@/components/ComplianceFooterBlock";
 
 // All 8 social platforms from the legacy site, with brand-correct SVG paths.
 // Lucide doesn't ship Pinterest / Tumblr / WhatsApp / X icons, so we keep them
@@ -48,30 +49,32 @@ const socials: { label: string; href: string; path: string }[] = [
 ];
 
 const trustBadges = [
-  { icon: Truck, title: "Free Shipping", desc: "On orders above ₹249" },
-  { icon: Wallet, title: "COD Available", desc: "₹30 per order" },
-  { icon: ShieldCheck, title: "AYUSH Certified", desc: "GMP · FDA · Lab Tested" },
-  { icon: Calendar, title: "Trusted Since 2006", desc: "Worldwide service" },
+  { icon: Truck, title: "Free Shipping", desc: "On prepaid orders above ₹249" },
+  { icon: Wallet, title: "COD available", desc: "₹30 per order where offered" },
+  { icon: ShieldCheck, title: "Quality & traceability", desc: "AYUSH · GMP · lab-tested batches" },
+  { icon: Calendar, title: "Trusted since 2006", desc: "Serving India & worldwide" },
 ];
 
 const categories = [
-  "Pain Relief Oils & Roll On",
-  "Ayurvedic Beauty Products",
-  "Ayurvedic Tablets",
-  "Ayurvedic Halwa Formation",
-  "Ayurvedic Powder Formation",
-  "Bacterial Vanish Ointment",
-  "Ayurvedic Capsules",
+  "Wellness oils & roll-ons",
+  "Ayurvedic beauty",
+  "Ayurvedic tablets",
+  "Ayurvedic halwa",
+  "Ayurvedic powders",
+  "Topical ointments",
+  "Ayurvedic capsules",
 ];
 
 const information = [
   { label: "FAQs", to: "/faqs" as const },
-  { label: "Shipping & Delivery", to: "/shipping-delivery" as const },
-  { label: "Returns & Refund", to: "/returns-refund" as const },
-  { label: "Privacy Policy", to: "/privacy-policy" as const },
-  { label: "Terms & Conditions", to: "/terms-conditions" as const },
-  { label: "Track Order", to: "/contact" as const },
-  { label: "Points of Sale", to: "/points-of-sale" as const },
+  { label: "Shipping & delivery", to: "/shipping-delivery" as const },
+  { label: "Refund policy", to: "/returns-refund" as const },
+  { label: "Privacy policy", to: "/privacy-policy" as const },
+  { label: "Terms & conditions", to: "/terms-conditions" as const },
+  { label: "Disclaimer", to: "/disclaimer" as const },
+  { label: "Medical disclaimer", to: "/medical-disclaimer" as const },
+  { label: "Track order / contact", to: "/contact" as const },
+  { label: "Points of sale", to: "/points-of-sale" as const },
 ];
 
 export function Footer() {
@@ -110,9 +113,7 @@ export function Footer() {
                   <p className="text-[13px] sm:text-sm font-bold text-white leading-tight">
                     {b.title}
                   </p>
-                  <p className="text-[11px] sm:text-xs text-white/65 mt-0.5 truncate">
-                    {b.desc}
-                  </p>
+                  <p className="text-[11px] sm:text-xs text-white/65 mt-0.5 truncate">{b.desc}</p>
                 </div>
               </div>
             ))}
@@ -140,8 +141,8 @@ export function Footer() {
               DardGo Pharma Pvt. Ltd.
             </p>
             <p className="text-sm leading-relaxed mb-3 text-white/75 max-w-sm">
-              Trusted worldwide since 2006 for effective Ayurvedic solutions. Honesty
-              and commitment define our service.
+              Ayurvedic-inspired herbal wellness from Balaghat, MP — oils, topicals, and daily
+              comfort products with transparent labeling and responsive customer care.
             </p>
             <a
               href="https://www.dardgo.in"
@@ -225,10 +226,16 @@ export function Footer() {
                 About Us
               </Link>
               <Link
+                to="/account"
+                className="text-sm text-white/80 hover:text-brand-yellow transition-colors inline-block w-fit py-0.5"
+              >
+                My account
+              </Link>
+              <Link
                 to="/blog"
                 className="text-sm text-white/80 hover:text-brand-yellow transition-colors inline-block w-fit py-0.5"
               >
-                Health Blog
+                Wellness blog
               </Link>
               <Link
                 to="/contact"
@@ -247,7 +254,7 @@ export function Footer() {
                 <Link
                   key={item.label}
                   to={item.to}
-                  className={`text-sm text-white/80 hover:text-brand-yellow transition-colors inline-block w-fit py-0.5 ${idx > 4 ? "hidden sm:inline-block" : ""}`}
+                  className={`text-sm text-white/80 hover:text-brand-yellow transition-colors inline-block w-fit py-0.5 ${idx > 5 ? "hidden sm:inline-block" : ""}`}
                 >
                   {item.label}
                 </Link>
@@ -270,10 +277,7 @@ export function Footer() {
                     </p>
                   </div>
                 </a>
-                <a
-                  href="mailto:care@dardgo.in"
-                  className="flex items-start gap-3 group"
-                >
+                <a href="mailto:care@dardgo.in" className="flex items-start gap-3 group">
                   <div className="w-10 h-10 rounded-xl bg-white/10 ring-1 ring-white/15 group-hover:bg-brand-yellow/30 group-hover:ring-brand-yellow/50 flex items-center justify-center flex-shrink-0 transition-all">
                     <Mail className="w-4 h-4 text-brand-yellow" strokeWidth={2.2} />
                   </div>
@@ -309,11 +313,21 @@ export function Footer() {
                   </div>
                 </div>
               </div>
+              <div className="mt-5 flex flex-wrap gap-3 justify-center sm:justify-start">
+                <a
+                  href="https://wa.me/919329912659?text=Hi%2C%20I%27d%20like%20help%20with%20my%20DARDGO%20order"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#25D366] text-white px-5 py-2.5 text-sm font-bold hover:brightness-110 transition-all shadow-md"
+                >
+                  Message on WhatsApp
+                </a>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Bottom bar */}
+        <ComplianceFooterBlock />
         <div className="border-t border-white/15 pt-6 pb-[calc(6rem+env(safe-area-inset-bottom))] lg:pb-0 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
           <p className="text-xs text-white/65">
             © {new Date().getFullYear()} DardGo Pharma Pvt. Ltd. All rights reserved.

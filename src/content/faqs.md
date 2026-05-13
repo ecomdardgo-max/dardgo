@@ -18,11 +18,11 @@ DARD GO Pharma Pvt. Ltd. is based in Balaghat, Madhya Pradesh, India.
 
 DARD GO offers:
 
-* Pain relief balm & oil
-* Ayurvedic capsules & tablets
-* Herbal wellness products
-* Skin care products
-* Ayurvedic health supplements
+- Pain relief balm & oil
+- Ayurvedic capsules & tablets
+- Herbal wellness products
+- Skin care products
+- Ayurvedic health supplements
 
 ### 5. Are your products safe to use?
 
@@ -56,9 +56,9 @@ Yes, we provide shipping services across most locations in India.
 
 You can contact us through:
 
-* Phone: [+91 93299 12659](tel:+919329912659)
-* [WhatsApp](https://wa.me/919329912659)
-* [Contact form](/contact) on the website
+- Phone: [+91 93299 12659](tel:+919329912659)
+- [WhatsApp](https://wa.me/919329912659)
+- [Contact form](/contact) on the website
 
 ### 13. Can distributors or retailers partner with DARD GO?
 

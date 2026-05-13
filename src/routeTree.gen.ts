@@ -14,16 +14,20 @@ import { Route as ShippingDeliveryRouteImport } from './routes/shipping-delivery
 import { Route as ReturnsRefundRouteImport } from './routes/returns-refund'
 import { Route as PrivacyPolicyRouteImport } from './routes/privacy-policy'
 import { Route as PointsOfSaleRouteImport } from './routes/points-of-sale'
+import { Route as MedicalDisclaimerRouteImport } from './routes/medical-disclaimer'
 import { Route as FaqsRouteImport } from './routes/faqs'
+import { Route as DisclaimerRouteImport } from './routes/disclaimer'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as CartRouteImport } from './routes/cart'
 import { Route as BlogRouteImport } from './routes/blog'
+import { Route as AccountRouteImport } from './routes/account'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ProductHandleRouteImport } from './routes/product.$handle'
 import { Route as CollectionsHandleRouteImport } from './routes/collections.$handle'
 import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
+import { Route as AccountCallbackRouteImport } from './routes/account.callback'
 
 const TermsConditionsRoute = TermsConditionsRouteImport.update({
   id: '/terms-conditions',
@@ -50,9 +54,19 @@ const PointsOfSaleRoute = PointsOfSaleRouteImport.update({
   path: '/points-of-sale',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MedicalDisclaimerRoute = MedicalDisclaimerRouteImport.update({
+  id: '/medical-disclaimer',
+  path: '/medical-disclaimer',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const FaqsRoute = FaqsRouteImport.update({
   id: '/faqs',
   path: '/faqs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DisclaimerRoute = DisclaimerRouteImport.update({
+  id: '/disclaimer',
+  path: '/disclaimer',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ContactRoute = ContactRouteImport.update({
@@ -73,6 +87,11 @@ const CartRoute = CartRouteImport.update({
 const BlogRoute = BlogRouteImport.update({
   id: '/blog',
   path: '/blog',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AccountRoute = AccountRouteImport.update({
+  id: '/account',
+  path: '/account',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AboutRoute = AboutRouteImport.update({
@@ -100,20 +119,29 @@ const BlogSlugRoute = BlogSlugRouteImport.update({
   path: '/$slug',
   getParentRoute: () => BlogRoute,
 } as any)
+const AccountCallbackRoute = AccountCallbackRouteImport.update({
+  id: '/callback',
+  path: '/callback',
+  getParentRoute: () => AccountRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/account': typeof AccountRouteWithChildren
   '/blog': typeof BlogRouteWithChildren
   '/cart': typeof CartRoute
   '/checkout': typeof CheckoutRoute
   '/contact': typeof ContactRoute
+  '/disclaimer': typeof DisclaimerRoute
   '/faqs': typeof FaqsRoute
+  '/medical-disclaimer': typeof MedicalDisclaimerRoute
   '/points-of-sale': typeof PointsOfSaleRoute
   '/privacy-policy': typeof PrivacyPolicyRoute
   '/returns-refund': typeof ReturnsRefundRoute
   '/shipping-delivery': typeof ShippingDeliveryRoute
   '/terms-conditions': typeof TermsConditionsRoute
+  '/account/callback': typeof AccountCallbackRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/collections/$handle': typeof CollectionsHandleRoute
   '/product/$handle': typeof ProductHandleRoute
@@ -121,16 +149,20 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/account': typeof AccountRouteWithChildren
   '/blog': typeof BlogRouteWithChildren
   '/cart': typeof CartRoute
   '/checkout': typeof CheckoutRoute
   '/contact': typeof ContactRoute
+  '/disclaimer': typeof DisclaimerRoute
   '/faqs': typeof FaqsRoute
+  '/medical-disclaimer': typeof MedicalDisclaimerRoute
   '/points-of-sale': typeof PointsOfSaleRoute
   '/privacy-policy': typeof PrivacyPolicyRoute
   '/returns-refund': typeof ReturnsRefundRoute
   '/shipping-delivery': typeof ShippingDeliveryRoute
   '/terms-conditions': typeof TermsConditionsRoute
+  '/account/callback': typeof AccountCallbackRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/collections/$handle': typeof CollectionsHandleRoute
   '/product/$handle': typeof ProductHandleRoute
@@ -139,16 +171,20 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/account': typeof AccountRouteWithChildren
   '/blog': typeof BlogRouteWithChildren
   '/cart': typeof CartRoute
   '/checkout': typeof CheckoutRoute
   '/contact': typeof ContactRoute
+  '/disclaimer': typeof DisclaimerRoute
   '/faqs': typeof FaqsRoute
+  '/medical-disclaimer': typeof MedicalDisclaimerRoute
   '/points-of-sale': typeof PointsOfSaleRoute
   '/privacy-policy': typeof PrivacyPolicyRoute
   '/returns-refund': typeof ReturnsRefundRoute
   '/shipping-delivery': typeof ShippingDeliveryRoute
   '/terms-conditions': typeof TermsConditionsRoute
+  '/account/callback': typeof AccountCallbackRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/collections/$handle': typeof CollectionsHandleRoute
   '/product/$handle': typeof ProductHandleRoute
@@ -158,16 +194,20 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/about'
+    | '/account'
     | '/blog'
     | '/cart'
     | '/checkout'
     | '/contact'
+    | '/disclaimer'
     | '/faqs'
+    | '/medical-disclaimer'
     | '/points-of-sale'
     | '/privacy-policy'
     | '/returns-refund'
     | '/shipping-delivery'
     | '/terms-conditions'
+    | '/account/callback'
     | '/blog/$slug'
     | '/collections/$handle'
     | '/product/$handle'
@@ -175,16 +215,20 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/about'
+    | '/account'
     | '/blog'
     | '/cart'
     | '/checkout'
     | '/contact'
+    | '/disclaimer'
     | '/faqs'
+    | '/medical-disclaimer'
     | '/points-of-sale'
     | '/privacy-policy'
     | '/returns-refund'
     | '/shipping-delivery'
     | '/terms-conditions'
+    | '/account/callback'
     | '/blog/$slug'
     | '/collections/$handle'
     | '/product/$handle'
@@ -192,16 +236,20 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/about'
+    | '/account'
     | '/blog'
     | '/cart'
     | '/checkout'
     | '/contact'
+    | '/disclaimer'
     | '/faqs'
+    | '/medical-disclaimer'
     | '/points-of-sale'
     | '/privacy-policy'
     | '/returns-refund'
     | '/shipping-delivery'
     | '/terms-conditions'
+    | '/account/callback'
     | '/blog/$slug'
     | '/collections/$handle'
     | '/product/$handle'
@@ -210,11 +258,14 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
+  AccountRoute: typeof AccountRouteWithChildren
   BlogRoute: typeof BlogRouteWithChildren
   CartRoute: typeof CartRoute
   CheckoutRoute: typeof CheckoutRoute
   ContactRoute: typeof ContactRoute
+  DisclaimerRoute: typeof DisclaimerRoute
   FaqsRoute: typeof FaqsRoute
+  MedicalDisclaimerRoute: typeof MedicalDisclaimerRoute
   PointsOfSaleRoute: typeof PointsOfSaleRoute
   PrivacyPolicyRoute: typeof PrivacyPolicyRoute
   ReturnsRefundRoute: typeof ReturnsRefundRoute
@@ -261,11 +312,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PointsOfSaleRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/medical-disclaimer': {
+      id: '/medical-disclaimer'
+      path: '/medical-disclaimer'
+      fullPath: '/medical-disclaimer'
+      preLoaderRoute: typeof MedicalDisclaimerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/faqs': {
       id: '/faqs'
       path: '/faqs'
       fullPath: '/faqs'
       preLoaderRoute: typeof FaqsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/disclaimer': {
+      id: '/disclaimer'
+      path: '/disclaimer'
+      fullPath: '/disclaimer'
+      preLoaderRoute: typeof DisclaimerRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/contact': {
@@ -294,6 +359,13 @@ declare module '@tanstack/react-router' {
       path: '/blog'
       fullPath: '/blog'
       preLoaderRoute: typeof BlogRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/account': {
+      id: '/account'
+      path: '/account'
+      fullPath: '/account'
+      preLoaderRoute: typeof AccountRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/about': {
@@ -331,8 +403,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BlogSlugRouteImport
       parentRoute: typeof BlogRoute
     }
+    '/account/callback': {
+      id: '/account/callback'
+      path: '/callback'
+      fullPath: '/account/callback'
+      preLoaderRoute: typeof AccountCallbackRouteImport
+      parentRoute: typeof AccountRoute
+    }
   }
 }
+
+interface AccountRouteChildren {
+  AccountCallbackRoute: typeof AccountCallbackRoute
+}
+
+const AccountRouteChildren: AccountRouteChildren = {
+  AccountCallbackRoute: AccountCallbackRoute,
+}
+
+const AccountRouteWithChildren =
+  AccountRoute._addFileChildren(AccountRouteChildren)
 
 interface BlogRouteChildren {
   BlogSlugRoute: typeof BlogSlugRoute
@@ -347,11 +437,14 @@ const BlogRouteWithChildren = BlogRoute._addFileChildren(BlogRouteChildren)
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
+  AccountRoute: AccountRouteWithChildren,
   BlogRoute: BlogRouteWithChildren,
   CartRoute: CartRoute,
   CheckoutRoute: CheckoutRoute,
   ContactRoute: ContactRoute,
+  DisclaimerRoute: DisclaimerRoute,
   FaqsRoute: FaqsRoute,
+  MedicalDisclaimerRoute: MedicalDisclaimerRoute,
   PointsOfSaleRoute: PointsOfSaleRoute,
   PrivacyPolicyRoute: PrivacyPolicyRoute,
   ReturnsRefundRoute: ReturnsRefundRoute,

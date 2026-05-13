@@ -184,8 +184,8 @@ export function PwaInstallPrompt() {
 
         {hasNativeInstall ? (
           <p className="text-sm text-muted-foreground">
-            Tap <strong className="text-foreground">Install</strong> below when your browser asks — it only takes a
-            moment.
+            Tap <strong className="text-foreground">Install</strong> below when your browser asks —
+            it only takes a moment.
           </p>
         ) : (
           <div className="space-y-3 text-sm text-muted-foreground">
@@ -217,7 +217,11 @@ export function PwaInstallPrompt() {
               </Button>
             </>
           ) : (
-            <Button type="button" className="w-full sm:w-auto" onClick={() => handleOpenChange(false)}>
+            <Button
+              type="button"
+              className="w-full sm:w-auto"
+              onClick={() => handleOpenChange(false)}
+            >
               OK, thanks
             </Button>
           )}

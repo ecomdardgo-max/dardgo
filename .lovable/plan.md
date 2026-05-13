@@ -1,7 +1,7 @@
-
 # DARDGO Premium Ayurvedic Storefront Redesign
 
 ## Overview
+
 Complete frontend redesign of the DARDGO storefront with premium Ayurvedic healthcare aesthetics, Framer Motion animations, mobile-first design, and multiple new pages. Preserves existing Shopify Storefront API integration.
 
 **Note:** This project uses TanStack Start (not React Router DOM) for routing, so all routes will follow TanStack conventions.
@@ -9,12 +9,14 @@ Complete frontend redesign of the DARDGO storefront with premium Ayurvedic healt
 ## Phase 1: Foundation — Design System & Global Layout
 
 ### Design Tokens (styles.css)
+
 - New color palette: Ayurvedic Green (#2E7D32), Herbal Light Green (#66BB6A), Warm Cream (#F8F5EF), Soft Beige (#EFE7DA), Gold accents
 - Typography: DM Sans (body) + Poppins (headings) via Google Fonts
 - Glassmorphism utilities, soft shadows, rounded corner tokens
 - Animation keyframes for marquee, float, pulse-glow
 
 ### Global Components
+
 - **Navbar** — Redesigned sticky header with search drawer, cart icon with count, category mega-menu, glassmorphism on scroll
 - **MobileBottomNav** — Sticky bottom navigation (Home, Categories, Cart, Blog, Account) with active states
 - **WhatsApp Float** — Pulse-animated floating button
@@ -23,6 +25,7 @@ Complete frontend redesign of the DARDGO storefront with premium Ayurvedic healt
 - **Footer** — Multi-column premium footer with newsletter signup
 
 ### Install Dependencies
+
 - `framer-motion` for animations
 - `swiper` for carousels
 
@@ -44,12 +47,14 @@ Rebuild all homepage sections:
 ## Phase 3: New Pages
 
 ### Collection Page (`/collections/$handle`)
+
 - Product grid (2 cols mobile, 3-4 cols desktop)
 - Sidebar filters (mobile: bottom sheet drawer)
 - Sort dropdown, category tabs, pagination
 - Product cards with wishlist, ratings, discount badges
 
 ### Product Details Page (update existing `/product/$handle`)
+
 - Large image gallery with thumbnail strip and zoom
 - Sticky mobile CTA bar (Add to Cart / Buy Now)
 - Accordion sections: Benefits, Ingredients, How to Use, FAQ
@@ -57,33 +62,39 @@ Rebuild all homepage sections:
 - Related products carousel
 
 ### Cart Page (`/cart`)
+
 - Full cart UI with quantity controls, remove, coupon input
 - Price breakdown (subtotal, discount, delivery, total)
 - Delivery estimation
 - Checkout button redirecting to Shopify
 
 ### Checkout Redirect Page (`/checkout`)
+
 - Premium loading animation
 - "Redirecting to secure checkout" messaging
 - Trust badges
 
 ### Blog Listing (`/blog`)
+
 - Featured article hero
 - Article grid with category filter tabs
 - Pagination
 
 ### Blog Details (`/blog/$slug`)
+
 - Hero image, rich typography
 - Sticky share buttons
 - Related articles
 
 ### About Page (update existing `/about`)
+
 - Brand story with timeline
 - Mission & Ayurvedic philosophy
 - Certifications grid
 - Team section
 
 ### Contact Page (update existing `/contact`)
+
 - Contact form with validation
 - Map placeholder
 - WhatsApp/Email/Phone cards
@@ -109,4 +120,5 @@ Rebuild all homepage sections:
 - Mobile-first responsive design throughout
 
 ### New Files (~25-30 components + 6 route files)
+
 ### Modified Files (~10 existing components + styles.css)

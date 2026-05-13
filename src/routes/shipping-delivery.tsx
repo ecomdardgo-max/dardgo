@@ -58,8 +58,11 @@ function ShippingDeliveryPage() {
                   Delivery
                 </h2>
                 <p className="leading-relaxed text-muted-foreground mb-0">
-                  We offer <strong className="text-foreground">free shipping on all orders within India</strong>.
-                  We aim to deliver your order within{" "}
+                  We offer{" "}
+                  <strong className="text-foreground">
+                    free shipping on all orders within India
+                  </strong>
+                  . We aim to deliver your order within{" "}
                   <strong className="text-foreground">3–5 days in metro cities</strong> and{" "}
                   <strong className="text-foreground">8–10 days in remote areas</strong>. However,
                   please note that delivery times may vary depending on your location and any

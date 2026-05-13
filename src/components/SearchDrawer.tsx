@@ -1,7 +1,11 @@
 import { useState, useEffect, useRef } from "react";
 import { Search, X, Loader2 } from "lucide-react";
 import { Link } from "@tanstack/react-router";
-import { storefrontApiRequest, STOREFRONT_PRODUCTS_QUERY, type ShopifyProduct } from "@/lib/shopify";
+import {
+  storefrontApiRequest,
+  STOREFRONT_PRODUCTS_QUERY,
+  type ShopifyProduct,
+} from "@/lib/shopify";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface SearchDrawerProps {
@@ -32,7 +36,10 @@ export function SearchDrawer({ isOpen, onClose }: SearchDrawerProps) {
     const timer = setTimeout(async () => {
       setLoading(true);
       try {
-        const data = await storefrontApiRequest(STOREFRONT_PRODUCTS_QUERY, { first: 6, query: query });
+        const data = await storefrontApiRequest(STOREFRONT_PRODUCTS_QUERY, {
+          first: 6,
+          query: query,
+        });
         setResults(data?.data?.products?.edges || []);
       } catch {
         setResults([]);
@@ -75,7 +82,10 @@ export function SearchDrawer({ isOpen, onClose }: SearchDrawerProps) {
                     className="w-full pl-12 pr-4 py-3.5 rounded-2xl bg-muted/60 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 text-sm"
                   />
                 </div>
-                <button onClick={onClose} className="p-2.5 rounded-xl hover:bg-muted transition-colors">
+                <button
+                  onClick={onClose}
+                  className="p-2.5 rounded-xl hover:bg-muted transition-colors"
+                >
                   <X className="w-5 h-5" />
                 </button>
               </div>
@@ -100,11 +110,21 @@ export function SearchDrawer({ isOpen, onClose }: SearchDrawerProps) {
                         className="flex items-center gap-4 p-3 rounded-2xl hover:bg-muted/60 transition-colors"
                       >
                         <div className="w-14 h-14 rounded-xl bg-muted overflow-hidden flex-shrink-0">
-                          {image && <img src={image.url} alt={image.altText || ""} className="w-full h-full object-cover" />}
+                          {image && (
+                            <img
+                              src={image.url}
+                              alt={image.altText || ""}
+                              className="w-full h-full object-cover"
+                            />
+                          )}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="font-medium text-sm text-foreground truncate">{product.node.title}</p>
-                          <p className="text-primary font-bold text-sm">₹{parseFloat(price.amount).toFixed(0)}</p>
+                          <p className="font-medium text-sm text-foreground truncate">
+                            {product.node.title}
+                          </p>
+                          <p className="text-primary font-bold text-sm">
+                            ₹{parseFloat(price.amount).toFixed(0)}
+                          </p>
                         </div>
                       </Link>
                     );

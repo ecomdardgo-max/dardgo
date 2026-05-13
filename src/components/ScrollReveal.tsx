@@ -79,17 +79,17 @@ export function ScrollReveal({
         variants={containerVariants}
         className={className}
       >
-        {Array.isArray(children)
-          ? children.map((child, i) => (
-              <motion.div key={i} variants={itemVariants} data-reveal-child>
-                {child}
-              </motion.div>
-            ))
-          : (
-              <motion.div variants={itemVariants} data-reveal-child>
-                {children}
-              </motion.div>
-            )}
+        {Array.isArray(children) ? (
+          children.map((child, i) => (
+            <motion.div key={i} variants={itemVariants} data-reveal-child>
+              {child}
+            </motion.div>
+          ))
+        ) : (
+          <motion.div variants={itemVariants} data-reveal-child>
+            {children}
+          </motion.div>
+        )}
       </motion.div>
     );
   }

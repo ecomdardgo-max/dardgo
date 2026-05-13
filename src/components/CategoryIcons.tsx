@@ -1,11 +1,11 @@
 import { Droplets, Pill, Sparkles, Leaf, FlaskConical, Candy } from "lucide-react";
 
 const categories = [
-  { icon: Droplets, label: "Pain Relief Oils", color: "text-primary" },
-  { icon: Pill, label: "Ayurvedic Tablets", color: "text-primary" },
-  { icon: Sparkles, label: "Beauty Products", color: "text-primary" },
-  { icon: Candy, label: "Halwa Formation", color: "text-primary" },
-  { icon: FlaskConical, label: "Powder Formation", color: "text-primary" },
+  { icon: Droplets, label: "Wellness oils", color: "text-primary" },
+  { icon: Pill, label: "Ayurvedic tablets", color: "text-primary" },
+  { icon: Sparkles, label: "Beauty", color: "text-primary" },
+  { icon: Candy, label: "Halwa", color: "text-primary" },
+  { icon: FlaskConical, label: "Powders", color: "text-primary" },
   { icon: Leaf, label: "Capsules", color: "text-primary" },
 ];
 

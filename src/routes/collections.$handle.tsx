@@ -7,7 +7,11 @@ import { ScrollReveal } from "@/components/ScrollReveal";
 import { useEffect, useState } from "react";
 import { Loader2, Package, ShoppingCart, SlidersHorizontal, Star, Heart, X } from "lucide-react";
 import { Link } from "@tanstack/react-router";
-import { storefrontApiRequest, STOREFRONT_PRODUCTS_QUERY, type ShopifyProduct } from "@/lib/shopify";
+import {
+  storefrontApiRequest,
+  STOREFRONT_PRODUCTS_QUERY,
+  type ShopifyProduct,
+} from "@/lib/shopify";
 import { useCartStore } from "@/stores/cartStore";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
@@ -17,7 +21,11 @@ export const Route = createFileRoute("/collections/$handle")({
   head: ({ params }) => ({
     meta: [
       { title: `${params.handle === "all" ? "All Products" : params.handle} — DARDGO` },
-      { name: "description", content: "Browse DARDGO's premium Ayurvedic wellness products. 100% natural, AYUSH certified, and doctor recommended." },
+      {
+        name: "description",
+        content:
+          "Browse DARDGO Ayurvedic-inspired herbal wellness products — oils, topicals, and daily comfort essentials with transparent labeling.",
+      },
     ],
   }),
 });
@@ -81,18 +89,20 @@ function CollectionPage() {
                   {handle === "all"
                     ? "All Products"
                     : handle === "pain-relief-oils"
-                    ? "Pain Relief Oils & Roll On"
-                    : handle === "ayurvedic-tablets"
-                    ? "Ayurvedic Tablets"
-                    : handle === "ayurvedic-beauty"
-                    ? "Ayurvedic Beauty Products"
-                    : handle === "ayurvedic-halwa"
-                    ? "Ayurvedic Halwa Formation"
-                    : handle === "ayurvedic-powder"
-                    ? "Ayurvedic Powder Formation"
-                    : handle.replace(/-/g, " ")}
+                      ? "Wellness oils & roll-ons"
+                      : handle === "ayurvedic-tablets"
+                        ? "Ayurvedic Tablets"
+                        : handle === "ayurvedic-beauty"
+                          ? "Ayurvedic Beauty Products"
+                          : handle === "ayurvedic-halwa"
+                            ? "Ayurvedic Halwa Formation"
+                            : handle === "ayurvedic-powder"
+                              ? "Ayurvedic Powder Formation"
+                              : handle.replace(/-/g, " ")}
                 </h1>
-                <p className="text-xs sm:text-sm text-muted-foreground">{products.length} products</p>
+                <p className="text-xs sm:text-sm text-muted-foreground">
+                  {products.length} products
+                </p>
               </div>
               <button
                 onClick={() => setFilterOpen(true)}
@@ -111,7 +121,10 @@ function CollectionPage() {
                   <h3 className="font-semibold text-sm text-foreground mb-3">Sort By</h3>
                   <div className="space-y-1.5">
                     {sortOptions.map((opt) => (
-                      <button key={opt} className="block text-sm text-muted-foreground hover:text-primary py-1.5 transition-colors w-full text-left">
+                      <button
+                        key={opt}
+                        className="block text-sm text-muted-foreground hover:text-primary py-1.5 transition-colors w-full text-left"
+                      >
                         {opt}
                       </button>
                     ))}
@@ -120,11 +133,16 @@ function CollectionPage() {
                 <div>
                   <h3 className="font-semibold text-sm text-foreground mb-3">Categories</h3>
                   <div className="space-y-1.5">
-                    {["All", "Pain Relief", "Joint Care", "Immunity", "Digestive", "Beauty"].map((cat) => (
-                      <button key={cat} className="block text-sm text-muted-foreground hover:text-primary py-1.5 transition-colors w-full text-left">
-                        {cat}
-                      </button>
-                    ))}
+                    {["All", "Wellness oils", "Joint care", "Immunity", "Digestive", "Beauty"].map(
+                      (cat) => (
+                        <button
+                          key={cat}
+                          className="block text-sm text-muted-foreground hover:text-primary py-1.5 transition-colors w-full text-left"
+                        >
+                          {cat}
+                        </button>
+                      ),
+                    )}
                   </div>
                 </div>
               </div>
@@ -148,7 +166,11 @@ function CollectionPage() {
                     const price = product.node.priceRange.minVariantPrice;
                     const displayPrice = parseFloat(price.amount);
                     return (
-                      <ScrollReveal key={product.node.id} delay={i * 0.03} className="h-full min-w-0">
+                      <ScrollReveal
+                        key={product.node.id}
+                        delay={i * 0.03}
+                        className="h-full min-w-0"
+                      >
                         <Link
                           to="/product/$handle"
                           params={{ handle: product.node.handle }}
@@ -236,11 +258,21 @@ function CollectionPage() {
                 >
                   <div className="flex items-center justify-between mb-5">
                     <h3 className="font-semibold text-foreground">Filters & Sort</h3>
-                    <button onClick={() => setFilterOpen(false)} className="p-2 rounded-xl hover:bg-muted"><X className="w-5 h-5" /></button>
+                    <button
+                      onClick={() => setFilterOpen(false)}
+                      className="p-2 rounded-xl hover:bg-muted"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
                   </div>
                   <div className="space-y-4">
                     {sortOptions.map((opt) => (
-                      <button key={opt} className="block text-sm text-muted-foreground hover:text-primary py-2 w-full text-left">{opt}</button>
+                      <button
+                        key={opt}
+                        className="block text-sm text-muted-foreground hover:text-primary py-2 w-full text-left"
+                      >
+                        {opt}
+                      </button>
                     ))}
                   </div>
                 </motion.div>

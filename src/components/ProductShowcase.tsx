@@ -1,7 +1,11 @@
 import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { Loader2, ShoppingCart, Package, Star, Heart } from "lucide-react";
-import { storefrontApiRequest, STOREFRONT_PRODUCTS_QUERY, type ShopifyProduct } from "@/lib/shopify";
+import {
+  storefrontApiRequest,
+  STOREFRONT_PRODUCTS_QUERY,
+  type ShopifyProduct,
+} from "@/lib/shopify";
 import { useCartStore } from "@/stores/cartStore";
 import { toast } from "sonner";
 import { ScrollReveal } from "@/components/ScrollReveal";
@@ -48,13 +52,13 @@ export function ProductShowcase() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <ScrollReveal>
           <div className="text-center mb-10 sm:mb-14 max-w-2xl mx-auto">
-            <span className="text-eyebrow text-brand-orange mb-4 block">— Best sellers</span>
+            <span className="text-eyebrow text-brand-orange mb-4 block">— Shop the range</span>
             <h2 className="text-display-2 text-foreground mb-4">
-              Our most loved{" "}
-              <span className="text-gradient-green">products</span>
+              Customer <span className="text-gradient-green">favourites</span>
             </h2>
             <p className="text-muted-foreground text-sm sm:text-base leading-relaxed">
-              Premium Ayurvedic wellness products trusted by thousands of families across India.
+              Ayurvedic-inspired oils, topicals, and daily wellness staples — curated for quality
+              and transparent labeling.
             </p>
           </div>
         </ScrollReveal>

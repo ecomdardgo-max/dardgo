@@ -1,24 +1,11 @@
 import { useState, useEffect } from "react";
 import { Link } from "@tanstack/react-router";
-import { Menu, X, ChevronDown, Search, Heart, Sparkles, User } from "lucide-react";
+import { Menu, X, ChevronDown, Search, Heart, Sparkles, User, PackageSearch } from "lucide-react";
 import { CartDrawer } from "@/components/CartDrawer";
 import { SearchDrawer } from "@/components/SearchDrawer";
 import { motion, AnimatePresence } from "framer-motion";
 import dardgoLogo from "@/assets/dardgo-logo.webp";
-
-const shopCategories: Array<{
-  label: string;
-  handle: string;
-  emoji: string;
-  desc: string;
-}> = [
-  { label: "Wellness oils", handle: "pain-relief-oils", emoji: "💧", desc: "Massage & comfort" },
-  { label: "Joint care", handle: "ayurvedic-tablets", emoji: "🦴", desc: "Mobility routines" },
-  { label: "Immunity support", handle: "ayurvedic-capsules", emoji: "🛡️", desc: "Daily balance" },
-  { label: "Digestive care", handle: "ayurvedic-halwa", emoji: "🌿", desc: "Gentle wellness" },
-  { label: "Beauty & skin", handle: "ayurvedic-beauty", emoji: "✨", desc: "Botanical care" },
-  { label: "Women's wellness", handle: "ayurvedic-powder", emoji: "🌸", desc: "Holistic support" },
-];
+import { SHOP_CATEGORIES } from "@/lib/shop-categories";
 
 const announcements = [
   "Free shipping on prepaid orders above ₹249",
@@ -34,6 +21,8 @@ const navLinks = [
   { label: "Blog", to: "/blog" as const },
   { label: "Contact", to: "/contact" as const },
 ];
+
+const TRACK_ORDER_URL = "https://dardgo.shiprocket.co/tracking/";
 
 export function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -190,7 +179,7 @@ export function Navbar() {
                         <p className="text-eyebrow text-muted-foreground">Shop by category</p>
                       </div>
                       <div className="grid grid-cols-2 gap-1 p-2">
-                        {shopCategories.map((cat) => (
+                        {SHOP_CATEGORIES.map((cat) => (
                           <Link
                             key={cat.label}
                             to="/collections/$handle"
@@ -244,6 +233,14 @@ export function Navbar() {
                   )}
                 </Link>
               ))}
+              <a
+                href={TRACK_ORDER_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-5 py-2.5 text-[15px] font-semibold text-foreground/70 hover:text-foreground rounded-full transition-colors"
+              >
+                Track order
+              </a>
             </nav>
 
             {/* Right icons */}
@@ -281,9 +278,9 @@ export function Navbar() {
               animate={{ height: "auto", opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
               transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
-              className="lg:hidden max-h-[calc(100dvh-4rem)] overflow-y-auto overflow-hidden border-t border-border/50 bg-card"
+              className="lg:hidden min-h-0 max-h-[calc(100dvh-5rem-env(safe-area-inset-top,0px))] overflow-y-auto overflow-x-hidden overscroll-contain border-t border-border/50 bg-card [-webkit-overflow-scrolling:touch]"
             >
-              <nav className="flex flex-col px-4 py-4 gap-0.5 pb-[calc(1rem+env(safe-area-inset-bottom))]">
+              <nav className="flex flex-col px-4 py-4 gap-0.5 pb-[calc(1.25rem+env(safe-area-inset-bottom))]">
                 <Link
                   to="/"
                   onClick={() => setMobileOpen(false)}
@@ -294,7 +291,7 @@ export function Navbar() {
                 <div className="py-3 px-4">
                   <p className="text-eyebrow text-muted-foreground mb-3">Shop Categories</p>
                   <div className="grid grid-cols-2 gap-2">
-                    {shopCategories.map((cat) => (
+                    {SHOP_CATEGORIES.map((cat) => (
                       <Link
                         key={cat.label}
                         to="/collections/$handle"
@@ -318,6 +315,16 @@ export function Navbar() {
                     {link.label}
                   </Link>
                 ))}
+                <a
+                  href={TRACK_ORDER_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => setMobileOpen(false)}
+                  className="text-base font-semibold py-3 px-4 text-foreground rounded-2xl hover:bg-primary/5 hover:text-primary transition-colors flex items-center gap-2"
+                >
+                  <PackageSearch className="w-4 h-4 shrink-0" aria-hidden />
+                  Track order
+                </a>
 
                 <Link
                   to="/account"

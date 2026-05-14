@@ -88,8 +88,8 @@ export async function storefrontApiRequest(query: string, variables: Record<stri
 }
 
 export const STOREFRONT_PRODUCTS_QUERY = `
-  query GetProducts($first: Int!, $query: String) {
-    products(first: $first, query: $query) {
+  query GetProducts($first: Int!, $query: String, $sortKey: ProductSortKeys, $reverse: Boolean) {
+    products(first: $first, query: $query, sortKey: $sortKey, reverse: $reverse) {
       edges {
         node {
           id
@@ -333,6 +333,78 @@ export const STOREFRONT_PRODUCT_BY_HANDLE_QUERY = `
         values
       }
       onlineStoreUrl
+      dardgoNsPdpTabsMf: metafield(namespace: "dardgo", key: "pdp_tabs") {
+        value
+        type
+      }
+      dardgoNsKeyIngredientsMf: metafield(namespace: "dardgo", key: "key_ingredients") {
+        value
+        type
+      }
+      dardgoNsHowToUseMf: metafield(namespace: "dardgo", key: "how_to_use") {
+        value
+        type
+      }
+      dardgoNsBenefitsMf: metafield(namespace: "dardgo", key: "benefits") {
+        value
+        type
+      }
+      dardgoNsSuitableForMf: metafield(namespace: "dardgo", key: "suitable_for") {
+        value
+        type
+      }
+      dardgoNsStorageSafetyMf: metafield(namespace: "dardgo", key: "storage_safety") {
+        value
+        type
+      }
+      dardgoNsFaqsMf: metafield(namespace: "dardgo", key: "faqs") {
+        value
+        type
+      }
+      dardgoPdpTabsMetafield: metafield(namespace: "custom", key: "dardgo_pdp_tabs") {
+        value
+        type
+      }
+      dardgoKeyIngredientsMf: metafield(namespace: "custom", key: "dardgo_key_ingredients") {
+        value
+        type
+      }
+      dardgoHowToUseMf: metafield(namespace: "custom", key: "dardgo_how_to_use") {
+        value
+        type
+      }
+      dardgoBenefitsMf: metafield(namespace: "custom", key: "dardgo_benefits") {
+        value
+        type
+      }
+      dardgoSuitableForMf: metafield(namespace: "custom", key: "dardgo_suitable_for") {
+        value
+        type
+      }
+      dardgoStorageSafetyMf: metafield(namespace: "custom", key: "dardgo_storage_safety") {
+        value
+        type
+      }
+      dardgoFaqsMf: metafield(namespace: "custom", key: "dardgo_faqs") {
+        value
+        type
+      }
+      merchantKeyIngredientsLineMf: metafield(namespace: "custom", key: "key_ingredients") {
+        value
+        type
+      }
+      merchantHowToUseRichMf: metafield(namespace: "custom", key: "how_to_use") {
+        value
+        type
+      }
+      merchantDirectionRichMf: metafield(namespace: "custom", key: "direction") {
+        value
+        type
+      }
+      merchantSuitableForRichMf: metafield(namespace: "custom", key: "suitable_for") {
+        value
+        type
+      }
       metafields(
         identifiers: [
           { namespace: "reviews", key: "rating" },

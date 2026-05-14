@@ -15,6 +15,7 @@
     "build:shopify-csv": "node scripts/build-shopify-import-csv.mjs",
     "seed:smart-collections": "node scripts/ensure-smart-collections-from-import.mjs",
     "check:shopify-read": "node scripts/check-shopify-admin-read.mjs",
+    "ensure:pdp-metafields": "node scripts/ensure-dardgo-pdp-metafield-definitions.mjs",
     "csv:shopify": "node scripts/generate-csv.mjs"
   },
   "dependencies": {

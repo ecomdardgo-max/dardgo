@@ -12,9 +12,11 @@ import {
   STOREFRONT_PRODUCTS_QUERY,
   type ShopifyProduct,
 } from "@/lib/shopify";
+import { SHOP_CATEGORIES } from "@/lib/shop-categories";
 import { useCartStore } from "@/stores/cartStore";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/collections/$handle")({
   component: CollectionPage,
@@ -30,36 +32,59 @@ export const Route = createFileRoute("/collections/$handle")({
   }),
 });
 
-const sortOptions = ["Best Selling", "Price: Low to High", "Price: High to Low", "Newest"];
+const sortOptions = ["Best Selling", "Price: Low to High", "Price: High to Low", "Newest"] as const;
+
+type SortOption = (typeof sortOptions)[number];
+
+const SORT_TO_STOREFRONT: Record<SortOption, { sortKey: string; reverse: boolean }> = {
+  "Best Selling": { sortKey: "BEST_SELLING", reverse: false },
+  "Price: Low to High": { sortKey: "PRICE", reverse: false },
+  "Price: High to Low": { sortKey: "PRICE", reverse: true },
+  Newest: { sortKey: "CREATED_AT", reverse: true },
+};
 
 function CollectionPage() {
   const { handle } = Route.useParams();
   const [products, setProducts] = useState<ShopifyProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [filterOpen, setFilterOpen] = useState(false);
+  const [sortBy, setSortBy] = useState<SortOption>("Best Selling");
   const addItem = useCartStore((s) => s.addItem);
   const isLoading = useCartStore((s) => s.isLoading);
 
   useEffect(() => {
+    let cancelled = false;
     async function load() {
+      setLoading(true);
       try {
         // For category pages we filter by the `category-<handle>` tag that the
         // CSV importer stamps on every product. The "all" handle returns the
         // full catalogue (no filter applied).
-        const variables: Record<string, unknown> = { first: 50 };
+        const sort = SORT_TO_STOREFRONT[sortBy];
+        const variables: Record<string, unknown> = {
+          first: 50,
+          sortKey: sort.sortKey,
+          reverse: sort.reverse,
+        };
         if (handle && handle !== "all") {
           variables.query = `tag:category-${handle}`;
         }
         const data = await storefrontApiRequest(STOREFRONT_PRODUCTS_QUERY, variables);
-        setProducts(data?.data?.products?.edges || []);
+        if (!cancelled) {
+          setProducts(data?.data?.products?.edges || []);
+        }
       } catch (e) {
         console.error(e);
+        if (!cancelled) setProducts([]);
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     }
     load();
-  }, [handle]);
+    return () => {
+      cancelled = true;
+    };
+  }, [handle, sortBy]);
 
   const handleAddToCart = async (product: ShopifyProduct, e: React.MouseEvent) => {
     e.preventDefault();
@@ -123,7 +148,14 @@ function CollectionPage() {
                     {sortOptions.map((opt) => (
                       <button
                         key={opt}
-                        className="block text-sm text-muted-foreground hover:text-primary py-1.5 transition-colors w-full text-left"
+                        type="button"
+                        onClick={() => setSortBy(opt)}
+                        className={cn(
+                          "block w-full py-1.5 text-left text-sm transition-colors",
+                          sortBy === opt
+                            ? "font-semibold text-primary"
+                            : "text-muted-foreground hover:text-primary",
+                        )}
                       >
                         {opt}
                       </button>
@@ -133,16 +165,33 @@ function CollectionPage() {
                 <div>
                   <h3 className="font-semibold text-sm text-foreground mb-3">Categories</h3>
                   <div className="space-y-1.5">
-                    {["All", "Wellness oils", "Joint care", "Immunity", "Digestive", "Beauty"].map(
-                      (cat) => (
-                        <button
-                          key={cat}
-                          className="block text-sm text-muted-foreground hover:text-primary py-1.5 transition-colors w-full text-left"
-                        >
-                          {cat}
-                        </button>
-                      ),
-                    )}
+                    <Link
+                      to="/collections/$handle"
+                      params={{ handle: "all" }}
+                      className={cn(
+                        "block py-1.5 text-sm transition-colors",
+                        handle === "all"
+                          ? "font-semibold text-primary"
+                          : "text-muted-foreground hover:text-primary",
+                      )}
+                    >
+                      All products
+                    </Link>
+                    {SHOP_CATEGORIES.map((cat) => (
+                      <Link
+                        key={cat.handle}
+                        to="/collections/$handle"
+                        params={{ handle: cat.handle }}
+                        className={cn(
+                          "block py-1.5 text-sm transition-colors",
+                          handle === cat.handle
+                            ? "font-semibold text-primary"
+                            : "text-muted-foreground hover:text-primary",
+                        )}
+                      >
+                        {cat.label}
+                      </Link>
+                    ))}
                   </div>
                 </div>
               </div>
@@ -266,14 +315,63 @@ function CollectionPage() {
                     </button>
                   </div>
                   <div className="space-y-4">
-                    {sortOptions.map((opt) => (
-                      <button
-                        key={opt}
-                        className="block text-sm text-muted-foreground hover:text-primary py-2 w-full text-left"
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">
+                        Sort
+                      </p>
+                      {sortOptions.map((opt) => (
+                        <button
+                          key={opt}
+                          type="button"
+                          onClick={() => {
+                            setSortBy(opt);
+                            setFilterOpen(false);
+                          }}
+                          className={cn(
+                            "block w-full py-2 text-left text-sm transition-colors",
+                            sortBy === opt
+                              ? "font-semibold text-primary"
+                              : "text-muted-foreground hover:text-primary",
+                          )}
+                        >
+                          {opt}
+                        </button>
+                      ))}
+                    </div>
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">
+                        Categories
+                      </p>
+                      <Link
+                        to="/collections/$handle"
+                        params={{ handle: "all" }}
+                        onClick={() => setFilterOpen(false)}
+                        className={cn(
+                          "block py-2 text-sm transition-colors",
+                          handle === "all"
+                            ? "font-semibold text-primary"
+                            : "text-muted-foreground hover:text-primary",
+                        )}
                       >
-                        {opt}
-                      </button>
-                    ))}
+                        All products
+                      </Link>
+                      {SHOP_CATEGORIES.map((cat) => (
+                        <Link
+                          key={cat.handle}
+                          to="/collections/$handle"
+                          params={{ handle: cat.handle }}
+                          onClick={() => setFilterOpen(false)}
+                          className={cn(
+                            "block py-2 text-sm transition-colors",
+                            handle === cat.handle
+                              ? "font-semibold text-primary"
+                              : "text-muted-foreground hover:text-primary",
+                          )}
+                        >
+                          {cat.label}
+                        </Link>
+                      ))}
+                    </div>
                   </div>
                 </motion.div>
               </motion.div>

@@ -65,6 +65,7 @@ import {
   type CarouselApi,
 } from "@/components/ui/carousel";
 import { cn } from "@/lib/utils";
+import { resolvePdpTabsFromProduct } from "@/lib/product-pdp-tabs";
 
 export const Route = createFileRoute("/product/$handle")({
   component: ProductPage,
@@ -88,114 +89,6 @@ export const Route = createFileRoute("/product/$handle")({
     };
   },
 });
-
-// --- Static data for tabs ---
-const KEY_INGREDIENTS = [
-  {
-    name: "Ashwagandha",
-    emoji: "🌿",
-    desc: "Traditionally valued in Ayurveda for adaptogenic wellness support and general vitality when used as directed.",
-  },
-  {
-    name: "Gandhak",
-    emoji: "🔶",
-    desc: "Mineral component used in classical formulations; intended for external or internal formats per label only.",
-  },
-  {
-    name: "Shallaki",
-    emoji: "🍃",
-    desc: "Herb often chosen in mobility-focused traditional formulas to complement massage and movement routines.",
-  },
-  {
-    name: "Triphala",
-    emoji: "🫐",
-    desc: "Blend of three fruits traditionally associated with gentle digestive balance in Ayurvedic lifestyle texts.",
-  },
-];
-
-const BENEFITS_LIST = [
-  {
-    title: "Comfort-forward routine",
-    desc: "Crafted to support everyday ease of movement and relaxation when paired with sensible activity and rest.",
-  },
-  {
-    title: "Joint-friendly habits",
-    desc: "Designed to align with stretching, hydration, and professional guidance — not as a substitute for care.",
-  },
-  {
-    title: "Mindful formulation",
-    desc: "Herb selection reflects traditional texts and modern quality checks; individual response may vary.",
-  },
-  {
-    title: "Botanical-first formula",
-    desc: "Prioritises herbal actives and avoids unnecessary synthetic fillers where the format allows.",
-  },
-  {
-    title: "Holistic wellness lens",
-    desc: "Encourages balanced nutrition, sleep, and stress care alongside any supplement or topical.",
-  },
-  {
-    title: "Mobility support mindset",
-    desc: "Supports active lifestyles with transparent expectations — results are personal and not guaranteed.",
-  },
-];
-
-const HOW_TO_USE_STEPS = [
-  "Read the entire product label before first use.",
-  "Follow the directions for amount, frequency, and route (oral vs external) printed on the pack.",
-  "If the product is a tablet or capsule, swallow with water unless the label states otherwise.",
-  "For oils and roll-ons, apply only to intact skin; wash hands after use unless applying to hands.",
-  "Discontinue use and consult a healthcare professional if irritation occurs or if you are pregnant, nursing, or on medication.",
-];
-
-const SUITABLE_FOR = [
-  "Adults seeking traditional-format herbal wellness as part of a balanced lifestyle",
-  "Shoppers who read labels carefully and follow directions",
-  "Households combining movement, rest, and professional guidance for comfort",
-  "Those looking for transparent Ayurvedic-inspired options without disease-cure messaging",
-];
-
-const FAQS = [
-  {
-    q: "What are the key ingredients?",
-    a: "Representative herbs may include Ashwagandha, Gandhak, Shallaki, and Triphala depending on the SKU. Always confirm the exact list on your product label.",
-  },
-  {
-    q: "How should I use this product?",
-    a: "Follow the printed label for dose, timing, and whether the product is for external or internal use. When in doubt, ask a qualified professional.",
-  },
-  {
-    q: "Are side effects possible?",
-    a: "Any wellness product can cause sensitivity in some individuals. Stop use if you notice irritation or discomfort and seek medical advice if symptoms persist.",
-  },
-  {
-    q: "When might I notice a difference?",
-    a: "Experiences vary widely. Consistency, sleep, nutrition, and activity all influence outcomes — we do not promise timelines.",
-  },
-  {
-    q: "Can this replace my prescription?",
-    a: "No. Our products are not substitutes for prescribed therapy. Never change medications without your prescriber’s guidance.",
-  },
-  {
-    q: "Is long-term use appropriate?",
-    a: "That depends on your health profile. Periodic review with a healthcare provider is the safest approach for any ongoing supplement or topical.",
-  },
-];
-
-const STORAGE_SAFETY = [
-  {
-    title: "Storage",
-    body: "Keep the container tightly closed in a cool, dry place away from direct sunlight and out of reach of children unless supervising an adult application.",
-  },
-  {
-    title: "Safety",
-    body: "For external products, avoid eyes, mucosa, and broken skin. For ingestible formats, do not exceed the stated dose. This product is not intended to diagnose, treat, cure, or prevent any disease.",
-  },
-  {
-    title: "Allergies",
-    body: "Review the full ingredient list for personal allergens. Discontinue if rash or swelling occurs and seek urgent care for breathing difficulty.",
-  },
-];
 
 const TABS = [
   "Key Ingredients",
@@ -274,6 +167,8 @@ function ProductPage() {
 
   useEffect(() => {
     setSelectedImage(0);
+    setActiveTab("Key Ingredients");
+    setOpenFaq(null);
   }, [handle]);
 
   useEffect(() => {
@@ -470,6 +365,7 @@ function ProductPage() {
   }, [price, fbtCompanions, fbtSelection]);
 
   const reviewState = useMemo(() => parseProductReviewState(product), [product]);
+  const pdpTabs = useMemo(() => resolvePdpTabsFromProduct(product), [product]);
   const histogramTotal = useMemo(
     () => reviewState.histogram.reduce((a, h) => a + h.count, 0),
     [reviewState.histogram],
@@ -491,13 +387,13 @@ function ProductPage() {
     () => ({
       "@context": "https://schema.org",
       "@type": "FAQPage",
-      mainEntity: FAQS.map((f) => ({
+      mainEntity: pdpTabs.faqs.map((f) => ({
         "@type": "Question",
         name: f.q,
         acceptedAnswer: { "@type": "Answer", text: f.a },
       })),
     }),
-    [],
+    [pdpTabs],
   );
 
   // -------------------------------------------------------------------------
@@ -1334,22 +1230,29 @@ function ProductPage() {
                 >
                   {activeTab === "Key Ingredients" && (
                     <div className="grid sm:grid-cols-2 gap-3 sm:gap-4">
-                      {KEY_INGREDIENTS.map((ing) => (
-                        <div
-                          key={ing.name}
-                          className="flex items-start gap-3 sm:gap-4 p-3 sm:p-4 rounded-xl bg-primary/5 border border-primary/10"
-                        >
-                          <span className="text-2xl sm:text-3xl flex-shrink-0">{ing.emoji}</span>
-                          <div className="min-w-0">
-                            <h4 className="font-bold text-foreground text-sm sm:text-base mb-1">
-                              {ing.name}
-                            </h4>
-                            <p className="text-[12px] sm:text-sm text-muted-foreground leading-relaxed">
-                              {ing.desc}
-                            </p>
+                      {pdpTabs.keyIngredients.length === 0 ? (
+                        <p className="text-sm text-muted-foreground col-span-full">
+                          Ingredient highlights are not listed for this product online. Refer to the
+                          physical label for the full composition.
+                        </p>
+                      ) : (
+                        pdpTabs.keyIngredients.map((ing) => (
+                          <div
+                            key={ing.name}
+                            className="flex items-start gap-3 sm:gap-4 p-3 sm:p-4 rounded-xl bg-primary/5 border border-primary/10"
+                          >
+                            <span className="text-2xl sm:text-3xl flex-shrink-0">{ing.emoji}</span>
+                            <div className="min-w-0">
+                              <h4 className="font-bold text-foreground text-sm sm:text-base mb-1">
+                                {ing.name}
+                              </h4>
+                              <p className="text-[12px] sm:text-sm text-muted-foreground leading-relaxed">
+                                {ing.desc}
+                              </p>
+                            </div>
                           </div>
-                        </div>
-                      ))}
+                        ))
+                      )}
                     </div>
                   )}
 
@@ -1359,57 +1262,76 @@ function ProductPage() {
                         <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
                         Directions for Use
                       </h3>
-                      <ol className="space-y-2.5 sm:space-y-3">
-                        {HOW_TO_USE_STEPS.map((step, i) => (
-                          <li key={i} className="flex items-start gap-2.5 sm:gap-3">
-                            <span className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-primary text-primary-foreground text-[11px] sm:text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">
-                              {i + 1}
-                            </span>
-                            <p className="text-[13px] sm:text-sm text-muted-foreground leading-relaxed">
-                              {step}
-                            </p>
-                          </li>
-                        ))}
-                      </ol>
+                      {pdpTabs.howToUse.length === 0 ? (
+                        <p className="text-sm text-muted-foreground">
+                          Usage steps are not listed here. Follow the directions printed on your
+                          product packaging.
+                        </p>
+                      ) : (
+                        <ol className="space-y-2.5 sm:space-y-3">
+                          {pdpTabs.howToUse.map((step, i) => (
+                            <li key={i} className="flex items-start gap-2.5 sm:gap-3">
+                              <span className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-primary text-primary-foreground text-[11px] sm:text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">
+                                {i + 1}
+                              </span>
+                              <p className="text-[13px] sm:text-sm text-muted-foreground leading-relaxed">
+                                {step}
+                              </p>
+                            </li>
+                          ))}
+                        </ol>
+                      )}
                     </div>
                   )}
 
                   {activeTab === "Benefits" && (
                     <div className="grid sm:grid-cols-2 gap-3 sm:gap-4">
-                      {BENEFITS_LIST.map((b, i) => (
-                        <div
-                          key={i}
-                          className="flex items-start gap-2.5 sm:gap-3 p-3 sm:p-4 rounded-xl bg-gradient-cream border border-border/30"
-                        >
-                          <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-primary flex-shrink-0 mt-0.5" />
-                          <div className="min-w-0">
-                            <h4 className="font-semibold text-foreground text-[13px] sm:text-sm mb-0.5">
-                              {b.title}
-                            </h4>
-                            <p className="text-[11.5px] sm:text-xs text-muted-foreground leading-relaxed">
-                              {b.desc}
-                            </p>
+                      {pdpTabs.benefits.length === 0 ? (
+                        <p className="text-sm text-muted-foreground col-span-full">
+                          Benefit summaries are not listed for this SKU online.
+                        </p>
+                      ) : (
+                        pdpTabs.benefits.map((b, i) => (
+                          <div
+                            key={`${b.title}-${i}`}
+                            className="flex items-start gap-2.5 sm:gap-3 p-3 sm:p-4 rounded-xl bg-gradient-cream border border-border/30"
+                          >
+                            <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-primary flex-shrink-0 mt-0.5" />
+                            <div className="min-w-0">
+                              <h4 className="font-semibold text-foreground text-[13px] sm:text-sm mb-0.5">
+                                {b.title}
+                              </h4>
+                              <p className="text-[11.5px] sm:text-xs text-muted-foreground leading-relaxed">
+                                {b.desc}
+                              </p>
+                            </div>
                           </div>
-                        </div>
-                      ))}
+                        ))
+                      )}
                     </div>
                   )}
 
                   {activeTab === "Suitable For" && (
                     <div className="space-y-2.5 sm:space-y-3">
-                      {SUITABLE_FOR.map((item, i) => (
-                        <div
-                          key={i}
-                          className="flex items-start gap-2.5 sm:gap-3 p-2.5 sm:p-3 rounded-lg bg-muted/40"
-                        >
-                          <span className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5">
-                            <CheckCircle2 className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-primary" />
-                          </span>
-                          <p className="text-[13px] sm:text-sm text-foreground leading-relaxed">
-                            {item}
-                          </p>
-                        </div>
-                      ))}
+                      {pdpTabs.suitableFor.length === 0 ? (
+                        <p className="text-sm text-muted-foreground">
+                          Suitability notes are not listed for this product online.
+                        </p>
+                      ) : (
+                        pdpTabs.suitableFor.map((item, i) => (
+                          <div
+                            key={i}
+                            className="flex items-start gap-2.5 sm:gap-3 p-2.5 sm:p-3 rounded-lg bg-muted/40"
+                          >
+                            <span className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                              <CheckCircle2 className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-primary" />
+                            </span>
+                            <p className="text-[13px] sm:text-sm text-foreground leading-relaxed">
+                              {item}
+                            </p>
+                          </div>
+                        ))
+                      )}
                       <p className="text-[11px] sm:text-xs text-muted-foreground italic mt-3 leading-relaxed">
                         Consult a qualified healthcare professional to confirm suitability for your
                         situation.
@@ -1419,19 +1341,26 @@ function ProductPage() {
 
                   {activeTab === "Storage & safety" && (
                     <div className="grid sm:grid-cols-1 gap-4">
-                      {STORAGE_SAFETY.map((row) => (
-                        <div
-                          key={row.title}
-                          className="rounded-xl border border-border/50 bg-muted/20 p-4 sm:p-5"
-                        >
-                          <h4 className="font-semibold text-foreground text-sm sm:text-base mb-2">
-                            {row.title}
-                          </h4>
-                          <p className="text-[13px] sm:text-sm text-muted-foreground leading-relaxed">
-                            {row.body}
-                          </p>
-                        </div>
-                      ))}
+                      {pdpTabs.storageSafety.length === 0 ? (
+                        <p className="text-sm text-muted-foreground">
+                          Storage and safety copy is not listed for this product online. See the
+                          label and package insert.
+                        </p>
+                      ) : (
+                        pdpTabs.storageSafety.map((row) => (
+                          <div
+                            key={row.title}
+                            className="rounded-xl border border-border/50 bg-muted/20 p-4 sm:p-5"
+                          >
+                            <h4 className="font-semibold text-foreground text-sm sm:text-base mb-2">
+                              {row.title}
+                            </h4>
+                            <p className="text-[13px] sm:text-sm text-muted-foreground leading-relaxed">
+                              {row.body}
+                            </p>
+                          </div>
+                        ))
+                      )}
                       <p className="text-[11px] sm:text-xs text-muted-foreground">
                         {FDA_STRUCTURED_CLAIM_DISCLAIMER}{" "}
                         <Link
@@ -1446,38 +1375,48 @@ function ProductPage() {
 
                   {activeTab === "FAQs" && (
                     <div className="space-y-2">
-                      {FAQS.map((faq, i) => (
-                        <div key={i} className="border border-border/50 rounded-xl overflow-hidden">
-                          <button
-                            onClick={() => setOpenFaq(openFaq === i ? null : i)}
-                            className="w-full flex items-center justify-between gap-3 p-3.5 sm:p-4 text-left hover:bg-muted/30 transition-colors"
+                      {pdpTabs.faqs.length === 0 ? (
+                        <p className="text-sm text-muted-foreground">
+                          No FAQs for this product yet.
+                        </p>
+                      ) : (
+                        pdpTabs.faqs.map((faq, i) => (
+                          <div
+                            key={`faq-${i}`}
+                            className="border border-border/50 rounded-xl overflow-hidden"
                           >
-                            <span className="text-[13px] sm:text-sm font-medium text-foreground">
-                              {faq.q}
-                            </span>
-                            {openFaq === i ? (
-                              <ChevronUp className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                            ) : (
-                              <ChevronDown className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                            )}
-                          </button>
-                          <AnimatePresence>
-                            {openFaq === i && (
-                              <motion.div
-                                initial={{ height: 0, opacity: 0 }}
-                                animate={{ height: "auto", opacity: 1 }}
-                                exit={{ height: 0, opacity: 0 }}
-                                transition={{ duration: 0.2 }}
-                                className="overflow-hidden"
-                              >
-                                <p className="px-3.5 sm:px-4 pb-3.5 sm:pb-4 text-[12.5px] sm:text-sm text-muted-foreground leading-relaxed">
-                                  {faq.a}
-                                </p>
-                              </motion.div>
-                            )}
-                          </AnimatePresence>
-                        </div>
-                      ))}
+                            <button
+                              type="button"
+                              onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                              className="w-full flex items-center justify-between gap-3 p-3.5 sm:p-4 text-left hover:bg-muted/30 transition-colors"
+                            >
+                              <span className="text-[13px] sm:text-sm font-medium text-foreground">
+                                {faq.q}
+                              </span>
+                              {openFaq === i ? (
+                                <ChevronUp className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                              ) : (
+                                <ChevronDown className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                              )}
+                            </button>
+                            <AnimatePresence>
+                              {openFaq === i && (
+                                <motion.div
+                                  initial={{ height: 0, opacity: 0 }}
+                                  animate={{ height: "auto", opacity: 1 }}
+                                  exit={{ height: 0, opacity: 0 }}
+                                  transition={{ duration: 0.2 }}
+                                  className="overflow-hidden"
+                                >
+                                  <p className="px-3.5 sm:px-4 pb-3.5 sm:pb-4 text-[12.5px] sm:text-sm text-muted-foreground leading-relaxed">
+                                    {faq.a}
+                                  </p>
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
+                          </div>
+                        ))
+                      )}
                     </div>
                   )}
                 </motion.div>

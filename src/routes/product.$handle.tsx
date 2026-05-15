@@ -365,7 +365,14 @@ function ProductPage() {
   }, [price, fbtCompanions, fbtSelection]);
 
   const reviewState = useMemo(() => parseProductReviewState(product), [product]);
-  const pdpTabs = useMemo(() => resolvePdpTabsFromProduct(product), [product]);
+  const productImageUrls = useMemo(
+    () => product?.images?.edges?.map((e: { node: { url: string } }) => e.node.url) ?? [],
+    [product],
+  );
+  const pdpTabs = useMemo(
+    () => resolvePdpTabsFromProduct(product, { imageUrls: productImageUrls }),
+    [product, productImageUrls],
+  );
   const histogramTotal = useMemo(
     () => reviewState.histogram.reduce((a, h) => a + h.count, 0),
     [reviewState.histogram],
@@ -953,18 +960,32 @@ function ProductPage() {
                   </p>
                 </div>
 
-                {/* Product description (from Shopify) */}
-                <div className="border-t border-border/50 pt-4 sm:pt-5 mb-2">
-                  <h2 className="text-[15px] sm:text-base font-bold text-foreground mb-2.5 sm:mb-3">
-                    About this product
-                  </h2>
-                  <p className="text-[13px] sm:text-sm text-muted-foreground leading-relaxed break-words [overflow-wrap:anywhere]">
-                    {product.description}
-                  </p>
-                </div>
               </div>
             </ScrollReveal>
           </div>
+          {/* About this product — full width below gallery + purchase column */}
+          {(product.descriptionHtml?.trim() || product.description?.trim()) && (
+            <ScrollReveal className="mt-6 sm:mt-8 lg:mt-10">
+              <div className="rounded-2xl border border-border/50 bg-card p-4 sm:p-6 lg:p-8">
+                <h2 className="text-base sm:text-lg font-bold text-foreground mb-3 sm:mb-4 font-display">
+                  About this product
+                </h2>
+                {product.descriptionHtml?.trim() ? (
+                  <div
+                    className="product-description-html text-[13px] sm:text-sm lg:text-[15px] break-words [overflow-wrap:anywhere]"
+                    dangerouslySetInnerHTML={{
+                      __html: product.descriptionHtml.trim(),
+                    }}
+                  />
+                ) : (
+                  <p className="text-[13px] sm:text-sm lg:text-[15px] text-muted-foreground leading-relaxed break-words [overflow-wrap:anywhere]">
+                    {product.description}
+                  </p>
+                )}
+              </div>
+            </ScrollReveal>
+          )}
+
 
           {/* ===== FREQUENTLY BOUGHT TOGETHER =====
               Mobile: vertical row of compact "checkbox + thumb + name + price"
@@ -1241,7 +1262,18 @@ function ProductPage() {
                             key={ing.name}
                             className="flex items-start gap-3 sm:gap-4 p-3 sm:p-4 rounded-xl bg-primary/5 border border-primary/10"
                           >
-                            <span className="text-2xl sm:text-3xl flex-shrink-0">{ing.emoji}</span>
+                            {ing.imageUrl ? (
+                              <img
+                                src={ing.imageUrl}
+                                alt={ing.name}
+                                className="w-12 h-12 sm:w-14 sm:h-14 rounded-lg object-cover flex-shrink-0 border border-primary/10 bg-background"
+                                loading="lazy"
+                                width={56}
+                                height={56}
+                              />
+                            ) : (
+                              <span className="text-2xl sm:text-3xl flex-shrink-0">{ing.emoji}</span>
+                            )}
                             <div className="min-w-0">
                               <h4 className="font-bold text-foreground text-sm sm:text-base mb-1">
                                 {ing.name}
@@ -1262,7 +1294,12 @@ function ProductPage() {
                         <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
                         Directions for Use
                       </h3>
-                      {pdpTabs.howToUse.length === 0 ? (
+                      {pdpTabs.howToUseHtml?.trim() ? (
+                        <div
+                          className="product-description-html text-[13px] sm:text-sm break-words [overflow-wrap:anywhere]"
+                          dangerouslySetInnerHTML={{ __html: pdpTabs.howToUseHtml.trim() }}
+                        />
+                      ) : pdpTabs.howToUse.length === 0 ? (
                         <p className="text-sm text-muted-foreground">
                           Usage steps are not listed here. Follow the directions printed on your
                           product packaging.

@@ -8,9 +8,9 @@
  * **Legacy** — `custom.dardgo_*` keys still supported if you created those in Admin manually.
  *
  * **Admin “Product metafield definitions” (common setup)** — namespace `custom`, Storefront readable:
- *   - `key_ingredients` — single line text (comma / `;` / `|` separated names → ingredient cards)
- *   - `how_to_use` — rich text → “How to Use” steps (paragraphs + list items)
- *   - `direction` — rich text → merged into “How to Use” after `how_to_use` when present
+ *   - `key_ingredients` — multi-line: `image.jpg|🟢 Ingredient name – description` per line (image matched from product media by filename), or comma-separated names
+ *   - `how_to_use` — rich text → “How to Use” with Shopify formatting (lists, bold, headings)
+ *   - `direction` — rich text → appended to “How to Use” when present
  *   - `suitable_for` — rich text → “Suitable for” bullets
  *
  * If your definition keys differ, open each definition in Admin and align keys with the above,
@@ -19,7 +19,7 @@
  * Enable **Storefront** access on each definition. Omitted keys in combined JSON → default for that section.
  */
 
-export type PdpKeyIngredient = { name: string; emoji: string; desc: string };
+export type PdpKeyIngredient = { name: string; emoji: string; desc: string; imageUrl?: string };
 export type PdpBenefit = { title: string; desc: string };
 export type PdpStorageRow = { title: string; body: string };
 export type PdpFaq = { q: string; a: string };
@@ -27,6 +27,8 @@ export type PdpFaq = { q: string; a: string };
 export type PdpTabsContent = {
   keyIngredients: PdpKeyIngredient[];
   howToUse: string[];
+  /** Rendered Shopify rich text / HTML for How to Use (preferred over plain step list). */
+  howToUseHtml?: string | null;
   benefits: PdpBenefit[];
   suitableFor: string[];
   storageSafety: PdpStorageRow[];
@@ -140,10 +142,6 @@ export const DEFAULT_PDP_TABS: PdpTabsContent = {
   ],
   faqs: [
     {
-      q: "What are the key ingredients?",
-      a: "Representative herbs may include Ashwagandha, Gandhak, Shallaki, and Triphala depending on the SKU. Always confirm the exact list on your product label.",
-    },
-    {
       q: "How should I use this product?",
       a: "Follow the printed label for dose, timing, and whether the product is for external or internal use. When in doubt, ask a qualified professional.",
     },
@@ -170,6 +168,7 @@ function cloneTabs(d: PdpTabsContent): PdpTabsContent {
   return {
     keyIngredients: d.keyIngredients.map((x) => ({ ...x })),
     howToUse: [...d.howToUse],
+    howToUseHtml: d.howToUseHtml ?? null,
     benefits: d.benefits.map((x) => ({ ...x })),
     suitableFor: [...d.suitableFor],
     storageSafety: d.storageSafety.map((x) => ({ ...x })),
@@ -196,6 +195,17 @@ function mfString(m: MfVal): string | null {
   return typeof v === "string" && v.trim() ? v.trim() : null;
 }
 
+function ingredientImageUrl(o: Record<string, unknown>): string | undefined {
+  for (const key of ["imageUrl", "image", "img", "image_url", "src"]) {
+    const v = o[key];
+    if (typeof v === "string" && v.trim()) {
+      const u = v.trim();
+      if (u.startsWith("http://") || u.startsWith("https://") || u.startsWith("//")) return u;
+    }
+  }
+  return undefined;
+}
+
 function normalizeIngredients(v: unknown): PdpKeyIngredient[] | null {
   if (!Array.isArray(v)) return null;
   const out: PdpKeyIngredient[] = [];
@@ -204,10 +214,12 @@ function normalizeIngredients(v: unknown): PdpKeyIngredient[] | null {
     if (!o) continue;
     const name = typeof o.name === "string" ? o.name.trim() : "";
     if (!name) continue;
+    const imageUrl = ingredientImageUrl(o);
     out.push({
       name,
       emoji: typeof o.emoji === "string" && o.emoji.trim() ? o.emoji.trim() : "🌿",
       desc: typeof o.desc === "string" ? o.desc.trim() : "",
+      imageUrl,
     });
   }
   return out;
@@ -277,10 +289,27 @@ function pickSection<T>(
   return n;
 }
 
+function pickHowToUseHtml(o: Record<string, unknown>): string | null {
+  for (const key of ["howToUseHtml", "how_to_use_html", "howToUseRich"]) {
+    const v = o[key];
+    if (typeof v === "string" && v.trim()) {
+      const html = richTextToHtml(v.trim());
+      if (html) return html;
+    }
+  }
+  const rawHow = o.howToUse ?? o.how_to_use;
+  if (typeof rawHow === "string" && rawHow.trim().startsWith("{")) {
+    return richTextToHtml(rawHow);
+  }
+  return null;
+}
+
 function tabsFromParsedRecord(o: Record<string, unknown>, d: PdpTabsContent): PdpTabsContent {
+  const howHtml = pickHowToUseHtml(o);
   return {
     keyIngredients: pickSection(o, "keyIngredients", normalizeIngredients, d.keyIngredients),
     howToUse: pickSection(o, "howToUse", normalizeStringArray, d.howToUse),
+    howToUseHtml: howHtml ?? d.howToUseHtml ?? null,
     benefits: pickSection(o, "benefits", normalizeBenefits, d.benefits),
     suitableFor: pickSection(o, "suitableFor", normalizeStringArray, d.suitableFor),
     storageSafety: pickSection(o, "storageSafety", normalizeStorage, d.storageSafety),
@@ -317,8 +346,115 @@ function linesFromText(raw: string): string[] {
 type RichTextNode = {
   type?: string;
   value?: string;
+  url?: string;
+  bold?: boolean;
+  italic?: boolean;
+  level?: number;
+  listType?: string;
   children?: RichTextNode[];
 };
+
+function escapeHtml(s: string): string {
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+function listItemInnerHtml(item: RichTextNode): string {
+  return (item.children ?? [])
+    .map((child) => {
+      if (child.type === "paragraph") return (child.children ?? []).map(renderRichTextInline).join("");
+      return renderRichTextInline(child);
+    })
+    .join("");
+}
+
+function renderRichTextInline(node: RichTextNode): string {
+  const t = node.type;
+  if (t === "text") {
+    let s = escapeHtml(node.value ?? "");
+    if (node.italic) s = `<em>${s}</em>`;
+    if (node.bold) s = `<strong>${s}</strong>`;
+    return s;
+  }
+  if (t === "line-break" || t === "soft-break") return "<br />";
+  if (t === "link") {
+    const href = escapeHtml(node.url ?? "#");
+    const inner = (node.children ?? []).map(renderRichTextInline).join("");
+    return `<a href="${href}" rel="noopener noreferrer">${inner}</a>`;
+  }
+  if (Array.isArray(node.children)) return node.children.map(renderRichTextInline).join("");
+  return "";
+}
+
+function renderRichTextBlock(node: RichTextNode): string {
+  const t = node.type;
+  const inner = (node.children ?? []).map(renderRichTextInline).join("");
+  if (t === "paragraph") return inner ? `<p>${inner}</p>` : "";
+  if (t === "heading") {
+    const level = Math.min(6, Math.max(1, node.level ?? 2));
+    return inner ? `<h${level}>${inner}</h${level}>` : "";
+  }
+  if (t === "list" && Array.isArray(node.children)) {
+    const tag = node.listType === "ordered" ? "ol" : "ul";
+    const items = node.children
+      .filter((c) => c.type === "list-item")
+      .map((c) => {
+        const li = listItemInnerHtml(c);
+        return li ? `<li>${li}</li>` : "";
+      })
+      .filter(Boolean)
+      .join("");
+    return items ? `<${tag}>${items}</${tag}>` : "";
+  }
+  if (t === "list-item") {
+    const li = listItemInnerHtml(node);
+    return li ? `<li>${li}</li>` : "";
+  }
+  return inner ? `<p>${inner}</p>` : "";
+}
+
+/** Shopify `rich_text_field` JSON → HTML (bold, lists, headings, links). */
+export function richTextToHtml(raw: string | null | undefined): string | null {
+  if (!raw?.trim()) return null;
+  const trimmed = raw.trim();
+  if (trimmed.startsWith("<") && trimmed.includes(">")) return trimmed;
+
+  const parsed = safeJsonParse(trimmed);
+  const root = asRecord(parsed);
+  if (!root || root.type !== "root") return null;
+  const children = root.children;
+  if (!Array.isArray(children)) return null;
+
+  const html = (children as RichTextNode[])
+    .map(renderRichTextBlock)
+    .filter(Boolean)
+    .join("");
+  return html || null;
+}
+
+function mergeRichTextFieldsToHtml(...raws: (string | null | undefined)[]): string | null {
+  const parts: string[] = [];
+  for (const raw of raws) {
+    const html = richTextToHtml(raw);
+    if (html) parts.push(html);
+  }
+  return parts.length ? parts.join("") : null;
+}
+
+function applyHowToUseFromRaw(raw: string, out: Partial<PdpTabsContent>) {
+  const html = richTextToHtml(raw);
+  if (html) {
+    out.howToUseHtml = html;
+    return;
+  }
+  const parsed = safeJsonParse(raw);
+  let steps = normalizeStringArray(parsed);
+  if (!steps?.length) steps = linesFromText(raw);
+  if (steps.length) out.howToUse = steps;
+}
 
 function collectRichTextLeaf(node: RichTextNode | null | undefined): string {
   if (!node || typeof node !== "object") return "";
@@ -373,11 +509,67 @@ function dedupeConsecutiveStrings(xs: string[]): string[] {
   return out;
 }
 
+const IMAGE_FILENAME_RE = /\.(jpe?g|png|webp|gif|avif|svg)(\?.*)?$/i;
+
+function resolveIngredientImageFromUrls(filename: string, imageUrls: string[]): string | undefined {
+  const base = filename.trim().toLowerCase();
+  if (!base) return undefined;
+  return imageUrls.find((url) => {
+    try {
+      const path = new URL(url).pathname.toLowerCase();
+      return path.endsWith(`/${base}`) || path.includes(`/${base}`);
+    } catch {
+      return url.toLowerCase().includes(base);
+    }
+  });
+}
+
+/** Shopify Admin format: one ingredient per line — `photo.jpg|🟢 Name – description` */
+function parseMerchantKeyIngredientsMultiline(
+  raw: string,
+  imageUrls: string[],
+): PdpKeyIngredient[] | null {
+  const lines = raw
+    .split(/\r?\n/)
+    .map((l) => l.trim())
+    .filter(Boolean);
+  if (!lines.length) return null;
+
+  const out: PdpKeyIngredient[] = [];
+  for (const line of lines) {
+    let rest = line.replace(/\s*\|\s*$/, "").trim();
+    let imageUrl: string | undefined;
+
+    const pipeIdx = rest.indexOf("|");
+    if (pipeIdx > 0) {
+      const left = rest.slice(0, pipeIdx).trim();
+      const right = rest.slice(pipeIdx + 1).trim();
+      if (IMAGE_FILENAME_RE.test(left) || /^[\w.-]+\.(jpe?g|png|webp|gif)$/i.test(left)) {
+        imageUrl =
+          resolveIngredientImageFromUrls(left, imageUrls) ??
+          (left.startsWith("http") ? left : undefined);
+        rest = right;
+      }
+    }
+
+    const emojiMatch = rest.match(/^(\p{Extended_Pictographic})\s*/u);
+    const emoji = emojiMatch?.[0]?.trim() || "🌿";
+    const text = emojiMatch ? rest.slice(emojiMatch[0].length).trim() : rest;
+    const dashParts = text.split(/\s*[–—]\s+|\s+-\s+/);
+    const name = (dashParts[0] ?? text).trim();
+    const desc = dashParts.slice(1).join(" – ").trim();
+    if (!name) continue;
+
+    out.push({ name, emoji, desc, imageUrl });
+  }
+  return out.length ? out : null;
+}
+
 function singleLineKeyIngredients(raw: string): PdpKeyIngredient[] | null {
   const t = raw.trim();
-  if (!t) return null;
+  if (!t || t.includes("\n") || t.includes("|")) return null;
   const parts = t
-    .split(/[,;|]/)
+    .split(/[,;]/)
     .map((s) => s.trim())
     .filter(Boolean);
   if (!parts.length) return null;
@@ -388,22 +580,51 @@ function singleLineKeyIngredients(raw: string): PdpKeyIngredient[] | null {
   }));
 }
 
+function parseMerchantKeyIngredientsRaw(
+  raw: string,
+  imageUrls: string[],
+): PdpKeyIngredient[] | null {
+  const t = raw.trim();
+  if (!t) return null;
+  if (t.includes("\n") || (t.includes("|") && IMAGE_FILENAME_RE.test(t.split("|")[0] ?? ""))) {
+    return parseMerchantKeyIngredientsMultiline(t, imageUrls);
+  }
+  if (t.startsWith("[") || t.startsWith("{")) {
+    const fromJson = normalizeIngredients(safeJsonParse(t));
+    if (fromJson?.length) return fromJson;
+  }
+  return singleLineKeyIngredients(t);
+}
+
+export type ResolvePdpTabsOptions = {
+  /** Product image URLs — used to resolve ingredient filenames from `key_ingredients` metafield */
+  imageUrls?: string[];
+};
+
 /** Overrides from merchant-created definitions in Admin (`custom` namespace — see file header). */
-function overlayMerchantAdminMetafields(product: ProductForPdpTabs): Partial<PdpTabsContent> {
+function overlayMerchantAdminMetafields(
+  product: ProductForPdpTabs,
+  imageUrls: string[],
+): Partial<PdpTabsContent> {
   const out: Partial<PdpTabsContent> = {};
 
   const kiLine = mfString(product?.merchantKeyIngredientsLineMf);
   if (kiLine) {
-    const n = singleLineKeyIngredients(kiLine);
+    const n = parseMerchantKeyIngredientsRaw(kiLine, imageUrls);
     if (n?.length) out.keyIngredients = n;
   }
 
   const howRaw = mfString(product?.merchantHowToUseRichMf);
   const dirRaw = mfString(product?.merchantDirectionRichMf);
-  const howSegs = howRaw ? richTextToSegments(howRaw) : [];
-  const dirSegs = dirRaw ? richTextToSegments(dirRaw) : [];
-  const mergedHt = dedupeConsecutiveStrings([...howSegs, ...dirSegs]);
-  if (mergedHt.length) out.howToUse = mergedHt;
+  const mergedHtml = mergeRichTextFieldsToHtml(howRaw, dirRaw);
+  if (mergedHtml) {
+    out.howToUseHtml = mergedHtml;
+  } else {
+    const howSegs = howRaw ? richTextToSegments(howRaw) : [];
+    const dirSegs = dirRaw ? richTextToSegments(dirRaw) : [];
+    const mergedHt = dedupeConsecutiveStrings([...howSegs, ...dirSegs]);
+    if (mergedHt.length) out.howToUse = mergedHt;
+  }
 
   const sfRaw = mfString(product?.merchantSuitableForRichMf);
   if (sfRaw) {
@@ -426,12 +647,7 @@ function overlayFromSeparateMetafields(product: ProductForPdpTabs): Partial<PdpT
   }
 
   const htRaw = mfString(product?.dardgoNsHowToUseMf) || mfString(product?.dardgoHowToUseMf);
-  if (htRaw) {
-    const parsed = safeJsonParse(htRaw);
-    let steps = normalizeStringArray(parsed);
-    if (!steps?.length) steps = linesFromText(htRaw);
-    if (steps.length) out.howToUse = steps;
-  }
+  if (htRaw) applyHowToUseFromRaw(htRaw, out);
 
   const benRaw = mfString(product?.dardgoNsBenefitsMf) || mfString(product?.dardgoBenefitsMf);
   if (benRaw) {
@@ -462,7 +678,11 @@ function overlayFromSeparateMetafields(product: ProductForPdpTabs): Partial<PdpT
   return out;
 }
 
-export function resolvePdpTabsFromProduct(product: ProductForPdpTabs | null): PdpTabsContent {
+export function resolvePdpTabsFromProduct(
+  product: ProductForPdpTabs | null,
+  options?: ResolvePdpTabsOptions,
+): PdpTabsContent {
+  const imageUrls = options?.imageUrls ?? [];
   const d = DEFAULT_PDP_TABS;
   if (!product) return cloneTabs(d);
 
@@ -476,6 +696,7 @@ export function resolvePdpTabsFromProduct(product: ProductForPdpTabs | null): Pd
       const merged = tabsFromParsedRecord(o, d);
       base.keyIngredients = merged.keyIngredients;
       base.howToUse = merged.howToUse;
+      if (merged.howToUseHtml) base.howToUseHtml = merged.howToUseHtml;
       base.benefits = merged.benefits;
       base.suitableFor = merged.suitableFor;
       base.storageSafety = merged.storageSafety;
@@ -485,15 +706,17 @@ export function resolvePdpTabsFromProduct(product: ProductForPdpTabs | null): Pd
 
   const overlay = overlayFromSeparateMetafields(product);
   if (overlay.keyIngredients?.length) base.keyIngredients = overlay.keyIngredients;
-  if (overlay.howToUse?.length) base.howToUse = overlay.howToUse;
+  if (overlay.howToUseHtml) base.howToUseHtml = overlay.howToUseHtml;
+  else if (overlay.howToUse?.length) base.howToUse = overlay.howToUse;
   if (overlay.benefits?.length) base.benefits = overlay.benefits;
   if (overlay.suitableFor?.length) base.suitableFor = overlay.suitableFor;
   if (overlay.storageSafety?.length) base.storageSafety = overlay.storageSafety;
   if (overlay.faqs?.length) base.faqs = overlay.faqs;
 
-  const merchant = overlayMerchantAdminMetafields(product);
+  const merchant = overlayMerchantAdminMetafields(product, imageUrls);
   if (merchant.keyIngredients?.length) base.keyIngredients = merchant.keyIngredients;
-  if (merchant.howToUse?.length) base.howToUse = merchant.howToUse;
+  if (merchant.howToUseHtml) base.howToUseHtml = merchant.howToUseHtml;
+  else if (merchant.howToUse?.length) base.howToUse = merchant.howToUse;
   if (merchant.suitableFor?.length) base.suitableFor = merchant.suitableFor;
 
   return base;

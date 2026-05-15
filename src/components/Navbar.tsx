@@ -19,6 +19,7 @@ const navLinks = [
   { label: "Home", to: "/" as const, exact: true },
   { label: "About", to: "/about" as const },
   { label: "Blog", to: "/blog" as const },
+  { label: "Bulk Order", to: "/bulk-order" as const },
   { label: "Contact", to: "/contact" as const },
 ];
 

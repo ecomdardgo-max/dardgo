@@ -19,7 +19,9 @@ import { Route as FaqsRouteImport } from './routes/faqs'
 import { Route as DisclaimerRouteImport } from './routes/disclaimer'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as CheckoutRouteImport } from './routes/checkout'
+import { Route as CategoriesRouteImport } from './routes/categories'
 import { Route as CartRouteImport } from './routes/cart'
+import { Route as BulkOrderRouteImport } from './routes/bulk-order'
 import { Route as BlogRouteImport } from './routes/blog'
 import { Route as AccountRouteImport } from './routes/account'
 import { Route as AboutRouteImport } from './routes/about'
@@ -79,9 +81,19 @@ const CheckoutRoute = CheckoutRouteImport.update({
   path: '/checkout',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CategoriesRoute = CategoriesRouteImport.update({
+  id: '/categories',
+  path: '/categories',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CartRoute = CartRouteImport.update({
   id: '/cart',
   path: '/cart',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BulkOrderRoute = BulkOrderRouteImport.update({
+  id: '/bulk-order',
+  path: '/bulk-order',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BlogRoute = BlogRouteImport.update({
@@ -130,7 +142,9 @@ export interface FileRoutesByFullPath {
   '/about': typeof AboutRoute
   '/account': typeof AccountRouteWithChildren
   '/blog': typeof BlogRouteWithChildren
+  '/bulk-order': typeof BulkOrderRoute
   '/cart': typeof CartRoute
+  '/categories': typeof CategoriesRoute
   '/checkout': typeof CheckoutRoute
   '/contact': typeof ContactRoute
   '/disclaimer': typeof DisclaimerRoute
@@ -151,7 +165,9 @@ export interface FileRoutesByTo {
   '/about': typeof AboutRoute
   '/account': typeof AccountRouteWithChildren
   '/blog': typeof BlogRouteWithChildren
+  '/bulk-order': typeof BulkOrderRoute
   '/cart': typeof CartRoute
+  '/categories': typeof CategoriesRoute
   '/checkout': typeof CheckoutRoute
   '/contact': typeof ContactRoute
   '/disclaimer': typeof DisclaimerRoute
@@ -173,7 +189,9 @@ export interface FileRoutesById {
   '/about': typeof AboutRoute
   '/account': typeof AccountRouteWithChildren
   '/blog': typeof BlogRouteWithChildren
+  '/bulk-order': typeof BulkOrderRoute
   '/cart': typeof CartRoute
+  '/categories': typeof CategoriesRoute
   '/checkout': typeof CheckoutRoute
   '/contact': typeof ContactRoute
   '/disclaimer': typeof DisclaimerRoute
@@ -196,7 +214,9 @@ export interface FileRouteTypes {
     | '/about'
     | '/account'
     | '/blog'
+    | '/bulk-order'
     | '/cart'
+    | '/categories'
     | '/checkout'
     | '/contact'
     | '/disclaimer'
@@ -217,7 +237,9 @@ export interface FileRouteTypes {
     | '/about'
     | '/account'
     | '/blog'
+    | '/bulk-order'
     | '/cart'
+    | '/categories'
     | '/checkout'
     | '/contact'
     | '/disclaimer'
@@ -238,7 +260,9 @@ export interface FileRouteTypes {
     | '/about'
     | '/account'
     | '/blog'
+    | '/bulk-order'
     | '/cart'
+    | '/categories'
     | '/checkout'
     | '/contact'
     | '/disclaimer'
@@ -260,7 +284,9 @@ export interface RootRouteChildren {
   AboutRoute: typeof AboutRoute
   AccountRoute: typeof AccountRouteWithChildren
   BlogRoute: typeof BlogRouteWithChildren
+  BulkOrderRoute: typeof BulkOrderRoute
   CartRoute: typeof CartRoute
+  CategoriesRoute: typeof CategoriesRoute
   CheckoutRoute: typeof CheckoutRoute
   ContactRoute: typeof ContactRoute
   DisclaimerRoute: typeof DisclaimerRoute
@@ -347,11 +373,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CheckoutRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/categories': {
+      id: '/categories'
+      path: '/categories'
+      fullPath: '/categories'
+      preLoaderRoute: typeof CategoriesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/cart': {
       id: '/cart'
       path: '/cart'
       fullPath: '/cart'
       preLoaderRoute: typeof CartRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/bulk-order': {
+      id: '/bulk-order'
+      path: '/bulk-order'
+      fullPath: '/bulk-order'
+      preLoaderRoute: typeof BulkOrderRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/blog': {
@@ -439,7 +479,9 @@ const rootRouteChildren: RootRouteChildren = {
   AboutRoute: AboutRoute,
   AccountRoute: AccountRouteWithChildren,
   BlogRoute: BlogRouteWithChildren,
+  BulkOrderRoute: BulkOrderRoute,
   CartRoute: CartRoute,
+  CategoriesRoute: CategoriesRoute,
   CheckoutRoute: CheckoutRoute,
   ContactRoute: ContactRoute,
   DisclaimerRoute: DisclaimerRoute,

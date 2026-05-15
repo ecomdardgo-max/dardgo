@@ -32,6 +32,7 @@ import {
 import {
   storefrontApiRequest,
   STOREFRONT_PRODUCT_BY_HANDLE_QUERY,
+  findProductImageIndexForVariant,
   STOREFRONT_PRODUCTS_QUERY,
 } from "@/lib/shopify";
 import { parseProductReviewState } from "@/lib/shopify-product-reviews";
@@ -230,6 +231,16 @@ function ProductPage() {
       setQuantity(1);
     }
   }, [product, variantFromUrl]);
+
+  // When the selected variant changes, show that variant's image from Shopify.
+  useEffect(() => {
+    if (!product?.images?.edges?.length) return;
+    const variantNode = product.variants?.edges?.[selectedVariant]?.node;
+    const variantImageUrl = variantNode?.image?.url;
+    if (!variantImageUrl) return;
+    const idx = findProductImageIndexForVariant(product.images.edges, variantImageUrl);
+    setSelectedImage(idx);
+  }, [selectedVariant, product]);
 
   const handleAddToCart = async () => {
     if (!product) return;

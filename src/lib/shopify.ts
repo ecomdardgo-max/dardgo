@@ -47,6 +47,14 @@ export interface ShopifyProduct {
             name: string;
             value: string;
           }>;
+          image?: {
+            url: string;
+            altText: string | null;
+          } | null;
+          compareAtPrice?: {
+            amount: string;
+            currencyCode: string;
+          } | null;
         };
       }>;
     };
@@ -85,6 +93,24 @@ export async function storefrontApiRequest(query: string, variables: Record<stri
     );
   }
   return data;
+}
+
+/** Match a variant image URL to an index in the product gallery (ignores query params). */
+export function findProductImageIndexForVariant(
+  images: Array<{ node: { url: string } }>,
+  variantImageUrl: string | undefined | null,
+): number {
+  if (!variantImageUrl || images.length === 0) return 0;
+  const normalize = (url: string) => url.split("?")[0].split("#")[0];
+  const target = normalize(variantImageUrl);
+  const exact = images.findIndex((e) => normalize(e.node.url) === target);
+  if (exact >= 0) return exact;
+  const file = target.split("/").pop();
+  if (file) {
+    const partial = images.findIndex((e) => e.node.url.includes(file));
+    if (partial >= 0) return partial;
+  }
+  return 0;
 }
 
 export const STOREFRONT_PRODUCTS_QUERY = `
@@ -321,6 +347,14 @@ export const STOREFRONT_PRODUCT_BY_HANDLE_QUERY = `
               currencyCode
             }
             availableForSale
+            compareAtPrice {
+              amount
+              currencyCode
+            }
+            image {
+              url
+              altText
+            }
             selectedOptions {
               name
               value

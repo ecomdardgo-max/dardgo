@@ -8,7 +8,7 @@ import { ScrollReveal } from "@/components/ScrollReveal";
 import { Package, Send, MessageCircle } from "lucide-react";
 import {
   openBulkOrderWhatsApp,
-  DARDGO_WHATSAPP_DISPLAY,
+  DARDGO_BULK_ORDER_WHATSAPP_DISPLAY,
   type BulkOrderFormData,
 } from "@/lib/whatsapp";
 
@@ -92,7 +92,7 @@ function BulkOrderPage() {
               </h1>
               <p className="text-muted-foreground max-w-xl mx-auto text-sm sm:text-base leading-relaxed">
                 Fill in your requirements below. When you tap send, WhatsApp opens with your
-                details pre-filled to {DARDGO_WHATSAPP_DISPLAY} — review and send the message to
+                details pre-filled to {DARDGO_BULK_ORDER_WHATSAPP_DISPLAY} — review and send the message to
                 our team.
               </p>
             </div>
@@ -238,7 +238,7 @@ function BulkOrderPage() {
 
                 <p className="text-[11px] sm:text-xs text-muted-foreground text-center leading-relaxed flex items-start justify-center gap-1.5">
                   <MessageCircle className="w-3.5 h-3.5 shrink-0 mt-0.5 text-[#25D366]" aria-hidden />
-                  You will be redirected to WhatsApp ({DARDGO_WHATSAPP_DISPLAY}). Tap send there to
+                  You will be redirected to WhatsApp ({DARDGO_BULK_ORDER_WHATSAPP_DISPLAY}). Tap send there to
                   submit your enquiry.
                 </p>
               </form>

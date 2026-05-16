@@ -2083,7 +2083,14 @@ function ProductPage() {
       </AnimatePresence>
 
       <Footer />
-      <WhatsAppFloat />
+      <WhatsAppFloat
+        className={cn(
+          "bottom-[calc(8.75rem+env(safe-area-inset-bottom))]",
+          showStickyCta
+            ? "lg:bottom-[calc(5.5rem+env(safe-area-inset-bottom))]"
+            : "lg:bottom-6",
+        )}
+      />
       <MobileBottomNav />
     </div>
   );

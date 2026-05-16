@@ -3,6 +3,11 @@ export const DARDGO_WHATSAPP_PHONE = "919329912659";
 
 export const DARDGO_WHATSAPP_DISPLAY = "+91 93299 12659";
 
+/** Bulk-order enquiries only — other pages keep DARDGO_WHATSAPP_PHONE. */
+export const DARDGO_BULK_ORDER_WHATSAPP_PHONE = "918517960888";
+
+export const DARDGO_BULK_ORDER_WHATSAPP_DISPLAY = "+91 8517960888";
+
 export function buildWhatsAppUrl(message: string, phone = DARDGO_WHATSAPP_PHONE): string {
   const text = message.trim();
   const base = `https://wa.me/${phone}`;
@@ -38,6 +43,9 @@ export function buildBulkOrderWhatsAppMessage(data: BulkOrderFormData): string {
 }
 
 export function openBulkOrderWhatsApp(data: BulkOrderFormData): void {
-  const url = buildWhatsAppUrl(buildBulkOrderWhatsAppMessage(data));
+  const url = buildWhatsAppUrl(
+    buildBulkOrderWhatsAppMessage(data),
+    DARDGO_BULK_ORDER_WHATSAPP_PHONE,
+  );
   window.open(url, "_blank", "noopener,noreferrer");
 }

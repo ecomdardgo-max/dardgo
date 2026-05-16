@@ -1,10 +1,19 @@
-export function WhatsAppFloat() {
+import { cn } from "@/lib/utils";
+
+type WhatsAppFloatProps = {
+  className?: string;
+};
+
+export function WhatsAppFloat({ className }: WhatsAppFloatProps) {
   return (
     <a
       href="https://wa.me/919329912659?text=Hi%2C%20I%20want%20to%20order%20DARDGO%20products"
       target="_blank"
       rel="noopener noreferrer"
-      className="fixed bottom-[calc(5rem+env(safe-area-inset-bottom))] lg:bottom-6 right-4 sm:right-6 z-50 w-12 h-12 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center shadow-lg transition-all hover:scale-110 active:scale-95 animate-whatsapp-pulse"
+      className={cn(
+        "fixed bottom-[calc(5rem+env(safe-area-inset-bottom))] lg:bottom-6 right-4 sm:right-6 z-50 w-12 h-12 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center shadow-lg transition-all hover:scale-110 active:scale-95 animate-whatsapp-pulse",
+        className,
+      )}
       style={{ backgroundColor: "#25D366" }}
       aria-label="Chat on WhatsApp"
     >

@@ -17,7 +17,6 @@ import {
   User,
   Heart,
   Share2,
-  MapPin,
   Award,
   RotateCcw,
   Zap,
@@ -110,14 +109,6 @@ const TRUST_HIGHLIGHTS = [
   { icon: Leaf, label: "Herbal-first", sub: "Label transparency" },
 ] as const;
 
-// Pincode checker — purely client-side mock. Any 6-digit pincode is "deliverable",
-// 4-5 days lead time. We highlight a couple of metro pincodes as 1-2 days.
-function checkPincode(pin: string): { available: boolean; days: number } {
-  const fastPins = new Set(["110001", "400001", "560001", "411001", "500001", "700001", "600001"]);
-  if (!/^\d{6}$/.test(pin)) return { available: false, days: 0 };
-  return { available: true, days: fastPins.has(pin) ? 2 : 4 };
-}
-
 function ProductPage() {
   const { handle } = Route.useParams();
   const { variant: variantFromUrl } = Route.useSearch();
@@ -131,15 +122,10 @@ function ProductPage() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [recommendedProducts, setRecommendedProducts] = useState<any[]>([]);
 
-  // New UX state — wishlist toggle, lightbox, pincode checker, review filter,
+  // New UX state — wishlist toggle, lightbox, review filter,
   // social-proof rotation, FBT bundle selection, and a sticky-CTA visibility flag.
   const [wishlisted, setWishlisted] = useState(false);
   const [lightboxOpen, setLightboxOpen] = useState(false);
-  const [pincode, setPincode] = useState("");
-  const [pincodeStatus, setPincodeStatus] = useState<null | {
-    available: boolean;
-    days: number;
-  }>(null);
   const [reviewFilter, setReviewFilter] = useState<number | "all">("all");
   const [reviewSort, setReviewSort] = useState<"recent" | "helpful">("recent");
   const [fbtSelection, setFbtSelection] = useState<Record<string, boolean>>({});
@@ -326,12 +312,6 @@ function ProductPage() {
       await navigator.clipboard.writeText(url);
       toast.success("Link copied!", { description: "Share it with anyone." });
     }
-  };
-
-  const handlePincodeCheck = (e: React.FormEvent) => {
-    e.preventDefault();
-    const result = checkPincode(pincode.trim());
-    setPincodeStatus(result);
   };
 
   // -------------------------------------------------------------------------
@@ -864,63 +844,6 @@ function ProductPage() {
                     onClick={() => void handleBuyNow()}
                     disabled={!variant?.availableForSale}
                   />
-                </div>
-
-                {/* Pincode checker + estimated delivery */}
-                <div className="rounded-2xl border border-border/50 bg-card p-3 sm:p-4 mb-4">
-                  <div className="flex items-start gap-2.5 sm:gap-3">
-                    <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                      <MapPin className="w-4 h-4 text-primary" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-[13px] sm:text-sm font-semibold text-foreground">
-                        Check delivery to your area
-                      </p>
-                      <form
-                        onSubmit={handlePincodeCheck}
-                        className="mt-2 flex flex-col gap-2 sm:flex-row sm:items-stretch sm:gap-2"
-                      >
-                        <input
-                          type="text"
-                          inputMode="numeric"
-                          maxLength={6}
-                          value={pincode}
-                          onChange={(e) =>
-                            setPincode(e.target.value.replace(/\D/g, "").slice(0, 6))
-                          }
-                          placeholder="6-digit pincode"
-                          className="w-full min-w-0 flex-1 px-2.5 sm:px-3 py-2.5 min-h-[44px] rounded-lg border border-border bg-background text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/40"
-                        />
-                        <button
-                          type="submit"
-                          disabled={pincode.length !== 6}
-                          className="w-full sm:w-auto sm:min-w-[88px] px-4 py-2.5 min-h-[44px] rounded-lg bg-primary text-primary-foreground text-[11px] sm:text-xs font-bold uppercase tracking-wider disabled:opacity-50 hover:bg-primary/90 transition flex-shrink-0"
-                        >
-                          Check
-                        </button>
-                      </form>
-                      {pincodeStatus && (
-                        <div className="mt-2 flex items-start gap-2 text-[11px] sm:text-xs">
-                          {pincodeStatus.available ? (
-                            <>
-                              <CheckCircle2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-green-600 flex-shrink-0 mt-0.5" />
-                              <p className="text-foreground leading-snug">
-                                Delivery available — reaches in{" "}
-                                <span className="font-bold text-green-700">
-                                  {pincodeStatus.days} days
-                                </span>
-                                .
-                              </p>
-                            </>
-                          ) : (
-                            <p className="text-red-600">
-                              Please enter a valid 6-digit Indian pincode.
-                            </p>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  </div>
                 </div>
 
                 {/* Trust highlights — 2×2 on mobile, 3×2 from sm+ so desktop cells stay wide enough (no overflow) */}

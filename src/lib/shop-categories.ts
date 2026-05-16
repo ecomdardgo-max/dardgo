@@ -9,3 +9,14 @@ export const SHOP_CATEGORIES = [
 ] as const;
 
 export type ShopCategory = (typeof SHOP_CATEGORIES)[number];
+
+/** Footer + marketing labels — handles match Shopify smart collections (see scripts/products.json). */
+export const FOOTER_SHOP_CATEGORIES = [
+  { label: "Wellness oils & roll-ons", handle: "pain-relief-oils" },
+  { label: "Ayurvedic beauty", handle: "ayurvedic-beauty" },
+  { label: "Ayurvedic tablets", handle: "ayurvedic-tablets" },
+  { label: "Ayurvedic halwa", handle: "ayurvedic-halwa" },
+  { label: "Ayurvedic powders", handle: "ayurvedic-powder" },
+  { label: "Topical ointments", handle: "bacterial-vanish-ointment" },
+  { label: "Ayurvedic capsules", handle: "ayurvedic-capsules" },
+] as const;

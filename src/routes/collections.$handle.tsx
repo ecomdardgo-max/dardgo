@@ -123,7 +123,11 @@ function CollectionPage() {
                             ? "Ayurvedic Halwa Formation"
                             : handle === "ayurvedic-powder"
                               ? "Ayurvedic Powder Formation"
-                              : handle.replace(/-/g, " ")}
+                              : handle === "ayurvedic-capsules"
+                                ? "Ayurvedic Capsules"
+                                : handle === "bacterial-vanish-ointment"
+                                  ? "Topical ointments"
+                                  : handle.replace(/-/g, " ")}
                 </h1>
                 <p className="text-xs sm:text-sm text-muted-foreground">
                   {products.length} products

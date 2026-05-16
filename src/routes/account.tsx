@@ -22,8 +22,6 @@ import {
   CUSTOMER_DASHBOARD_QUERY,
   customerAccountGraphql,
   getCustomerAccountConfigMessage,
-  getRedirectUri,
-  getPublicOrigin,
   isCustomerAccountConfigured,
   redirectToCustomerLogin,
   logoutCustomer,
@@ -181,23 +179,6 @@ function AccountPage() {
                 >
                   Continue to sign in
                 </Button>
-                <p className="mt-8 text-xs text-muted-foreground leading-relaxed max-w-lg mx-auto text-left rounded-xl border border-border/50 bg-muted/30 p-4">
-                  <span className="font-semibold text-foreground">
-                    Shopify Admin (fix “redirect_uri mismatch”):
-                  </span>{" "}
-                  Headless → your storefront → <strong>Customer Account API</strong> → Application
-                  setup. Under <strong>Callback URL(s)</strong> add exactly:{" "}
-                  <code className="break-all rounded bg-background px-1 py-0.5">
-                    {getRedirectUri()}
-                  </code>
-                  . Under <strong>JavaScript origins</strong> add:{" "}
-                  <code className="break-all rounded bg-background px-1 py-0.5">
-                    {getPublicOrigin()}
-                  </code>
-                  . Save, wait a minute, then try again. If you use both{" "}
-                  <code className="text-[11px]">www</code> and non-www, register both callback URLs
-                  and origins.
-                </p>
               </div>
             </ScrollReveal>
           )}

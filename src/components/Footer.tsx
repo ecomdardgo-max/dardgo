@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { Truck, Wallet, ShieldCheck, Calendar, Mail, Phone, MapPin, Clock } from "lucide-react";
 import { ComplianceFooterBlock } from "@/components/ComplianceFooterBlock";
+import { FOOTER_SHOP_CATEGORIES } from "@/lib/shop-categories";
 
 // All 8 social platforms from the legacy site, with brand-correct SVG paths.
 // Lucide doesn't ship Pinterest / Tumblr / WhatsApp / X icons, so we keep them
@@ -53,16 +54,6 @@ const trustBadges = [
   { icon: Wallet, title: "COD available", desc: "₹30 per order where offered" },
   { icon: ShieldCheck, title: "Quality & traceability", desc: "AYUSH · GMP · lab-tested batches" },
   { icon: Calendar, title: "Trusted since 2006", desc: "Serving India & worldwide" },
-];
-
-const categories = [
-  "Wellness oils & roll-ons",
-  "Ayurvedic beauty",
-  "Ayurvedic tablets",
-  "Ayurvedic halwa",
-  "Ayurvedic powders",
-  "Topical ointments",
-  "Ayurvedic capsules",
 ];
 
 const information = [
@@ -185,21 +176,22 @@ export function Footer() {
           <div className="lg:col-span-3">
             <h4 className="text-eyebrow text-brand-yellow/90 mb-4 sm:mb-5">Categories</h4>
             <nav className="flex flex-col gap-3">
-              {categories.map((cat, idx) => (
-                <a
-                  key={cat}
-                  href="/#products"
+              {FOOTER_SHOP_CATEGORIES.map((cat, idx) => (
+                <Link
+                  key={cat.handle}
+                  to="/collections/$handle"
+                  params={{ handle: cat.handle }}
                   className={`text-sm text-white/80 hover:text-brand-yellow transition-colors inline-block w-fit py-0.5 ${idx > 3 ? "hidden sm:inline-block" : ""}`}
                 >
-                  {cat}
-                </a>
+                  {cat.label}
+                </Link>
               ))}
-              <a
-                href="/#products"
+              <Link
+                to="/categories"
                 className="sm:hidden inline-flex items-center justify-center mt-1 rounded-xl border border-brand-yellow/40 bg-brand-yellow/15 px-3 py-2 text-xs font-bold text-brand-yellow"
               >
                 View all categories
-              </a>
+              </Link>
             </nav>
           </div>
 

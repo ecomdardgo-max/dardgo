@@ -1,21 +1,22 @@
-/** Same list as Navbar “Shop” mega-menu — collection handles must exist in Shopify. */
-export const SHOP_CATEGORIES = [
-  { label: "Wellness oils", handle: "pain-relief-oils", emoji: "💧", desc: "Massage & comfort" },
-  { label: "Joint care", handle: "ayurvedic-tablets", emoji: "🦴", desc: "Mobility routines" },
-  { label: "Immunity support", handle: "ayurvedic-capsules", emoji: "🛡️", desc: "Daily balance" },
-  { label: "Digestive care", handle: "ayurvedic-halwa", emoji: "🌿", desc: "Gentle wellness" },
-  { label: "Beauty & skin", handle: "ayurvedic-beauty", emoji: "✨", desc: "Botanical care" },
-] as const;
+import { CATALOG_SECTIONS, CUSTOMER_FAVOURITES, type CatalogSection } from "@/lib/product-catalog";
+
+/** Navbar, /categories, and collection sidebars — main shop departments. */
+export const SHOP_CATEGORIES = CATALOG_SECTIONS.map((s) => ({
+  label: s.title,
+  handle: s.collectionHandle,
+  emoji: s.emoji,
+  desc: s.desc,
+}));
 
 export type ShopCategory = (typeof SHOP_CATEGORIES)[number];
 
-/** Footer + marketing labels — handles match Shopify smart collections (see scripts/products.json). */
+export { CUSTOMER_FAVOURITES, CATALOG_SECTIONS, type CatalogSection };
+
+/** Footer category links */
 export const FOOTER_SHOP_CATEGORIES = [
-  { label: "Wellness oils & roll-ons", handle: "pain-relief-oils" },
-  { label: "Ayurvedic beauty", handle: "ayurvedic-beauty" },
-  { label: "Ayurvedic tablets", handle: "ayurvedic-tablets" },
-  { label: "Ayurvedic halwa", handle: "ayurvedic-halwa" },
-  { label: "Ayurvedic powders", handle: "ayurvedic-powder" },
-  { label: "Topical ointments", handle: "bacterial-vanish-ointment" },
-  { label: "Ayurvedic capsules", handle: "ayurvedic-capsules" },
+  { label: "Customer favourites", handle: "customer-favourites" },
+  ...CATALOG_SECTIONS.map((s) => ({
+    label: s.title,
+    handle: s.collectionHandle,
+  })),
 ] as const;

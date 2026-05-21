@@ -5,12 +5,13 @@ import { Footer } from "@/components/Footer";
 import { WhatsAppFloat } from "@/components/WhatsAppFloat";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
 import { ScrollReveal } from "@/components/ScrollReveal";
-import { SHOP_CATEGORIES } from "@/lib/shop-categories";
 import {
-  storefrontApiRequest,
-  STOREFRONT_PRODUCTS_QUERY,
-  type ShopifyProduct,
-} from "@/lib/shopify";
+  CATALOG_SECTIONS,
+  CUSTOMER_FAVOURITES,
+  fetchCatalogProducts,
+  type CatalogSection,
+} from "@/lib/product-catalog";
+import type { ShopifyProduct } from "@/lib/shopify";
 import { useCartStore } from "@/stores/cartStore";
 import { ArrowRight, Loader2, Package, ShoppingCart, Star } from "lucide-react";
 import { toast } from "sonner";
@@ -30,15 +31,44 @@ export const Route = createFileRoute("/categories")({
   }),
 });
 
-const PRODUCTS_PER_CATEGORY = 50;
-
-type CategoryProducts = {
-  category: (typeof SHOP_CATEGORIES)[number];
+type CategoryRow = {
+  category: {
+    label: string;
+    handle: string;
+    emoji: string;
+    desc: string;
+  };
   products: ShopifyProduct[];
 };
 
+const MOBILE_CATEGORY_SECTIONS: Array<{
+  section: CatalogSection | null;
+  label: string;
+  handle: string;
+  emoji: string;
+  desc: string;
+  products: typeof CUSTOMER_FAVOURITES;
+}> = [
+  {
+    section: null,
+    label: "Customer Favourites",
+    handle: "customer-favourites",
+    emoji: "⭐",
+    desc: "Top picks",
+    products: CUSTOMER_FAVOURITES,
+  },
+  ...CATALOG_SECTIONS.map((section) => ({
+    section,
+    label: section.title,
+    handle: section.collectionHandle,
+    emoji: section.emoji,
+    desc: section.desc,
+    products: section.products,
+  })),
+];
+
 function CategoriesPage() {
-  const [sections, setSections] = useState<CategoryProducts[]>([]);
+  const [sections, setSections] = useState<CategoryRow[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -47,18 +77,29 @@ function CategoriesPage() {
       setLoading(true);
       try {
         const results = await Promise.all(
-          SHOP_CATEGORIES.map(async (category) => {
+          MOBILE_CATEGORY_SECTIONS.map(async (row) => {
             try {
-              const data = await storefrontApiRequest(STOREFRONT_PRODUCTS_QUERY, {
-                first: PRODUCTS_PER_CATEGORY,
-                query: `tag:category-${category.handle}`,
-              });
-              const products =
-                (data?.data?.products?.edges as ShopifyProduct[] | undefined) ?? [];
-              return { category, products };
+              const products = await fetchCatalogProducts(row.products, 50);
+              return {
+                category: {
+                  label: row.label,
+                  handle: row.handle,
+                  emoji: row.emoji,
+                  desc: row.desc,
+                },
+                products,
+              };
             } catch (err) {
-              console.error(`Failed to load ${category.handle}:`, err);
-              return { category, products: [] as ShopifyProduct[] };
+              console.error(`Failed to load ${row.handle}:`, err);
+              return {
+                category: {
+                  label: row.label,
+                  handle: row.handle,
+                  emoji: row.emoji,
+                  desc: row.desc,
+                },
+                products: [] as ShopifyProduct[],
+              };
             }
           }),
         );

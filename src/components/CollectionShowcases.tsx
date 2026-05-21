@@ -3,62 +3,10 @@ import { Link } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import { ArrowRight, Heart, Loader2, Package, ShoppingCart, Star } from "lucide-react";
 import { toast } from "sonner";
-import {
-  storefrontApiRequest,
-  STOREFRONT_PRODUCTS_QUERY,
-  type ShopifyProduct,
-} from "@/lib/shopify";
+import { CATALOG_SECTIONS, fetchCatalogProducts, type CatalogSection } from "@/lib/product-catalog";
+import type { ShopifyProduct } from "@/lib/shopify";
 import { useCartStore } from "@/stores/cartStore";
 import { ScrollReveal } from "@/components/ScrollReveal";
-
-// The exact homepage layout used on dardgo.com — categories appear in this
-// order, each surfacing the first 4 products from the matching collection
-// followed by a "View More" link to the full collection page.
-const FEATURED_COLLECTIONS: Array<{
-  handle: string;
-  title: string;
-  tagline: string;
-  accent: "primary" | "yellow" | "orange" | "green";
-}> = [
-  {
-    handle: "pain-relief-oils",
-    title: "Wellness oils & roll-ons",
-    tagline: "Natural comfort support for everyday wellness and relaxation.",
-    accent: "primary",
-  },
-  {
-    handle: "ayurvedic-tablets",
-    title: "Ayurvedic Tablets",
-    tagline: "Nature's wellness in every tablet — naturally effective, purely Ayurvedic.",
-    accent: "yellow",
-  },
-  {
-    handle: "ayurvedic-beauty",
-    title: "Ayurvedic Beauty Products",
-    tagline: "Pure Ayurveda for pure beauty. Glow naturally with Ayurveda.",
-    accent: "orange",
-  },
-  {
-    handle: "ayurvedic-halwa",
-    title: "Ayurvedic Halwa Formation",
-    tagline: "Wholesome Halwa, holistic health. Ancient recipes, modern wellness.",
-    accent: "green",
-  },
-  {
-    handle: "ayurvedic-powder",
-    title: "Ayurvedic Powder Formation",
-    tagline: "Pure power of Ayurveda — ancient wisdom in every spoon.",
-    accent: "primary",
-  },
-  {
-    handle: "ayurvedic-capsules",
-    title: "Ayurvedic Capsules",
-    tagline: "Concentrated herbal goodness in every capsule.",
-    accent: "orange",
-  },
-];
-
-const PRODUCTS_PER_COLLECTION = 4;
 
 const accentClasses: Record<string, { eyebrow: string; gradient: string }> = {
   primary: { eyebrow: "text-primary", gradient: "text-gradient-green" },
@@ -68,34 +16,17 @@ const accentClasses: Record<string, { eyebrow: string; gradient: string }> = {
 };
 
 export function CollectionShowcases() {
-  // Each section loads products via Storefront `tag:category-<handle>` — same tags as CSV import.
-  // Shopify smart collections (npm run seed:smart-collections) use the same tags so collection pages stay in sync.
-  const [productsByCategory, setProductsByCategory] = useState<Array<ShopifyProduct[] | null>>([]);
+  const [bySection, setBySection] = useState<ShopifyProduct[][]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let cancelled = false;
     async function load() {
       try {
-        const results = await Promise.all(
-          FEATURED_COLLECTIONS.map(async (c) => {
-            try {
-              // Storefront API supports `tag:<value>` in the products `query`
-              // argument. The CSV importer adds `category-<handle>` to every
-              // product so this filter perfectly mirrors the category sections.
-              const data = await storefrontApiRequest(STOREFRONT_PRODUCTS_QUERY, {
-                first: PRODUCTS_PER_COLLECTION,
-                query: `tag:category-${c.handle}`,
-              });
-              const edges = (data?.data?.products?.edges as ShopifyProduct[] | undefined) ?? [];
-              return edges;
-            } catch (err) {
-              console.error(`Failed to load category ${c.handle}:`, err);
-              return null;
-            }
-          }),
+        const sections = await Promise.all(
+          CATALOG_SECTIONS.map((s) => fetchCatalogProducts(s.products, 8)),
         );
-        if (!cancelled) setProductsByCategory(results);
+        if (!cancelled) setBySection(sections);
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -108,7 +39,7 @@ export function CollectionShowcases() {
 
   if (loading) {
     return (
-      <section id="products" className="py-16 sm:py-24 scroll-mt-20">
+      <section className="py-16 sm:py-24 scroll-mt-20">
         <div className="flex justify-center">
           <Loader2 className="w-8 h-8 animate-spin text-primary" />
         </div>
@@ -116,51 +47,41 @@ export function CollectionShowcases() {
     );
   }
 
-  // Skip categories that returned no products so visitors never see an empty
-  // header with nothing underneath.
-  const populated = FEATURED_COLLECTIONS.map((meta, i) => ({
+  const populated = CATALOG_SECTIONS.map((meta, i) => ({
     meta,
-    products: productsByCategory[i] ?? [],
+    products: bySection[i] ?? [],
   })).filter(({ products }) => products.length > 0);
 
   if (populated.length === 0) {
     return (
-      <section id="products" className="py-16 sm:py-24 scroll-mt-20">
+      <section className="py-16 sm:py-24 scroll-mt-20">
         <div className="mx-auto max-w-2xl px-4 text-center">
-          <div className="w-20 h-20 rounded-3xl bg-muted flex items-center justify-center mb-4 mx-auto">
-            <Package className="w-10 h-10 text-muted-foreground" />
-          </div>
+          <Package className="w-10 h-10 text-muted-foreground mx-auto mb-4" />
           <h3 className="text-xl font-semibold text-foreground mb-2">No products yet</h3>
-          <p className="text-muted-foreground text-sm">
-            Make sure the imported products carry the{" "}
-            <code className="px-1.5 py-0.5 rounded bg-muted text-xs">category-*</code> tags.
-          </p>
+          <p className="text-muted-foreground text-sm">Products will appear when published in Shopify.</p>
         </div>
       </section>
     );
   }
 
   return (
-    <section id="products" className="scroll-mt-20">
+    <section className="scroll-mt-20">
       {populated.map(({ meta, products }, i) => (
-        <CollectionBlock
-          key={meta.handle}
-          meta={meta}
-          products={products}
-          alternate={i % 2 === 1}
-        />
+        <CollectionBlock key={meta.id} meta={meta} products={products} alternate={i % 2 === 1} />
       ))}
     </section>
   );
 }
 
-interface CollectionBlockProps {
-  meta: (typeof FEATURED_COLLECTIONS)[number];
+function CollectionBlock({
+  meta,
+  products,
+  alternate,
+}: {
+  meta: CatalogSection;
   products: ShopifyProduct[];
   alternate: boolean;
-}
-
-function CollectionBlock({ meta, products, alternate }: CollectionBlockProps) {
+}) {
   const accent = accentClasses[meta.accent];
   return (
     <div className={alternate ? "bg-gradient-cream/40" : "bg-background"}>
@@ -170,7 +91,7 @@ function CollectionBlock({ meta, products, alternate }: CollectionBlockProps) {
             <div className="max-w-2xl">
               <span className={`text-eyebrow ${accent.eyebrow} mb-3 block`}>— {meta.title}</span>
               <h2 className="text-display-3 text-foreground mb-3">
-                Discover our <span className={accent.gradient}>{shortTitle(meta.title)}</span>
+                Discover our <span className={accent.gradient}>{meta.title}</span>
               </h2>
               <p className="text-muted-foreground text-sm sm:text-base leading-relaxed">
                 {meta.tagline}
@@ -178,7 +99,7 @@ function CollectionBlock({ meta, products, alternate }: CollectionBlockProps) {
             </div>
             <Link
               to="/collections/$handle"
-              params={{ handle: meta.handle }}
+              params={{ handle: meta.collectionHandle }}
               className="hidden sm:inline-flex items-center gap-1.5 px-5 py-2.5 rounded-full bg-foreground text-background text-sm font-semibold hover:opacity-90 transition-opacity self-start sm:self-auto"
             >
               View More
@@ -195,11 +116,10 @@ function CollectionBlock({ meta, products, alternate }: CollectionBlockProps) {
           ))}
         </div>
 
-        {/* Mobile-only "View More" link below the grid */}
         <div className="sm:hidden mt-6 text-center">
           <Link
             to="/collections/$handle"
-            params={{ handle: meta.handle }}
+            params={{ handle: meta.collectionHandle }}
             className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-full bg-foreground text-background text-sm font-semibold"
           >
             View More
@@ -257,7 +177,6 @@ function ProductCard({ product }: { product: ShopifyProduct }) {
             <Package className="w-10 h-10 sm:w-12 sm:h-12" />
           </div>
         )}
-
         {soldOut && (
           <div className="absolute inset-0 bg-foreground/40 backdrop-blur-[2px] flex items-center justify-center">
             <span className="px-3 py-1.5 rounded-full bg-white text-foreground text-xs font-bold tracking-wide">
@@ -265,7 +184,6 @@ function ProductCard({ product }: { product: ShopifyProduct }) {
             </span>
           </div>
         )}
-
         <button
           onClick={(e) => {
             e.preventDefault();
@@ -276,13 +194,11 @@ function ProductCard({ product }: { product: ShopifyProduct }) {
         >
           <Heart className="w-4 h-4 text-foreground/60" />
         </button>
-
         <div className="absolute bottom-3 left-3 flex items-center gap-1 px-2 py-1 rounded-lg bg-white/90 backdrop-blur-sm text-[10px] font-semibold shadow-soft">
           <Star className="w-3 h-3 text-brand-yellow fill-brand-yellow" />
           <span>4.8</span>
         </div>
       </div>
-
       <div className="p-3.5 sm:p-4">
         <h3 className="font-semibold text-foreground text-xs sm:text-sm mb-1.5 line-clamp-2 leading-snug">
           {node.title}
@@ -304,11 +220,4 @@ function ProductCard({ product }: { product: ShopifyProduct }) {
       </div>
     </Link>
   );
-}
-
-// "Pain Relief Oils & Roll On" → "pain relief oils" (drops the leading
-// adjective like "Ayurvedic" so the second half can be styled as gradient).
-function shortTitle(title: string): string {
-  const lower = title.toLowerCase();
-  return lower.replace(/^ayurvedic\s+/, "").replace(/&\s*roll on$/i, "& roll on");
 }

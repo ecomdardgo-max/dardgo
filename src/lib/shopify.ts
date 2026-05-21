@@ -113,6 +113,64 @@ export function findProductImageIndexForVariant(
   return 0;
 }
 
+/** Lightweight product fetch for grids — same `node` shape as `STOREFRONT_PRODUCTS_QUERY`. */
+export const STOREFRONT_PRODUCT_CARD_BY_HANDLE_QUERY = `
+  query CatalogProductByHandle($handle: String!) {
+    productByHandle(handle: $handle) {
+      id
+      title
+      description
+      handle
+      priceRange {
+        minVariantPrice {
+          amount
+          currencyCode
+        }
+      }
+      images(first: 5) {
+        edges {
+          node {
+            url
+            altText
+          }
+        }
+      }
+      variants(first: 10) {
+        edges {
+          node {
+            id
+            title
+            price {
+              amount
+              currencyCode
+            }
+            availableForSale
+            selectedOptions {
+              name
+              value
+            }
+          }
+        }
+      }
+      options {
+        name
+        values
+      }
+    }
+  }
+`;
+
+export async function fetchShopifyProductByHandle(
+  handle: string,
+): Promise<ShopifyProduct | null> {
+  const data = await storefrontApiRequest(STOREFRONT_PRODUCT_CARD_BY_HANDLE_QUERY, {
+    handle,
+  });
+  const node = data?.data?.productByHandle;
+  if (!node?.id) return null;
+  return { node };
+}
+
 export const STOREFRONT_PRODUCTS_QUERY = `
   query GetProducts($first: Int!, $query: String, $sortKey: ProductSortKeys, $reverse: Boolean) {
     products(first: $first, query: $query, sortKey: $sortKey, reverse: $reverse) {

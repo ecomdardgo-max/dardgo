@@ -1,11 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { Loader2, ShoppingCart, Package, Star, Heart } from "lucide-react";
-import {
-  storefrontApiRequest,
-  STOREFRONT_PRODUCTS_QUERY,
-  type ShopifyProduct,
-} from "@/lib/shopify";
+import { CUSTOMER_FAVOURITES, fetchCatalogProducts } from "@/lib/product-catalog";
+import type { ShopifyProduct } from "@/lib/shopify";
 import { useCartStore } from "@/stores/cartStore";
 import { toast } from "sonner";
 import { ScrollReveal } from "@/components/ScrollReveal";
@@ -20,8 +17,7 @@ export function ProductShowcase() {
   useEffect(() => {
     async function load() {
       try {
-        const data = await storefrontApiRequest(STOREFRONT_PRODUCTS_QUERY, { first: 8 });
-        setProducts(data?.data?.products?.edges || []);
+        setProducts(await fetchCatalogProducts(CUSTOMER_FAVOURITES, 8));
       } catch (e) {
         console.error(e);
       } finally {

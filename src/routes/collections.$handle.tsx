@@ -12,6 +12,14 @@ import {
   STOREFRONT_PRODUCTS_QUERY,
   type ShopifyProduct,
 } from "@/lib/shopify";
+import {
+  COLLECTION_PAGE_TITLES,
+  favouritesAllHandles,
+  fetchProductsByHandles,
+  getCatalogSectionByHandle,
+  isCatalogCollectionHandle,
+  sectionAllHandles,
+} from "@/lib/product-catalog";
 import { SHOP_CATEGORIES } from "@/lib/shop-categories";
 import { useCartStore } from "@/stores/cartStore";
 import { toast } from "sonner";
@@ -22,7 +30,13 @@ export const Route = createFileRoute("/collections/$handle")({
   component: CollectionPage,
   head: ({ params }) => ({
     meta: [
-      { title: `${params.handle === "all" ? "All Products" : params.handle} — DARDGO` },
+      {
+        title: `${
+          params.handle === "all"
+            ? "All Products"
+            : (COLLECTION_PAGE_TITLES[params.handle] ?? params.handle)
+        } — DARDGO`,
+      },
       {
         name: "description",
         content:
@@ -66,6 +80,20 @@ function CollectionPage() {
           sortKey: sort.sortKey,
           reverse: sort.reverse,
         };
+        if (
+          handle &&
+          handle !== "all" &&
+          (handle === "customer-favourites" || isCatalogCollectionHandle(handle))
+        ) {
+          const list =
+            handle === "customer-favourites"
+              ? favouritesAllHandles()
+              : sectionAllHandles(getCatalogSectionByHandle(handle)!);
+          const catalogProducts = await fetchProductsByHandles(list);
+          if (!cancelled) setProducts(catalogProducts);
+          return;
+        }
+
         if (handle && handle !== "all") {
           variables.query = `tag:category-${handle}`;
         }
@@ -110,24 +138,10 @@ function CollectionPage() {
           <ScrollReveal>
             <div className="flex items-start justify-between gap-3 mb-6 sm:mb-8">
               <div className="min-w-0 flex-1">
-                <h1 className="text-xl sm:text-4xl font-bold text-foreground mb-1 capitalize break-words">
+                <h1 className="text-xl sm:text-4xl font-bold text-foreground mb-1 break-words">
                   {handle === "all"
                     ? "All Products"
-                    : handle === "pain-relief-oils"
-                      ? "Wellness oils & roll-ons"
-                      : handle === "ayurvedic-tablets"
-                        ? "Ayurvedic Tablets"
-                        : handle === "ayurvedic-beauty"
-                          ? "Ayurvedic Beauty Products"
-                          : handle === "ayurvedic-halwa"
-                            ? "Ayurvedic Halwa Formation"
-                            : handle === "ayurvedic-powder"
-                              ? "Ayurvedic Powder Formation"
-                              : handle === "ayurvedic-capsules"
-                                ? "Ayurvedic Capsules"
-                                : handle === "bacterial-vanish-ointment"
-                                  ? "Topical ointments"
-                                  : handle.replace(/-/g, " ")}
+                    : (COLLECTION_PAGE_TITLES[handle] ?? handle.replace(/-/g, " "))}
                 </h1>
                 <p className="text-xs sm:text-sm text-muted-foreground">
                   {products.length} products

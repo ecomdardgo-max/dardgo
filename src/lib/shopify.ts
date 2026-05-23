@@ -387,11 +387,23 @@ export const STOREFRONT_PRODUCT_BY_HANDLE_QUERY = `
           currencyCode
         }
       }
-      images(first: 10) {
+      images(first: 50) {
         edges {
           node {
             url
             altText
+          }
+        }
+      }
+      media(first: 50) {
+        edges {
+          node {
+            ... on MediaImage {
+              image {
+                url
+                altText
+              }
+            }
           }
         }
       }

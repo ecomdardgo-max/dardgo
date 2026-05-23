@@ -8,7 +8,8 @@
  * **Legacy** — `custom.dardgo_*` keys still supported if you created those in Admin manually.
  *
  * **Admin “Product metafield definitions” (common setup)** — namespace `custom`, Storefront readable:
- *   - `key_ingredients` — multi-line: `image.jpg|🟢 Ingredient name – description` per line (image matched from product media by filename), or comma-separated names
+ *   - `key_ingredients` — multi-line: `🟢 Ingredient name – description` per line (optional legacy `image.jpg|` prefix ignored)
+ *     Tab hero image: gallery image with alt exactly `key-ingredients` (or filename hint), else 2nd gallery image
  *   - `how_to_use` — rich text → “How to Use” with Shopify formatting (lists, bold, headings)
  *   - `direction` — rich text → appended to “How to Use” when present
  *   - `suitable_for` — rich text → “Suitable for” bullets
@@ -19,7 +20,20 @@
  * Enable **Storefront** access on each definition. Omitted keys in combined JSON → default for that section.
  */
 
-export type PdpKeyIngredient = { name: string; emoji: string; desc: string; imageUrl?: string };
+import {
+  INGREDIENT_IMAGE_FILENAME_RE,
+  isIngredientImageFilename,
+  resolveIngredientImageFromUrls,
+} from "@/lib/ingredient-image-match";
+
+export type PdpKeyIngredient = {
+  name: string;
+  emoji: string;
+  desc: string;
+  imageUrl?: string;
+  /** Metafield filename when using `photo.jpg|Name – desc` format. */
+  imageFilename?: string;
+};
 export type PdpBenefit = { title: string; desc: string };
 export type PdpStorageRow = { title: string; body: string };
 export type PdpFaq = { q: string; a: string };
@@ -509,19 +523,142 @@ function dedupeConsecutiveStrings(xs: string[]): string[] {
   return out;
 }
 
-const IMAGE_FILENAME_RE = /\.(jpe?g|png|webp|gif|avif|svg)(\?.*)?$/i;
+/** All product + variant + media image URLs for ingredient filename matching. */
+export function collectProductImageUrlsFromProduct(
+  product: {
+    images?: { edges?: Array<{ node: { url: string } }> };
+    variants?: { edges?: Array<{ node: { image?: { url: string | null } | null } }> };
+    media?: { edges?: Array<{ node: { image?: { url: string | null } | null } }> };
+  } | null,
+): string[] {
+  const urls: string[] = [];
+  const seen = new Set<string>();
+  const add = (url?: string | null) => {
+    if (!url || seen.has(url)) return;
+    seen.add(url);
+    urls.push(url);
+  };
+  product?.images?.edges?.forEach((e) => add(e.node.url));
+  product?.variants?.edges?.forEach((e) => add(e.node.image?.url));
+  product?.media?.edges?.forEach((e) => add(e.node.image?.url));
+  return urls;
+}
 
-function resolveIngredientImageFromUrls(filename: string, imageUrls: string[]): string | undefined {
-  const base = filename.trim().toLowerCase();
-  if (!base) return undefined;
-  return imageUrls.find((url) => {
-    try {
-      const path = new URL(url).pathname.toLowerCase();
-      return path.endsWith(`/${base}`) || path.includes(`/${base}`);
-    } catch {
-      return url.toLowerCase().includes(base);
-    }
-  });
+/** Dedicated alt merchants set for the composite ingredients image (not “herbal ingredients” in packshot copy). */
+const KEY_INGREDIENTS_ALT_RE = /^key[-_\s]?ingredients?$/i;
+const HOW_TO_USE_ALT_RE = /^how[-_\s]?to[-_\s]?use$/i;
+
+type GalleryImageNode = { url: string; altText?: string | null };
+
+function imageUrlBasename(url: string): string {
+  try {
+    return decodeURIComponent(new URL(url).pathname.split("/").pop() ?? "").toLowerCase();
+  } catch {
+    return url.toLowerCase();
+  }
+}
+
+function matchesKeyIngredientsHeroHint(img: GalleryImageNode): boolean {
+  const alt = (img.altText ?? "").trim();
+  if (KEY_INGREDIENTS_ALT_RE.test(alt)) return true;
+
+  const file = imageUrlBasename(img.url);
+  return /(?:^|[_.-])key[-_]?ingredients?(?:[_.-]|$)/i.test(file);
+}
+
+function matchesHowToUseHeroHint(img: GalleryImageNode): boolean {
+  const alt = (img.altText ?? "").trim();
+  if (HOW_TO_USE_ALT_RE.test(alt)) return true;
+
+  const file = imageUrlBasename(img.url);
+  return /(?:^|[_.-])how[-_]?to[-_]?use(?:[_.-]|$)/i.test(file);
+}
+
+/** Ordered product gallery images (images + media, deduped). */
+export function collectProductGalleryImages(
+  product: {
+    images?: { edges?: Array<{ node: GalleryImageNode }> };
+    media?: { edges?: Array<{ node: { image?: GalleryImageNode | null } }> };
+  } | null,
+): GalleryImageNode[] {
+  const out: GalleryImageNode[] = [];
+  const seen = new Set<string>();
+  const add = (node?: GalleryImageNode | null) => {
+    if (!node?.url || seen.has(node.url)) return;
+    seen.add(node.url);
+    out.push(node);
+  };
+  product?.images?.edges?.forEach((e) => add(e.node));
+  product?.media?.edges?.forEach((e) => add(e.node.image ?? null));
+  return out;
+}
+
+/**
+ * Single composite “all ingredients” image for the Key Ingredients tab — from product gallery only.
+ * Picks alt/filename match, else 2nd gallery image, else first.
+ */
+export function pickKeyIngredientsHeroImage(
+  product: Parameters<typeof collectProductGalleryImages>[0],
+  productTitle?: string,
+): { url: string; altText: string } | null {
+  const gallery = collectProductGalleryImages(product);
+  if (!gallery.length) return null;
+
+  const hinted = gallery.find(matchesKeyIngredientsHeroHint);
+  const picked = hinted ?? gallery[1] ?? gallery[0];
+  const title = productTitle?.trim() || "Product";
+  return {
+    url: picked.url,
+    altText: picked.altText?.trim() || `Key ingredients – ${title}`,
+  };
+}
+
+/**
+ * Composite “how to use” image for the How to Use tab — from product gallery only.
+ * Picks alt `how-to-use` or filename hint; no positional fallback.
+ */
+export function pickHowToUseHeroImage(
+  product: Parameters<typeof collectProductGalleryImages>[0],
+  productTitle?: string,
+): { url: string; altText: string } | null {
+  const gallery = collectProductGalleryImages(product);
+  const picked = gallery.find(matchesHowToUseHeroHint);
+  if (!picked) return null;
+
+  const title = productTitle?.trim() || "Product";
+  return {
+    url: picked.url,
+    altText: picked.altText?.trim() || `How to use – ${title}`,
+  };
+}
+
+function metafieldToPlainText(raw: string): string {
+  const trimmed = raw.trim();
+  if (!trimmed) return "";
+  if (trimmed.startsWith("{") && trimmed.includes('"type"')) {
+    return richTextToSegments(trimmed).join("\n");
+  }
+  return trimmed;
+}
+
+function parseKeyIngredientsMetafield(
+  raw: string,
+  imageUrls: string[],
+): PdpKeyIngredient[] | null {
+  const plain = metafieldToPlainText(raw);
+  const fromText = parseMerchantKeyIngredientsRaw(plain, imageUrls);
+  if (fromText?.length) return fromText;
+
+  const parsed = safeJsonParse(plain);
+  const fromJson = normalizeIngredients(parsed ?? null);
+  if (!fromJson?.length) return null;
+
+  return fromJson.map((ing) => ({
+    ...ing,
+    imageUrl:
+      ing.imageUrl ??
+      (ing.name ? resolveIngredientImageFromUrls(ing.name, imageUrls) : undefined),
+  }));
 }
 
 /** Shopify Admin format: one ingredient per line — `photo.jpg|🟢 Name – description` */
@@ -539,12 +676,14 @@ function parseMerchantKeyIngredientsMultiline(
   for (const line of lines) {
     let rest = line.replace(/\s*\|\s*$/, "").trim();
     let imageUrl: string | undefined;
+    let imageFilename: string | undefined;
 
     const pipeIdx = rest.indexOf("|");
     if (pipeIdx > 0) {
       const left = rest.slice(0, pipeIdx).trim();
       const right = rest.slice(pipeIdx + 1).trim();
-      if (IMAGE_FILENAME_RE.test(left) || /^[\w.-]+\.(jpe?g|png|webp|gif)$/i.test(left)) {
+      if (isIngredientImageFilename(left)) {
+        imageFilename = left;
         imageUrl =
           resolveIngredientImageFromUrls(left, imageUrls) ??
           (left.startsWith("http") ? left : undefined);
@@ -560,7 +699,7 @@ function parseMerchantKeyIngredientsMultiline(
     const desc = dashParts.slice(1).join(" – ").trim();
     if (!name) continue;
 
-    out.push({ name, emoji, desc, imageUrl });
+    out.push({ name, emoji, desc, imageUrl, imageFilename });
   }
   return out.length ? out : null;
 }
@@ -586,7 +725,7 @@ function parseMerchantKeyIngredientsRaw(
 ): PdpKeyIngredient[] | null {
   const t = raw.trim();
   if (!t) return null;
-  if (t.includes("\n") || (t.includes("|") && IMAGE_FILENAME_RE.test(t.split("|")[0] ?? ""))) {
+  if (t.includes("\n") || (t.includes("|") && INGREDIENT_IMAGE_FILENAME_RE.test(t.split("|")[0] ?? ""))) {
     return parseMerchantKeyIngredientsMultiline(t, imageUrls);
   }
   if (t.startsWith("[") || t.startsWith("{")) {
@@ -610,7 +749,7 @@ function overlayMerchantAdminMetafields(
 
   const kiLine = mfString(product?.merchantKeyIngredientsLineMf);
   if (kiLine) {
-    const n = parseMerchantKeyIngredientsRaw(kiLine, imageUrls);
+    const n = parseKeyIngredientsMetafield(kiLine, imageUrls);
     if (n?.length) out.keyIngredients = n;
   }
 
@@ -636,14 +775,16 @@ function overlayMerchantAdminMetafields(
 }
 
 /** Per-tab metafields override sections when they contain valid data. */
-function overlayFromSeparateMetafields(product: ProductForPdpTabs): Partial<PdpTabsContent> {
+function overlayFromSeparateMetafields(
+  product: ProductForPdpTabs,
+  imageUrls: string[],
+): Partial<PdpTabsContent> {
   const out: Partial<PdpTabsContent> = {};
 
   const kiRaw = mfString(product?.dardgoNsKeyIngredientsMf) || mfString(product?.dardgoKeyIngredientsMf);
   if (kiRaw) {
-    const parsed = safeJsonParse(kiRaw);
-    const n = normalizeIngredients(parsed ?? null);
-    if (n && n.length) out.keyIngredients = n;
+    const n = parseKeyIngredientsMetafield(kiRaw, imageUrls);
+    if (n?.length) out.keyIngredients = n;
   }
 
   const htRaw = mfString(product?.dardgoNsHowToUseMf) || mfString(product?.dardgoHowToUseMf);
@@ -704,7 +845,7 @@ export function resolvePdpTabsFromProduct(
     }
   }
 
-  const overlay = overlayFromSeparateMetafields(product);
+  const overlay = overlayFromSeparateMetafields(product, imageUrls);
   if (overlay.keyIngredients?.length) base.keyIngredients = overlay.keyIngredients;
   if (overlay.howToUseHtml) base.howToUseHtml = overlay.howToUseHtml;
   else if (overlay.howToUse?.length) base.howToUse = overlay.howToUse;

@@ -65,7 +65,12 @@ import {
   type CarouselApi,
 } from "@/components/ui/carousel";
 import { cn } from "@/lib/utils";
-import { resolvePdpTabsFromProduct } from "@/lib/product-pdp-tabs";
+import {
+  collectProductImageUrlsFromProduct,
+  pickHowToUseHeroImage,
+  pickKeyIngredientsHeroImage,
+  resolvePdpTabsFromProduct,
+} from "@/lib/product-pdp-tabs";
 
 export const Route = createFileRoute("/product/$handle")({
   component: ProductPage,
@@ -356,13 +361,18 @@ function ProductPage() {
   }, [price, fbtCompanions, fbtSelection]);
 
   const reviewState = useMemo(() => parseProductReviewState(product), [product]);
-  const productImageUrls = useMemo(
-    () => product?.images?.edges?.map((e: { node: { url: string } }) => e.node.url) ?? [],
-    [product],
-  );
+  const productImageUrls = useMemo(() => collectProductImageUrlsFromProduct(product), [product]);
   const pdpTabs = useMemo(
     () => resolvePdpTabsFromProduct(product, { imageUrls: productImageUrls }),
     [product, productImageUrls],
+  );
+  const keyIngredientsHero = useMemo(
+    () => pickKeyIngredientsHeroImage(product, product?.title),
+    [product],
+  );
+  const howToUseHero = useMemo(
+    () => pickHowToUseHeroImage(product, product?.title),
+    [product],
   );
   const histogramTotal = useMemo(
     () => reviewState.histogram.reduce((a, h) => a + h.count, 0),
@@ -1184,46 +1194,65 @@ function ProductPage() {
                   className="p-4 sm:p-6 lg:p-8"
                 >
                   {activeTab === "Key Ingredients" && (
-                    <div className="grid sm:grid-cols-2 gap-3 sm:gap-4">
+                    <div className="space-y-4 sm:space-y-6">
+                      {keyIngredientsHero && (
+                        <div className="flex justify-center">
+                          <div className="w-fit max-w-full rounded-2xl overflow-hidden border border-primary/15 bg-primary/5 shadow-sm">
+                            <img
+                              src={keyIngredientsHero.url}
+                              alt={keyIngredientsHero.altText}
+                              className="block w-auto max-w-full h-auto max-h-[min(70vh,520px)] bg-background"
+                              loading="lazy"
+                              width={1200}
+                              height={800}
+                            />
+                          </div>
+                        </div>
+                      )}
                       {pdpTabs.keyIngredients.length === 0 ? (
-                        <p className="text-sm text-muted-foreground col-span-full">
+                        <p className="text-sm text-muted-foreground">
                           Ingredient highlights are not listed for this product online. Refer to the
                           physical label for the full composition.
                         </p>
                       ) : (
-                        pdpTabs.keyIngredients.map((ing) => (
-                          <div
-                            key={ing.name}
-                            className="flex items-start gap-3 sm:gap-4 p-3 sm:p-4 rounded-xl bg-primary/5 border border-primary/10"
-                          >
-                            {ing.imageUrl ? (
-                              <img
-                                src={ing.imageUrl}
-                                alt={ing.name}
-                                className="w-12 h-12 sm:w-14 sm:h-14 rounded-lg object-cover flex-shrink-0 border border-primary/10 bg-background"
-                                loading="lazy"
-                                width={56}
-                                height={56}
-                              />
-                            ) : (
+                        <div className="grid sm:grid-cols-2 gap-3 sm:gap-4">
+                          {pdpTabs.keyIngredients.map((ing) => (
+                            <div
+                              key={ing.name}
+                              className="flex items-start gap-3 sm:gap-4 p-3 sm:p-4 rounded-xl bg-primary/5 border border-primary/10"
+                            >
                               <span className="text-2xl sm:text-3xl flex-shrink-0">{ing.emoji}</span>
-                            )}
-                            <div className="min-w-0">
-                              <h4 className="font-bold text-foreground text-sm sm:text-base mb-1">
-                                {ing.name}
-                              </h4>
-                              <p className="text-[12px] sm:text-sm text-muted-foreground leading-relaxed">
-                                {ing.desc}
-                              </p>
+                              <div className="min-w-0">
+                                <h4 className="font-bold text-foreground text-sm sm:text-base mb-1">
+                                  {ing.name}
+                                </h4>
+                                <p className="text-[12px] sm:text-sm text-muted-foreground leading-relaxed">
+                                  {ing.desc}
+                                </p>
+                              </div>
                             </div>
-                          </div>
-                        ))
+                          ))}
+                        </div>
                       )}
                     </div>
                   )}
 
                   {activeTab === "How to Use" && (
-                    <div className="space-y-3 sm:space-y-4">
+                    <div className="space-y-4 sm:space-y-6">
+                      {howToUseHero && (
+                        <div className="flex justify-center">
+                          <div className="w-fit max-w-full rounded-2xl overflow-hidden border border-primary/15 bg-primary/5 shadow-sm">
+                            <img
+                              src={howToUseHero.url}
+                              alt={howToUseHero.altText}
+                              className="block w-auto max-w-full h-auto max-h-[min(70vh,520px)] bg-background"
+                              loading="lazy"
+                              width={1200}
+                              height={800}
+                            />
+                          </div>
+                        </div>
+                      )}
                       <h3 className="text-base sm:text-lg font-bold text-foreground flex items-center gap-2">
                         <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
                         Directions for Use

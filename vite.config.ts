@@ -18,7 +18,9 @@ export default defineConfig({
   cloudflare: false,
   vite: {
     plugins: [
-      nitro(),
+      nitro({
+        serverDir: "./server",
+      }),
       VitePWA({
         registerType: "autoUpdate",
         injectRegister: "auto",

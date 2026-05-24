@@ -79,6 +79,114 @@ export function reloadJudgeMeWidgets(): void {
   }
 }
 
+function waitForJudgeMeReady(timeoutMs = 15_000): Promise<void> {
+  return new Promise((resolve) => {
+    const start = Date.now();
+    const tick = () => {
+      if (window.jdgm_preloader || Date.now() - start >= timeoutMs) {
+        resolve();
+        return;
+      }
+      window.requestAnimationFrame(tick);
+    };
+    tick();
+  });
+}
+
+function injectHtmlOnce(selector: string, html: string, target: ParentNode): void {
+  if (!html || document.querySelector(selector)) return;
+  const tpl = document.createElement("template");
+  tpl.innerHTML = html;
+  target.append(...Array.from(tpl.content.childNodes));
+}
+
+function injectJudgeMeSettings(settingsHtml: string): void {
+  if (!settingsHtml || document.querySelector(".jdgm-settings-script")) return;
+  const tpl = document.createElement("template");
+  tpl.innerHTML = settingsHtml;
+  const script = tpl.content.querySelector("script");
+  if (!script?.textContent) return;
+  const el = document.createElement("script");
+  el.className = "jdgm-settings-script";
+  el.setAttribute("data-cfasync", "false");
+  el.textContent = script.textContent;
+  document.head.appendChild(el);
+}
+
+/** Fetch widget HTML from our API and mount inside a visible container (dialog). */
+export async function mountJudgeMeWriteReviewWidget(
+  productId: string,
+  productTitle: string,
+  container: HTMLElement,
+): Promise<boolean> {
+  const cfg = getJudgeMeConfig();
+  if (!cfg || typeof document === "undefined") return false;
+
+  const externalId = shopifyGidToProductNumericId(productId);
+  const res = await fetch(`/api/judgeme-widget?externalId=${encodeURIComponent(externalId)}`);
+  if (!res.ok) return false;
+
+  const data = (await res.json()) as {
+    widget?: string;
+    settings?: string;
+    htmlMiracle?: string;
+  };
+  if (!data.widget) return false;
+
+  injectHtmlOnce(".jdgm-miracle-styles", data.htmlMiracle ?? "", document.head);
+  injectJudgeMeSettings(data.settings ?? "");
+
+  window.jdgm = {
+    ...(window.jdgm || {}),
+    SHOP_DOMAIN: cfg.shopDomain,
+    PLATFORM: "shopify",
+    PUBLIC_TOKEN: cfg.publicToken,
+  };
+
+  const safeTitle = productTitle.replace(/"/g, "&quot;");
+  container.innerHTML = `<div class="jdgm-widget jdgm-review-widget" data-id="${externalId}" data-product-title="${safeTitle}">${data.widget}</div>`;
+
+  ensureJudgeMeLoader();
+  await waitForJudgeMeReady();
+  reloadJudgeMeWidgets();
+
+  for (let i = 0; i < 40; i++) {
+    if (container.querySelector(".jdgm-rev-widg, .jdgm-write-rev-link")) {
+      return true;
+    }
+    reloadJudgeMeWidgets();
+    await new Promise((r) => window.setTimeout(r, 250));
+  }
+
+  return Boolean(container.querySelector(".jdgm-rev-widg"));
+}
+
+/** Click Judge.me “Write a review” to open their modal (after mount). */
+export async function triggerJudgeMeWriteReviewForm(root: HTMLElement): Promise<boolean> {
+  const link =
+    root.querySelector<HTMLElement>(".jdgm-write-rev-link") ??
+    root.querySelector<HTMLElement>("a.jdgm-write-rev-link");
+  if (!link) return false;
+
+  link.style.display = "";
+  link.style.visibility = "visible";
+  link.removeAttribute("hidden");
+  link.click();
+  link.dispatchEvent(
+    new MouseEvent("click", { bubbles: true, cancelable: true, view: window }),
+  );
+
+  for (let i = 0; i < 40; i++) {
+    const modal = document.querySelector(
+      ".jdgm-form-modal, .jdgm-write-review-modal, .jdgm-rev-widg__modal, .jdgm-widget-modal, .jdgm-modal",
+    );
+    if (modal) return true;
+    await new Promise((r) => window.setTimeout(r, 150));
+  }
+
+  return false;
+}
+
 /** Star snippet near the product title (Judge.me preview badge). */
 export function JudgeMePreviewBadge({ productId }: { productId: string }) {
   const id = shopifyGidToProductNumericId(productId);
@@ -96,14 +204,16 @@ export function JudgeMePreviewBadge({ productId }: { productId: string }) {
 export function JudgeMeReviewWidget({
   productId,
   productTitle,
+  className = "min-h-[200px] w-full",
 }: {
   productId: string;
   productTitle: string;
+  className?: string;
 }) {
   const id = shopifyGidToProductNumericId(productId);
   return (
     <div
-      className="jdgm-widget jdgm-review-widget min-h-[200px] w-full"
+      className={`jdgm-widget jdgm-review-widget ${className}`.trim()}
       data-id={id}
       data-product-title={productTitle}
     />

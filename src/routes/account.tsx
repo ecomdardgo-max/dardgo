@@ -23,7 +23,7 @@ import {
   customerAccountGraphql,
   getCustomerAccountConfigMessage,
   isCustomerAccountConfigured,
-  redirectToCustomerLogin,
+  redirectToShopifyKpAccount,
   logoutCustomer,
   type CustomerDashboardData,
   CUSTOMER_UPDATE_MUTATION,
@@ -83,12 +83,8 @@ function AccountPage() {
     else setDashboard(null);
   }, [session, loadDashboard]);
 
-  const handleLogin = async () => {
-    try {
-      await redirectToCustomerLogin();
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Could not start login");
-    }
+  const handleLogin = () => {
+    redirectToShopifyKpAccount();
   };
 
   const handleLogout = () => {
@@ -169,15 +165,16 @@ function AccountPage() {
                 </div>
                 <h2 className="text-xl font-bold text-foreground mb-2">Sign in</h2>
                 <p className="text-sm text-muted-foreground mb-6 max-w-md mx-auto leading-relaxed">
-                  You&apos;ll be redirected to a secure Shopify page. New customers can create an
-                  account there or during checkout — the same login works for this store.
+                  You&apos;ll be redirected to our secure Shopify account page to sign in or
+                  register. Use the same login for orders on this store.
                 </p>
                 <Button
                   size="lg"
-                  className="rounded-full font-bold"
-                  onClick={() => void handleLogin()}
+                  className="rounded-full font-bold gap-2"
+                  onClick={handleLogin}
                 >
                   Continue to sign in
+                  <ExternalLink className="w-4 h-4" />
                 </Button>
               </div>
             </ScrollReveal>

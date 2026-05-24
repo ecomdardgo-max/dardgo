@@ -187,6 +187,16 @@ const DEFINITIONS = [
     ownerType: "PRODUCT",
     access: { storefront: "PUBLIC_READ" },
   },
+  {
+    name: "DARDGO — product reviews JSON (Judge.me sync)",
+    namespace: "custom",
+    key: "dardgo_reviews",
+    description:
+      "JSON array synced from Judge.me: { name, rating, title, text, date, helpful?, verified? }. Storefront must read this.",
+    type: "json",
+    ownerType: "PRODUCT",
+    access: { storefront: "PUBLIC_READ" },
+  },
 ];
 
 function isAlreadyExists(errors) {

@@ -16,6 +16,16 @@ const PKCE_STATE_KEY = "dardgo_oauth_state";
 const PKCE_VERIFIER_KEY = "dardgo_code_verifier";
 const PKCE_NONCE_KEY = "dardgo_oauth_nonce";
 
+/** Shopify-hosted customer login (KwikPass / theme account page). */
+export const SHOPIFY_KP_ACCOUNT_URL =
+  (import.meta.env.VITE_SHOPIFY_ACCOUNT_LOGIN_URL as string | undefined)?.trim() ||
+  "https://dardgo-6404.myshopify.com/pages/kp-account";
+
+export function redirectToShopifyKpAccount(): void {
+  if (typeof window === "undefined") return;
+  window.location.assign(SHOPIFY_KP_ACCOUNT_URL);
+}
+
 export function isCustomerAccountConfigured(): boolean {
   return Boolean(SHOP_DOMAIN && CLIENT_ID && PUBLIC_APP_URL);
 }

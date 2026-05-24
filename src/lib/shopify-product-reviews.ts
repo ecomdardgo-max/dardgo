@@ -139,6 +139,7 @@ function averageFromList(reviews: ParsedShopifyReview[]): number | null {
 export function parseProductReviewState(
   product: {
     metafields?: unknown;
+    dardgoReviewsMf?: { value?: string | null } | null;
   } | null,
 ): ProductReviewState {
   if (!product) {
@@ -154,10 +155,11 @@ export function parseProductReviewState(
   const ratingMf = map.get("reviews.rating");
   const countMf = map.get("reviews.rating_count");
   const listMf = map.get("custom.dardgo_reviews");
+  const reviewsRaw = listMf?.value ?? product.dardgoReviewsMf?.value ?? undefined;
 
   const aggregateRating = ratingMf ? parseStandardRating(ratingMf.value) : null;
   let totalCount = countMf ? parseRatingCount(countMf.value) : 0;
-  const reviews = parseReviewsJson(listMf?.value);
+  const reviews = parseReviewsJson(reviewsRaw);
 
   if (totalCount === 0 && reviews.length > 0) {
     totalCount = reviews.length;
@@ -178,6 +180,21 @@ export function parseProductReviewState(
       histogram: [5, 4, 3, 2, 1].map((stars) => ({ stars: stars as 5 | 4 | 3 | 2 | 1, count: 0 })),
     };
   }
+
+  return { averageRating, totalCount, reviews, histogram };
+}
+
+/** Prefer metafield reviews; otherwise use live list (e.g. Judge.me API proxy). */
+export function enrichReviewStateWithList(
+  base: ProductReviewState,
+  extraReviews: ParsedShopifyReview[],
+): ProductReviewState {
+  if (base.reviews.length > 0 || extraReviews.length === 0) return base;
+
+  const reviews = extraReviews;
+  const histogram = buildHistogram(reviews);
+  const totalCount = base.totalCount > 0 ? base.totalCount : reviews.length;
+  const averageRating = base.averageRating ?? averageFromList(reviews);
 
   return { averageRating, totalCount, reviews, histogram };
 }

@@ -16,6 +16,9 @@
     "seed:smart-collections": "node scripts/ensure-smart-collections-from-import.mjs",
     "check:shopify-read": "node scripts/check-shopify-admin-read.mjs",
     "ensure:pdp-metafields": "node scripts/ensure-dardgo-pdp-metafield-definitions.mjs",
+    "sync:shopify-files": "node scripts/sync-shopify-files-manifest.mjs",
+    "sync:judgeme-reviews": "node scripts/sync-judgeme-reviews.mjs",
+    "ensure:reviews-storefront": "node scripts/ensure-dardgo-reviews-storefront.mjs",
     "csv:shopify": "node scripts/generate-csv.mjs"
   },
   "dependencies": {

@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Loader2,
   Package,
@@ -34,7 +34,11 @@ import {
   findProductImageIndexForVariant,
   STOREFRONT_PRODUCTS_QUERY,
 } from "@/lib/shopify";
-import { parseProductReviewState } from "@/lib/shopify-product-reviews";
+import {
+  enrichReviewStateWithList,
+  parseProductReviewState,
+} from "@/lib/shopify-product-reviews";
+import { fetchJudgeMeReviewsForProduct } from "@/lib/judgeme-reviews-fetch";
 import { useCartStore } from "@/stores/cartStore";
 import {
   buildShiprocketProductPayload,
@@ -50,9 +54,9 @@ import { ScrollReveal } from "@/components/ScrollReveal";
 import {
   getJudgeMeConfig,
   JudgeMePreviewBadge,
-  JudgeMeReviewWidget,
   useJudgeMeLoader,
 } from "@/components/JudgeMe";
+import { JudgeMeWriteReviewDialog } from "@/components/JudgeMeWriteReviewDialog";
 import { BuyNowShiprocketBar } from "@/components/BuyNowShiprocketBar";
 import { ProductStructuredData } from "@/components/ProductStructuredData";
 import { FDA_STRUCTURED_CLAIM_DISCLAIMER } from "@/lib/compliance";
@@ -360,7 +364,50 @@ function ProductPage() {
     return sum;
   }, [price, fbtCompanions, fbtSelection]);
 
-  const reviewState = useMemo(() => parseProductReviewState(product), [product]);
+  const reviewStateFromMf = useMemo(() => parseProductReviewState(product), [product]);
+  const [liveJudgeMeReviews, setLiveJudgeMeReviews] = useState<
+    ReturnType<typeof parseProductReviewState>["reviews"]
+  >([]);
+
+  const judgemeCfg = useMemo(() => getJudgeMeConfig(), []);
+  const [writeReviewOpen, setWriteReviewOpen] = useState(false);
+
+  const handleWriteReview = () => {
+    if (!product) return;
+    if (judgemeCfg) {
+      setWriteReviewOpen(true);
+      return;
+    }
+    toast.info("Review form is not configured for this store.");
+  };
+
+  const refetchLiveReviews = useCallback(() => {
+    if (!product?.id || !judgemeCfg) return;
+    void fetchJudgeMeReviewsForProduct(product.id).then(setLiveJudgeMeReviews);
+  }, [product?.id, judgemeCfg]);
+
+  useEffect(() => {
+    let cancelled = false;
+    setLiveJudgeMeReviews([]);
+
+    if (!product?.id || !judgemeCfg) {
+      return;
+    }
+    if (reviewStateFromMf.reviews.length > 0) {
+      return;
+    }
+    void fetchJudgeMeReviewsForProduct(product.id).then((reviews) => {
+      if (!cancelled) setLiveJudgeMeReviews(reviews);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [product?.id, judgemeCfg, reviewStateFromMf.reviews.length]);
+
+  const reviewState = useMemo(
+    () => enrichReviewStateWithList(reviewStateFromMf, liveJudgeMeReviews),
+    [reviewStateFromMf, liveJudgeMeReviews],
+  );
   const productImageUrls = useMemo(() => collectProductImageUrlsFromProduct(product), [product]);
   const pdpTabs = useMemo(
     () => resolvePdpTabsFromProduct(product, { imageUrls: productImageUrls }),
@@ -388,7 +435,6 @@ function ProductPage() {
     [reviewState.averageRating],
   );
 
-  const judgemeCfg = useMemo(() => getJudgeMeConfig(), []);
   useJudgeMeLoader(product?.id);
 
   const productFaqJsonLd = useMemo(
@@ -1425,129 +1471,81 @@ function ProductPage() {
           </ScrollReveal>
 
           {/* ===== CUSTOMER REVIEWS ===== */}
-          {judgemeCfg ? (
-            <ScrollReveal className="mt-8 sm:mt-12">
-              <div
-                id="reviews"
-                className="bg-card rounded-2xl border border-border/50 p-4 sm:p-6 lg:p-8 scroll-mt-24"
-              >
-                <div className="flex flex-wrap items-center justify-between gap-2 sm:gap-3 mb-4">
-                  <div className="min-w-0">
-                    <span className="text-eyebrow text-primary">— Judge.me</span>
-                    <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-foreground font-display">
-                      Customer reviews
-                    </h2>
-                  </div>
-                  {product.onlineStoreUrl ? (
-                    <a
-                      href={String(product.onlineStoreUrl)}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 sm:gap-2 px-3.5 sm:px-5 py-2 sm:py-2.5 rounded-full bg-foreground text-background text-[11px] sm:text-sm font-bold uppercase tracking-wider hover:opacity-90 transition flex-shrink-0"
-                    >
-                      <span className="hidden sm:inline">Write a review</span>
-                      <span className="sm:hidden">Write</span>
-                      <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                    </a>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={() =>
-                        toast.info(
-                          "Open this product on your Shopify storefront to leave a review.",
-                        )
-                      }
-                      className="inline-flex items-center gap-1.5 sm:gap-2 px-3.5 sm:px-5 py-2 sm:py-2.5 rounded-full bg-foreground text-background text-[11px] sm:text-sm font-bold uppercase tracking-wider hover:opacity-90 transition flex-shrink-0"
-                    >
-                      <span className="hidden sm:inline">Write a review</span>
-                      <span className="sm:hidden">Write</span>
-                      <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                    </button>
-                  )}
-                </div>
-                <p className="text-[11px] sm:text-xs text-muted-foreground mb-3 leading-relaxed">
-                  Reviews reflect individual experiences only and are not medical endorsements.{" "}
-                  {FDA_STRUCTURED_CLAIM_DISCLAIMER}
-                </p>
-                <p className="text-[11px] sm:text-xs text-muted-foreground mb-4 leading-relaxed">
-                  Widget loads from Judge.me (same reviews as your Shopify theme). Add{" "}
-                  <code className="rounded bg-muted px-1 py-0.5 text-[10px]">
-                    VITE_JUDGEME_PUBLIC_TOKEN
-                  </code>{" "}
-                  in <code className="rounded bg-muted px-1 py-0.5 text-[10px]">.env.local</code> —
-                  token from Judge.me → Settings → Integrations → Developers.
-                </p>
-                <JudgeMeReviewWidget productId={product.id} productTitle={product.title} />
-              </div>
-            </ScrollReveal>
-          ) : (
-            <ScrollReveal className="mt-8 sm:mt-12">
+          <ScrollReveal className="mt-8 sm:mt-12">
               <div
                 id="reviews"
                 className="bg-card rounded-2xl border border-border/50 p-4 sm:p-6 lg:p-8 scroll-mt-24"
               >
                 <div className="flex flex-wrap items-center justify-between gap-2 sm:gap-3 mb-5 sm:mb-6">
                   <div className="min-w-0">
-                    <span className="text-eyebrow text-primary">— Customer reviews</span>
+                    <span className="text-eyebrow text-primary">
+                      — {judgemeCfg ? "Judge.me" : "Customer reviews"}
+                    </span>
                     <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-foreground font-display">
                       Customer reviews
                     </h2>
                   </div>
-                  {product.onlineStoreUrl ? (
-                    <a
-                      href={String(product.onlineStoreUrl)}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 sm:gap-2 px-3.5 sm:px-5 py-2 sm:py-2.5 rounded-full bg-foreground text-background text-[11px] sm:text-sm font-bold uppercase tracking-wider hover:opacity-90 transition flex-shrink-0"
-                    >
-                      <span className="hidden sm:inline">Write a review</span>
-                      <span className="sm:hidden">Write</span>
-                      <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                    </a>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={() =>
-                        toast.info(
-                          "Open this product on your Shopify storefront to leave a review.",
-                        )
-                      }
-                      className="inline-flex items-center gap-1.5 sm:gap-2 px-3.5 sm:px-5 py-2 sm:py-2.5 rounded-full bg-foreground text-background text-[11px] sm:text-sm font-bold uppercase tracking-wider hover:opacity-90 transition flex-shrink-0"
-                    >
-                      <span className="hidden sm:inline">Write a review</span>
-                      <span className="sm:hidden">Write</span>
-                      <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                    </button>
-                  )}
+                  <button
+                    type="button"
+                    onClick={handleWriteReview}
+                    className="inline-flex items-center gap-1.5 sm:gap-2 px-3.5 sm:px-5 py-2 sm:py-2.5 rounded-full bg-foreground text-background text-[11px] sm:text-sm font-bold uppercase tracking-wider hover:opacity-90 transition flex-shrink-0"
+                  >
+                    <span className="hidden sm:inline">Write a review</span>
+                    <span className="sm:hidden">Write</span>
+                    <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                  </button>
                 </div>
 
-                {/* Rating summary — data from Shopify metafields (see shopify-product-reviews.ts) */}
+                <p className="text-[11px] sm:text-xs text-muted-foreground mb-5 leading-relaxed">
+                  Reviews reflect individual experiences only and are not medical endorsements.{" "}
+                  {FDA_STRUCTURED_CLAIM_DISCLAIMER}
+                </p>
+
+                {/* Rating summary — aggregate from Shopify; review text from custom.dardgo_reviews */}
                 <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-8 mb-5 sm:mb-7 pb-5 sm:pb-7 border-b border-border/50">
                   <div className="flex sm:flex-col items-center sm:items-start gap-3 sm:gap-0 flex-shrink-0">
-                    <p className="text-4xl sm:text-6xl font-extrabold text-foreground tabular-nums leading-none">
-                      {reviewState.averageRating != null
-                        ? reviewState.averageRating.toFixed(2)
-                        : "—"}
-                    </p>
-                    <div className="flex flex-col gap-0.5 sm:gap-0 items-start sm:items-start">
-                      <div className="flex items-center gap-0.5 sm:mt-2">
-                        {[1, 2, 3, 4, 5].map((s) => (
-                          <Star
-                            key={s}
-                            className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${
-                              s <= summaryStarFill
-                                ? "text-brand-yellow fill-brand-yellow"
-                                : "text-brand-yellow/40 fill-brand-yellow/40"
-                            }`}
-                          />
-                        ))}
+                    {judgemeCfg ? (
+                      <div className="flex flex-col items-start gap-2">
+                        <JudgeMePreviewBadge productId={product.id} />
+                        {reviewState.averageRating != null && (
+                          <p className="text-2xl sm:text-3xl font-extrabold text-foreground tabular-nums leading-none">
+                            {reviewState.averageRating.toFixed(2)}
+                          </p>
+                        )}
+                        <p className="text-[10px] sm:text-[11px] text-muted-foreground">
+                          {reviewState.totalCount > 0
+                            ? `Based on ${reviewState.totalCount} customer review${reviewState.totalCount === 1 ? "" : "s"}`
+                            : "No reviews yet"}
+                        </p>
                       </div>
-                      <p className="text-[10px] sm:text-[11px] text-muted-foreground mt-0.5 sm:mt-1">
-                        {reviewState.totalCount > 0
-                          ? `Based on ${reviewState.totalCount} customer review${reviewState.totalCount === 1 ? "" : "s"}`
-                          : "No reviews yet"}
-                      </p>
-                    </div>
+                    ) : (
+                      <>
+                        <p className="text-4xl sm:text-6xl font-extrabold text-foreground tabular-nums leading-none">
+                          {reviewState.averageRating != null
+                            ? reviewState.averageRating.toFixed(2)
+                            : "—"}
+                        </p>
+                        <div className="flex flex-col gap-0.5 sm:gap-0 items-start sm:items-start">
+                          <div className="flex items-center gap-0.5 sm:mt-2">
+                            {[1, 2, 3, 4, 5].map((s) => (
+                              <Star
+                                key={s}
+                                className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${
+                                  s <= summaryStarFill
+                                    ? "text-brand-yellow fill-brand-yellow"
+                                    : "text-brand-yellow/40 fill-brand-yellow/40"
+                                }`}
+                              />
+                            ))}
+                          </div>
+                          <p className="text-[10px] sm:text-[11px] text-muted-foreground mt-0.5 sm:mt-1">
+                            {reviewState.totalCount > 0
+                              ? `Based on ${reviewState.totalCount} customer review${reviewState.totalCount === 1 ? "" : "s"}`
+                              : "No reviews yet"}
+                          </p>
+                        </div>
+                      </>
+                    )}
                   </div>
                   <div className="flex-1 space-y-1 sm:space-y-1.5 w-full">
                     {histogramTotal > 0 ? (
@@ -1580,8 +1578,10 @@ function ProductPage() {
                     ) : (
                       <p className="text-[11px] sm:text-xs text-muted-foreground leading-relaxed">
                         {reviewState.totalCount > 0
-                          ? "Star breakdown shows when individual reviews are synced via the custom.dardgo_reviews metafield. Overall score above comes from Shopify."
-                          : "Connect reviews in Shopify (see metafields in Admin) or add a JSON list at custom.dardgo_reviews on the product."}
+                          ? judgemeCfg
+                            ? "Star breakdown appears after you sync Judge.me reviews to custom.dardgo_reviews (npm run sync:judgeme-reviews)."
+                            : "Star breakdown shows when individual reviews are synced via the custom.dardgo_reviews metafield. Overall score above comes from Shopify."
+                          : "Connect reviews in Shopify or add a JSON list at custom.dardgo_reviews on the product."}
                       </p>
                     )}
                   </div>
@@ -1707,40 +1707,50 @@ function ProductPage() {
                         </p>
                       );
                     }
-                    if (reviewState.totalCount > 0 && product.onlineStoreUrl) {
+                    if (reviewState.totalCount > 0) {
                       return (
                         <p className="text-center text-xs sm:text-sm text-muted-foreground py-8 leading-relaxed px-2">
-                          Shopify has {reviewState.totalCount} rating
-                          {reviewState.totalCount === 1 ? "" : "s"} for this product.{" "}
-                          <a
-                            href={String(product.onlineStoreUrl)}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="font-semibold text-primary underline-offset-4 hover:underline"
-                          >
-                            Open the storefront listing
-                          </a>{" "}
-                          to read full reviews, or sync review text via the{" "}
+                          {reviewState.totalCount} rating
+                          {reviewState.totalCount === 1 ? "" : "s"} on file, but review text is not
+                          synced yet. Run{" "}
+                          <code className="rounded bg-muted px-1 py-0.5 text-[10px]">
+                            npm run sync:judgeme-reviews
+                          </code>{" "}
+                          (needs{" "}
+                          <code className="rounded bg-muted px-1 py-0.5 text-[10px]">
+                            JUDGEME_API_TOKEN
+                          </code>
+                          ) to fill{" "}
                           <code className="rounded bg-muted px-1 py-0.5 text-[10px]">
                             custom.dardgo_reviews
-                          </code>{" "}
-                          metafield.
+                          </code>
+                          .
                         </p>
                       );
                     }
                     return (
                       <p className="text-center text-xs sm:text-sm text-muted-foreground py-8">
-                        No reviews yet. Add reviews in Shopify or populate the{" "}
+                        No reviews yet. Add reviews in Judge.me, then run{" "}
                         <code className="rounded bg-muted px-1 py-0.5 text-[10px]">
-                          custom.dardgo_reviews
-                        </code>{" "}
-                        JSON metafield on this product.
+                          npm run sync:judgeme-reviews
+                        </code>
+                        .
                       </p>
                     );
                   })()}
                 </div>
+
               </div>
             </ScrollReveal>
+
+          {judgemeCfg && product && (
+            <JudgeMeWriteReviewDialog
+              open={writeReviewOpen}
+              onOpenChange={setWriteReviewOpen}
+              productId={product.id}
+              productTitle={product.title}
+              onSubmitted={refetchLiveReviews}
+            />
           )}
 
           {/* ===== RECOMMENDED PRODUCTS ===== */}

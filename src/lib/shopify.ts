@@ -509,6 +509,10 @@ export const STOREFRONT_PRODUCT_BY_HANDLE_QUERY = `
         value
         type
       }
+      dardgoReviewsMf: metafield(namespace: "custom", key: "dardgo_reviews") {
+        value
+        type
+      }
       metafields(
         identifiers: [
           { namespace: "reviews", key: "rating" },

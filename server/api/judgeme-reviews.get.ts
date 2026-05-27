@@ -1,9 +1,6 @@
 /**
  * Proxy Judge.me reviews for headless PDP (private token stays server-side).
- * GET /api/judgeme-reviews?externalId=9221650841850
- *
- * Note: Judge.me's `product_external_id` query param often returns ALL shop reviews.
- * We resolve the Judge.me internal product id first, then filter by product_external_id.
+ * GET /api/judgeme-reviews?externalId=9221650841850&page=1&perPage=10
  */
 import { defineEventHandler, getQuery, setResponseStatus } from "nitro/h3";
 
@@ -54,6 +51,12 @@ function reviewMatchesProduct(r: JudgeMeReview, externalId: string): boolean {
   return String(r.product_external_id) === externalId;
 }
 
+function isPublishedReview(r: JudgeMeReview): boolean {
+  if (!r || r.hidden) return false;
+  if (r.curated === "spam") return false;
+  return true;
+}
+
 async function fetchJudgeMeProductId(
   shop: string,
   token: string,
@@ -72,7 +75,7 @@ async function fetchJudgeMeProductId(
   return typeof id === "number" && Number.isFinite(id) ? id : null;
 }
 
-async function fetchReviewsForProduct(
+async function fetchAllReviewsForProduct(
   shop: string,
   token: string,
   externalId: string,
@@ -81,7 +84,7 @@ async function fetchReviewsForProduct(
   const all: JudgeMeReview[] = [];
   let page = 1;
 
-  while (page <= 20) {
+  while (page <= 30) {
     const params = new URLSearchParams({
       shop_domain: shop,
       page: String(page),
@@ -105,7 +108,7 @@ async function fetchReviewsForProduct(
     const batch = Array.isArray(data.reviews) ? data.reviews : [];
     all.push(
       ...batch.filter(
-        (r) => r && !r.hidden && r.curated !== "spam" && reviewMatchesProduct(r, externalId),
+        (r) => isPublishedReview(r) && reviewMatchesProduct(r, externalId),
       ),
     );
     if (batch.length < 100) break;
@@ -118,9 +121,13 @@ async function fetchReviewsForProduct(
 export default defineEventHandler(async (event) => {
   const query = getQuery(event);
   const externalId = String(query.externalId ?? "").trim();
+  const loadAll = String(query.loadAll ?? "") === "1";
+  const page = Math.max(1, parseInt(String(query.page ?? "1"), 10) || 1);
+  const perPage = Math.min(100, Math.max(5, parseInt(String(query.perPage ?? "10"), 10) || 10));
+
   if (!externalId) {
     setResponseStatus(event, 400);
-    return { error: "Missing externalId", reviews: [] };
+    return { error: "Missing externalId", reviews: [], total: 0, page: 1, perPage, totalPages: 0 };
   }
 
   const shop =
@@ -131,18 +138,37 @@ export default defineEventHandler(async (event) => {
 
   if (!shop || !token) {
     setResponseStatus(event, 503);
-    return { error: "Judge.me not configured on server", reviews: [] };
+    return { error: "Judge.me not configured on server", reviews: [], total: 0, page: 1, perPage, totalPages: 0 };
   }
 
   try {
     const judgeProductId = await fetchJudgeMeProductId(shop, token, externalId);
-    const raw = await fetchReviewsForProduct(shop, token, externalId, judgeProductId);
-    const reviews = raw.map(mapReview).filter((r): r is ParsedShopifyReview => r != null);
+    const raw = await fetchAllReviewsForProduct(shop, token, externalId, judgeProductId);
+    const mapped = raw
+      .map(mapReview)
+      .filter((r): r is ParsedShopifyReview => r != null)
+      .sort((a, b) => {
+        const da = Date.parse(a.date);
+        const db = Date.parse(b.date);
+        if (Number.isFinite(da) && Number.isFinite(db)) return db - da;
+        return String(b.date).localeCompare(String(a.date));
+      });
 
-    return { reviews };
+    const total = mapped.length;
+
+    if (loadAll) {
+      return { reviews: mapped, total, page: 1, perPage: total, totalPages: total > 0 ? 1 : 0 };
+    }
+
+    const totalPages = total > 0 ? Math.ceil(total / perPage) : 0;
+    const safePage = totalPages > 0 ? Math.min(page, totalPages) : 1;
+    const start = (safePage - 1) * perPage;
+    const reviews = mapped.slice(start, start + perPage);
+
+    return { reviews, total, page: safePage, perPage, totalPages };
   } catch (err) {
     const message = err instanceof Error ? err.message : "Judge.me fetch failed";
     setResponseStatus(event, 500);
-    return { error: message, reviews: [] };
+    return { error: message, reviews: [], total: 0, page: 1, perPage, totalPages: 0 };
   }
 });

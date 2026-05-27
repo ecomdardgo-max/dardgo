@@ -189,11 +189,12 @@ export function enrichReviewStateWithList(
   base: ProductReviewState,
   extraReviews: ParsedShopifyReview[],
 ): ProductReviewState {
-  if (base.reviews.length > 0 || extraReviews.length === 0) return base;
+  if (base.reviews.length > 0) return base;
+  if (extraReviews.length === 0) return base;
 
   const reviews = extraReviews;
   const histogram = buildHistogram(reviews);
-  const totalCount = base.totalCount > 0 ? base.totalCount : reviews.length;
+  const totalCount = Math.max(base.totalCount, reviews.length);
   const averageRating = base.averageRating ?? averageFromList(reviews);
 
   return { averageRating, totalCount, reviews, histogram };

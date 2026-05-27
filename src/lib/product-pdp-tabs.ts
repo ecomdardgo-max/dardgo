@@ -9,7 +9,10 @@
  *
  * **Admin “Product metafield definitions” (common setup)** — namespace `custom`, Storefront readable:
  *   - `key_ingredients` — multi-line: `🟢 Ingredient name – description` per line (optional legacy `image.jpg|` prefix ignored)
- *     Tab hero image: gallery image with alt exactly `key-ingredients` (or filename hint), else 2nd gallery image
+ *     Tab hero image (product gallery alt text / filename):
+ *       - Desktop: `key-ingredients-desktop` (or `key-ingredients` fallback)
+ *       - Mobile: `key-ingredients-mobile` (or `key-ingredients` fallback)
+ *       - Else 2nd gallery image
  *   - `how_to_use` — rich text → “How to Use” with Shopify formatting (lists, bold, headings)
  *   - `direction` — rich text → appended to “How to Use” when present
  *   - `suitable_for` — rich text → “Suitable for” bullets
@@ -546,6 +549,13 @@ export function collectProductImageUrlsFromProduct(
 
 /** Dedicated alt merchants set for the composite ingredients image (not “herbal ingredients” in packshot copy). */
 const KEY_INGREDIENTS_ALT_RE = /^key[-_\s]?ingredients?$/i;
+const KEY_INGREDIENTS_DESKTOP_ALT_RE = /^key[-_\s]?ingredients?[-_\s]?desktop$/i;
+const KEY_INGREDIENTS_MOBILE_ALT_RE = /^key[-_\s]?ingredients?[-_\s]?mobile$/i;
+
+export type KeyIngredientsHeroImages = {
+  desktop: { url: string; altText: string };
+  mobile: { url: string; altText: string };
+};
 const HOW_TO_USE_ALT_RE = /^how[-_\s]?to[-_\s]?use$/i;
 
 type GalleryImageNode = { url: string; altText?: string | null };
@@ -563,7 +573,24 @@ function matchesKeyIngredientsHeroHint(img: GalleryImageNode): boolean {
   if (KEY_INGREDIENTS_ALT_RE.test(alt)) return true;
 
   const file = imageUrlBasename(img.url);
+  if (/(?:^|[_.-])key[-_]?ingredients?[-_]?(?:desktop|mobile)(?:[_.-]|$)/i.test(file)) {
+    return false;
+  }
   return /(?:^|[_.-])key[-_]?ingredients?(?:[_.-]|$)/i.test(file);
+}
+
+function matchesKeyIngredientsDesktopHint(img: GalleryImageNode): boolean {
+  const alt = (img.altText ?? "").trim();
+  if (KEY_INGREDIENTS_DESKTOP_ALT_RE.test(alt)) return true;
+  const file = imageUrlBasename(img.url);
+  return /(?:^|[_.-])key[-_]?ingredients?[-_]?desktop(?:[_.-]|$)/i.test(file);
+}
+
+function matchesKeyIngredientsMobileHint(img: GalleryImageNode): boolean {
+  const alt = (img.altText ?? "").trim();
+  if (KEY_INGREDIENTS_MOBILE_ALT_RE.test(alt)) return true;
+  const file = imageUrlBasename(img.url);
+  return /(?:^|[_.-])key[-_]?ingredients?[-_]?mobile(?:[_.-]|$)/i.test(file);
 }
 
 function matchesHowToUseHeroHint(img: GalleryImageNode): boolean {
@@ -594,22 +621,33 @@ export function collectProductGalleryImages(
 }
 
 /**
- * Single composite “all ingredients” image for the Key Ingredients tab — from product gallery only.
- * Picks alt/filename match, else 2nd gallery image, else first.
+ * Composite “all ingredients” images for the Key Ingredients tab — from product gallery.
+ * Desktop and mobile can be different files (alt `key-ingredients-desktop` / `key-ingredients-mobile`).
  */
 export function pickKeyIngredientsHeroImage(
   product: Parameters<typeof collectProductGalleryImages>[0],
   productTitle?: string,
-): { url: string; altText: string } | null {
+): KeyIngredientsHeroImages | null {
   const gallery = collectProductGalleryImages(product);
   if (!gallery.length) return null;
 
-  const hinted = gallery.find(matchesKeyIngredientsHeroHint);
-  const picked = hinted ?? gallery[1] ?? gallery[0];
   const title = productTitle?.trim() || "Product";
+  const shared = gallery.find(matchesKeyIngredientsHeroHint);
+
+  const desktopPicked =
+    gallery.find(matchesKeyIngredientsDesktopHint) ?? shared ?? gallery[1] ?? gallery[0];
+  const mobilePicked =
+    gallery.find(matchesKeyIngredientsMobileHint) ?? shared ?? gallery[1] ?? gallery[0];
+
   return {
-    url: picked.url,
-    altText: picked.altText?.trim() || `Key ingredients – ${title}`,
+    desktop: {
+      url: desktopPicked.url,
+      altText: desktopPicked.altText?.trim() || `Key ingredients – ${title}`,
+    },
+    mobile: {
+      url: mobilePicked.url,
+      altText: mobilePicked.altText?.trim() || `Key ingredients – ${title}`,
+    },
   };
 }
 

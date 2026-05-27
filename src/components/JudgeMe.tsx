@@ -15,9 +15,46 @@ import { useEffect } from "react";
 declare global {
   interface Window {
     jdgm?: Record<string, string>;
+    jdgmSettings?: Record<string, unknown>;
     jdgm_preloader?: () => void;
     jdgmCacheServer?: { reloadAll?: () => void };
   }
+}
+
+let judgeMeSettingsPromise: Promise<void> | null = null;
+
+/** Judge.me shopify_v2.js requires jdgmSettings before loader scripts run. */
+export async function ensureJudgeMeSettingsLoaded(): Promise<void> {
+  if (typeof document === "undefined") return;
+  if (document.querySelector(".jdgm-settings-script") || window.jdgmSettings) return;
+
+  if (!judgeMeSettingsPromise) {
+    judgeMeSettingsPromise = (async () => {
+      const cfg = getJudgeMeConfig();
+      if (!cfg) {
+        window.jdgmSettings = window.jdgmSettings ?? {};
+        return;
+      }
+
+      try {
+        const params = new URLSearchParams({
+          shop_domain: cfg.shopDomain,
+          api_token: cfg.publicToken,
+        });
+        const res = await fetch(`https://api.judge.me/api/v1/widgets/settings?${params}`);
+        if (res.ok) {
+          const data = (await res.json()) as { settings?: string };
+          if (data.settings) injectJudgeMeSettings(data.settings);
+        }
+      } catch {
+        /* noop */
+      }
+
+      window.jdgmSettings = window.jdgmSettings ?? {};
+    })();
+  }
+
+  await judgeMeSettingsPromise;
 }
 
 export function shopifyGidToProductNumericId(gid: string): string {
@@ -45,9 +82,11 @@ export function getJudgeMeConfig(): JudgeMeConfig | null {
   return { shopDomain, publicToken, cdnHost };
 }
 
-export function ensureJudgeMeLoader(): void {
+export async function ensureJudgeMeLoader(): Promise<void> {
   const cfg = getJudgeMeConfig();
   if (!cfg || typeof document === "undefined") return;
+
+  await ensureJudgeMeSettingsLoaded();
 
   window.jdgm = {
     ...(window.jdgm || {}),
@@ -146,7 +185,7 @@ export async function mountJudgeMeWriteReviewWidget(
   const safeTitle = productTitle.replace(/"/g, "&quot;");
   container.innerHTML = `<div class="jdgm-widget jdgm-review-widget" data-id="${externalId}" data-product-title="${safeTitle}">${data.widget}</div>`;
 
-  ensureJudgeMeLoader();
+  await ensureJudgeMeLoader();
   await waitForJudgeMeReady();
   reloadJudgeMeWidgets();
 
@@ -227,8 +266,16 @@ export function useJudgeMeLoader(productId: string | undefined): void {
     if (!token || !productId) return;
     const cfg = getJudgeMeConfig();
     if (!cfg) return;
-    ensureJudgeMeLoader();
-    const t = window.setTimeout(() => reloadJudgeMeWidgets(), 100);
-    return () => window.clearTimeout(t);
+
+    let cancelled = false;
+    void (async () => {
+      await ensureJudgeMeLoader();
+      if (cancelled) return;
+      window.setTimeout(() => reloadJudgeMeWidgets(), 100);
+    })();
+
+    return () => {
+      cancelled = true;
+    };
   }, [productId, token]);
 }

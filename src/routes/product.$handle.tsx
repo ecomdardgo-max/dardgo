@@ -51,6 +51,7 @@ import { Footer } from "@/components/Footer";
 import { WhatsAppFloat } from "@/components/WhatsAppFloat";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
 import { ScrollReveal } from "@/components/ScrollReveal";
+import { Button } from "@/components/ui/button";
 import {
   getJudgeMeConfig,
   JudgeMePreviewBadge,
@@ -137,6 +138,8 @@ function ProductPage() {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [reviewFilter, setReviewFilter] = useState<number | "all">("all");
   const [reviewSort, setReviewSort] = useState<"recent" | "helpful">("recent");
+  const [reviewPage, setReviewPage] = useState(1);
+  const [reviewsLoading, setReviewsLoading] = useState(false);
   const [fbtSelection, setFbtSelection] = useState<Record<string, boolean>>({});
   const [showStickyCta, setShowStickyCta] = useState(false);
   const ctaRef = useRef<HTMLDivElement | null>(null);
@@ -382,32 +385,73 @@ function ProductPage() {
   };
 
   const refetchLiveReviews = useCallback(() => {
-    if (!product?.id || !judgemeCfg) return;
-    void fetchJudgeMeReviewsForProduct(product.id).then(setLiveJudgeMeReviews);
-  }, [product?.id, judgemeCfg]);
+    if (!product?.id) return;
+    setReviewsLoading(true);
+    void fetchJudgeMeReviewsForProduct(product.id, { loadAll: true }).then((data) => {
+      setLiveJudgeMeReviews(data.reviews);
+      setReviewsLoading(false);
+    });
+  }, [product?.id]);
 
   useEffect(() => {
     let cancelled = false;
     setLiveJudgeMeReviews([]);
+    setReviewPage(1);
+    setReviewsLoading(false);
 
-    if (!product?.id || !judgemeCfg) {
-      return;
-    }
-    if (reviewStateFromMf.reviews.length > 0) {
-      return;
-    }
-    void fetchJudgeMeReviewsForProduct(product.id).then((reviews) => {
-      if (!cancelled) setLiveJudgeMeReviews(reviews);
-    });
+    if (!product?.id) return;
+    if (reviewStateFromMf.reviews.length > 0) return;
+
+    setReviewsLoading(true);
+    void fetchJudgeMeReviewsForProduct(product.id, { loadAll: true })
+      .then((data) => {
+        if (!cancelled) {
+          setLiveJudgeMeReviews(data.reviews);
+          setReviewsLoading(false);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setReviewsLoading(false);
+      });
+
     return () => {
       cancelled = true;
     };
-  }, [product?.id, judgemeCfg, reviewStateFromMf.reviews.length]);
+  }, [product?.id, reviewStateFromMf.reviews.length]);
 
   const reviewState = useMemo(
     () => enrichReviewStateWithList(reviewStateFromMf, liveJudgeMeReviews),
     [reviewStateFromMf, liveJudgeMeReviews],
   );
+
+  const REVIEWS_PER_PAGE = 10;
+
+  const filteredReviews = useMemo(() => {
+    return reviewState.reviews
+      .filter((r) => reviewFilter === "all" || r.rating === reviewFilter)
+      .sort((a, b) => {
+        if (reviewSort === "helpful") return b.helpful - a.helpful;
+        const da = Date.parse(a.date);
+        const db = Date.parse(b.date);
+        if (Number.isFinite(da) && Number.isFinite(db)) return db - da;
+        return String(b.date).localeCompare(String(a.date));
+      });
+  }, [reviewState.reviews, reviewFilter, reviewSort]);
+
+  const reviewTotalPages = Math.max(1, Math.ceil(filteredReviews.length / REVIEWS_PER_PAGE));
+
+  const pagedReviews = useMemo(() => {
+    const start = (reviewPage - 1) * REVIEWS_PER_PAGE;
+    return filteredReviews.slice(start, start + REVIEWS_PER_PAGE);
+  }, [filteredReviews, reviewPage]);
+
+  useEffect(() => {
+    setReviewPage(1);
+  }, [product?.id, reviewFilter, reviewSort]);
+
+  useEffect(() => {
+    if (reviewPage > reviewTotalPages) setReviewPage(reviewTotalPages);
+  }, [reviewPage, reviewTotalPages]);
   const productImageUrls = useMemo(() => collectProductImageUrlsFromProduct(product), [product]);
   const pdpTabs = useMemo(
     () => resolvePdpTabsFromProduct(product, { imageUrls: productImageUrls }),
@@ -765,39 +809,43 @@ function ProductPage() {
                 <h1 className="text-xl min-[400px]:text-[22px] sm:text-2xl lg:text-3xl font-bold text-foreground mb-2 font-display leading-snug break-words hyphens-auto">
                   {product.title}
                 </h1>
-                <div className="flex flex-wrap items-center gap-x-3 gap-y-2 mb-4">
-                  {judgemeCfg ? (
-                    <JudgeMePreviewBadge productId={product.id} />
-                  ) : (
-                    <div className="flex items-center gap-0.5">
-                      {[1, 2, 3, 4, 5].map((s) => (
-                        <Star
-                          key={s}
-                          className={`w-4 h-4 ${
-                            s <= summaryStarFill
-                              ? "text-brand-yellow fill-brand-yellow"
-                              : "text-brand-yellow/40 fill-brand-yellow/40"
-                          }`}
-                        />
-                      ))}
-                    </div>
-                  )}
-                  {!judgemeCfg && (
-                    <span className="text-sm text-primary font-semibold tabular-nums">
-                      {reviewState.averageRating != null
-                        ? reviewState.averageRating.toFixed(2)
-                        : "—"}
-                    </span>
-                  )}
+                <div className="flex flex-wrap items-center gap-x-2 sm:gap-x-3 gap-y-1.5 mb-4">
+                  {reviewState.averageRating != null ? (
+                    <>
+                      <div
+                        className="flex items-center gap-0.5"
+                        aria-label={`${reviewState.averageRating.toFixed(2)} out of 5 stars`}
+                      >
+                        {[1, 2, 3, 4, 5].map((s) => (
+                          <Star
+                            key={s}
+                            className={`w-4 h-4 sm:w-[18px] sm:h-[18px] ${
+                              s <= summaryStarFill
+                                ? "text-brand-yellow fill-brand-yellow"
+                                : "text-brand-yellow/40 fill-brand-yellow/40"
+                            }`}
+                          />
+                        ))}
+                      </div>
+                      <span className="text-sm sm:text-base font-bold text-foreground tabular-nums">
+                        {reviewState.averageRating.toFixed(2)}
+                      </span>
+                    </>
+                  ) : reviewsLoading ? (
+                    <span className="text-xs text-muted-foreground">Loading rating…</span>
+                  ) : null}
+                  <span className="text-muted-foreground/60 hidden sm:inline" aria-hidden>
+                    ·
+                  </span>
                   <a
                     href="#reviews"
-                    className="text-xs text-muted-foreground hover:text-primary underline-offset-4 hover:underline"
+                    className="text-xs sm:text-sm text-muted-foreground hover:text-primary underline-offset-4 hover:underline"
                   >
-                    {judgemeCfg
-                      ? "(Reviews below)"
-                      : reviewState.totalCount > 0
-                        ? `(${reviewState.totalCount} review${reviewState.totalCount === 1 ? "" : "s"})`
-                        : "(No reviews yet)"}
+                    {reviewState.totalCount > 0
+                      ? `${reviewState.totalCount} review${reviewState.totalCount === 1 ? "" : "s"}`
+                      : reviewsLoading
+                        ? "Loading reviews…"
+                        : "No reviews yet"}
                   </a>
                 </div>
 
@@ -1245,12 +1293,20 @@ function ProductPage() {
                         <div className="flex justify-center">
                           <div className="w-fit max-w-full rounded-2xl overflow-hidden border border-primary/15 bg-primary/5 shadow-sm">
                             <img
-                              src={keyIngredientsHero.url}
-                              alt={keyIngredientsHero.altText}
-                              className="block w-auto max-w-full h-auto max-h-[min(70vh,520px)] bg-background"
+                              src={keyIngredientsHero.desktop.url}
+                              alt={keyIngredientsHero.desktop.altText}
+                              className="hidden lg:block w-auto max-w-full h-auto max-h-[min(70vh,560px)] bg-background"
                               loading="lazy"
-                              width={1200}
-                              height={800}
+                              width={1400}
+                              height={900}
+                            />
+                            <img
+                              src={keyIngredientsHero.mobile.url}
+                              alt={keyIngredientsHero.mobile.altText}
+                              className="block lg:hidden w-auto max-w-full h-auto max-h-[min(55vh,420px)] bg-background"
+                              loading="lazy"
+                              width={800}
+                              height={1200}
                             />
                           </div>
                         </div>
@@ -1626,18 +1682,19 @@ function ProductPage() {
                   </span>
                 </div>
 
-                {/* Individual reviews — from Shopify custom.dardgo_reviews JSON when present */}
+                {/* Individual reviews — Judge.me API or custom.dardgo_reviews metafield */}
                 <div className="space-y-3 sm:space-y-5">
                   {(() => {
-                    const list = reviewState.reviews
-                      .filter((r) => reviewFilter === "all" || r.rating === reviewFilter)
-                      .sort((a, b) => {
-                        if (reviewSort === "helpful") return b.helpful - a.helpful;
-                        const da = Date.parse(a.date);
-                        const db = Date.parse(b.date);
-                        if (Number.isFinite(da) && Number.isFinite(db)) return db - da;
-                        return String(b.date).localeCompare(String(a.date));
-                      });
+                    if (reviewsLoading) {
+                      return (
+                        <div className="flex flex-col items-center justify-center gap-3 py-12 text-muted-foreground">
+                          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                          <p className="text-sm">Loading reviews…</p>
+                        </div>
+                      );
+                    }
+
+                    const list = pagedReviews;
                     if (list.length > 0) {
                       return list.map((review, i) => (
                         <motion.div
@@ -1700,7 +1757,7 @@ function ProductPage() {
                         </motion.div>
                       ));
                     }
-                    if (reviewState.reviews.length > 0) {
+                    if (reviewState.reviews.length > 0 && filteredReviews.length === 0) {
                       return (
                         <p className="text-center text-xs sm:text-sm text-muted-foreground py-8">
                           No reviews match this filter yet.
@@ -1711,34 +1768,58 @@ function ProductPage() {
                       return (
                         <p className="text-center text-xs sm:text-sm text-muted-foreground py-8 leading-relaxed px-2">
                           {reviewState.totalCount} rating
-                          {reviewState.totalCount === 1 ? "" : "s"} on file, but review text is not
-                          synced yet. Run{" "}
-                          <code className="rounded bg-muted px-1 py-0.5 text-[10px]">
-                            npm run sync:judgeme-reviews
-                          </code>{" "}
-                          (needs{" "}
+                          {reviewState.totalCount === 1 ? "" : "s"} on file, but review text could
+                          not be loaded. Check{" "}
                           <code className="rounded bg-muted px-1 py-0.5 text-[10px]">
                             JUDGEME_API_TOKEN
-                          </code>
-                          ) to fill{" "}
-                          <code className="rounded bg-muted px-1 py-0.5 text-[10px]">
-                            custom.dardgo_reviews
-                          </code>
-                          .
+                          </code>{" "}
+                          in <code className="rounded bg-muted px-1 py-0.5 text-[10px]">.env.local</code>{" "}
+                          and restart the dev server.
                         </p>
                       );
                     }
                     return (
                       <p className="text-center text-xs sm:text-sm text-muted-foreground py-8">
-                        No reviews yet. Add reviews in Judge.me, then run{" "}
-                        <code className="rounded bg-muted px-1 py-0.5 text-[10px]">
-                          npm run sync:judgeme-reviews
-                        </code>
-                        .
+                        No reviews yet. Customers can leave a review using the button above.
                       </p>
                     );
                   })()}
                 </div>
+
+                {!reviewsLoading && filteredReviews.length > REVIEWS_PER_PAGE ? (
+                  <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-4 border-t border-border/40">
+                    <p className="text-[11px] sm:text-xs text-muted-foreground">
+                      Showing {(reviewPage - 1) * REVIEWS_PER_PAGE + 1}–
+                      {Math.min(reviewPage * REVIEWS_PER_PAGE, filteredReviews.length)} of{" "}
+                      {filteredReviews.length} review{filteredReviews.length === 1 ? "" : "s"}
+                    </p>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="rounded-full h-8 px-3 text-xs"
+                        disabled={reviewPage <= 1}
+                        onClick={() => setReviewPage((p) => Math.max(1, p - 1))}
+                      >
+                        Previous
+                      </Button>
+                      <span className="text-xs font-medium tabular-nums px-1">
+                        {reviewPage} / {reviewTotalPages}
+                      </span>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="rounded-full h-8 px-3 text-xs"
+                        disabled={reviewPage >= reviewTotalPages}
+                        onClick={() => setReviewPage((p) => Math.min(reviewTotalPages, p + 1))}
+                      >
+                        Next
+                      </Button>
+                    </div>
+                  </div>
+                ) : null}
 
               </div>
             </ScrollReveal>

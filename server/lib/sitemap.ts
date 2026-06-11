@@ -206,7 +206,7 @@ export async function buildSitemapUrls(): Promise<SitemapUrl[]> {
   return urls;
 }
 
-export function buildSitemapXml(urls: SitemapUrl[]): string {
+function serializeSitemapXml(urls: SitemapUrl[]): string {
   const body = urls
     .map((u) => {
       const parts = [`    <loc>${escapeXml(u.loc)}</loc>`];
@@ -222,7 +222,7 @@ export function buildSitemapXml(urls: SitemapUrl[]): string {
 
 export async function buildSitemapXml(): Promise<string> {
   const urls = await buildSitemapUrls();
-  return buildSitemapXml(urls);
+  return serializeSitemapXml(urls);
 }
 
 export function buildRobotsTxt(): string {

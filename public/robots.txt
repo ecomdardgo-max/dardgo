@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /cart
+Disallow: /checkout
+Disallow: /account
+Disallow: /account/callback
+
+Sitemap: https://www.dardgo.in/sitemap.xml

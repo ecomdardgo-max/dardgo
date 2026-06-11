@@ -27,6 +27,7 @@ import {
   ChevronRight,
   BadgeCheck,
   ZoomIn,
+  ShoppingCart,
 } from "lucide-react";
 import {
   storefrontApiRequest,
@@ -253,6 +254,25 @@ function ProductPage() {
       selectedOptions: variant.selectedOptions || [],
     });
     toast.success("Added to cart!", { description: product.title });
+  };
+
+  const handleRecommendedAddToCart = async (p: any, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const variantNode = p.variants?.edges?.[0]?.node;
+    if (!variantNode?.availableForSale) {
+      toast.error("Out of stock");
+      return;
+    }
+    await addItem({
+      product: { node: p },
+      variantId: variantNode.id,
+      variantTitle: variantNode.title,
+      price: variantNode.price,
+      quantity: 1,
+      selectedOptions: variantNode.selectedOptions || [],
+    });
+    toast.success("Added to cart!", { description: p.title });
   };
 
   const handleBuyNow = async () => {
@@ -1867,6 +1887,7 @@ function ProductPage() {
                     pCompare && pCompare > pPrice
                       ? Math.round(((pCompare - pPrice) / pCompare) * 100)
                       : 0;
+                  const pSoldOut = variantNode ? !variantNode.availableForSale : false;
                   return (
                     <Link
                       key={p.id}
@@ -1891,6 +1912,13 @@ function ProductPage() {
                             {pDiscount}% OFF
                           </span>
                         )}
+                        {pSoldOut && (
+                          <div className="absolute inset-0 flex items-center justify-center bg-foreground/40">
+                            <span className="rounded-full bg-white px-2 py-0.5 text-[10px] font-bold">
+                              Sold out
+                            </span>
+                          </div>
+                        )}
                       </div>
                       <div className="flex min-h-0 flex-1 flex-col p-2.5 sm:p-3.5">
                         <p className="text-[9px] font-semibold uppercase tracking-wide text-muted-foreground mb-1">
@@ -1902,15 +1930,31 @@ function ProductPage() {
                         >
                           {p.title}
                         </h3>
-                        <div className="mt-auto flex flex-wrap items-baseline gap-1.5 sm:gap-2 pt-1">
-                          <p className="text-[13px] sm:text-base font-bold text-foreground">
-                            ₹{pPrice.toFixed(0)}
-                          </p>
-                          {pCompare && pCompare > pPrice && (
-                            <p className="text-[10px] sm:text-[11px] text-muted-foreground line-through">
-                              ₹{pCompare.toFixed(0)}
+                        <div className="mt-auto flex items-end justify-between gap-2 border-t border-border/40 pt-2">
+                          <div className="min-w-0">
+                            <p className="text-[13px] sm:text-base font-bold text-foreground">
+                              ₹{pPrice.toFixed(0)}
                             </p>
-                          )}
+                            {pCompare && pCompare > pPrice && (
+                              <p className="text-[10px] sm:text-[11px] text-muted-foreground line-through">
+                                ₹{pCompare.toFixed(0)}
+                              </p>
+                            )}
+                          </div>
+                          <button
+                            type="button"
+                            onClick={(e) => handleRecommendedAddToCart(p, e)}
+                            disabled={isLoading || pSoldOut}
+                            className="inline-flex shrink-0 items-center gap-1 rounded-lg bg-primary px-2 py-1.5 text-[10px] font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50 sm:gap-1.5 sm:px-3 sm:py-2 sm:text-[11px]"
+                          >
+                            {isLoading ? (
+                              <Loader2 className="h-3 w-3 animate-spin" />
+                            ) : (
+                              <ShoppingCart className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                            )}
+                            <span className="hidden sm:inline">Add to cart</span>
+                            <span className="sm:hidden">Add</span>
+                          </button>
                         </div>
                       </div>
                     </Link>

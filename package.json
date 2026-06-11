@@ -19,7 +19,8 @@
     "sync:shopify-files": "node scripts/sync-shopify-files-manifest.mjs",
     "sync:judgeme-reviews": "node scripts/sync-judgeme-reviews.mjs",
     "ensure:reviews-storefront": "node scripts/ensure-dardgo-reviews-storefront.mjs",
-    "csv:shopify": "node scripts/generate-csv.mjs"
+    "csv:shopify": "node scripts/generate-csv.mjs",
+    "generate:sitemap": "node scripts/generate-sitemap.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

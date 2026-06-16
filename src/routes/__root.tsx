@@ -6,7 +6,9 @@ import { ScrollProgress } from "@/components/ScrollProgress";
 import { PwaInstallPrompt } from "@/components/PwaInstallPrompt";
 import { SiteStructuredData } from "@/components/SiteStructuredData";
 import { ShiprocketCheckoutBootstrap } from "@/components/ShiprocketCheckoutBootstrap";
+import { MetaPixel } from "@/components/MetaPixel";
 import { DEFAULT_META_DESCRIPTION, DEFAULT_PAGE_TITLE } from "@/lib/compliance";
+import { isMetaPixelEnabled, META_PIXEL_ID } from "@/lib/meta-pixel";
 import appCss from "../styles.css?url";
 
 function NotFoundComponent() {
@@ -87,6 +89,17 @@ function RootShell({ children }: { children: React.ReactNode }) {
     <html lang="en">
       <head>
         <HeadContent />
+        {isMetaPixelEnabled() ? (
+          <noscript>
+            <img
+              height="1"
+              width="1"
+              style={{ display: "none" }}
+              src={`https://www.facebook.com/tr?id=${META_PIXEL_ID}&ev=PageView&noscript=1`}
+              alt=""
+            />
+          </noscript>
+        ) : null}
       </head>
       <body>
         {children}
@@ -101,6 +114,7 @@ function RootComponent() {
   return (
     <>
       <ShiprocketCheckoutBootstrap />
+      <MetaPixel />
       <SiteStructuredData />
       <SmoothScrollProvider />
       <ScrollProgress />

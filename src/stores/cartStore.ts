@@ -10,6 +10,7 @@ import {
   updateShopifyCartLine,
   removeLineFromShopifyCart,
 } from "@/lib/shopify";
+import { trackMetaAddToCart } from "@/lib/meta-pixel";
 
 export type { CartItem, ShopifyProduct };
 
@@ -49,6 +50,7 @@ export const useCartStore = create<CartStore>()(
                 checkoutUrl: result.checkoutUrl,
                 items: [{ ...item, lineId: result.lineId }],
               });
+              trackMetaAddToCart(item);
             }
           } else if (existingItem) {
             const newQuantity = existingItem.quantity + item.quantity;
@@ -61,6 +63,7 @@ export const useCartStore = create<CartStore>()(
                   i.variantId === item.variantId ? { ...i, quantity: newQuantity } : i,
                 ),
               });
+              trackMetaAddToCart({ ...item, quantity: item.quantity });
             } else if (result.cartNotFound) {
               clearCart();
             }
@@ -69,6 +72,7 @@ export const useCartStore = create<CartStore>()(
             if (result.success) {
               const currentItems = get().items;
               set({ items: [...currentItems, { ...item, lineId: result.lineId ?? null }] });
+              trackMetaAddToCart(item);
             } else if (result.cartNotFound) {
               clearCart();
             }

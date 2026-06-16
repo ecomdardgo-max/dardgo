@@ -40,6 +40,7 @@ import {
   parseProductReviewState,
 } from "@/lib/shopify-product-reviews";
 import { fetchJudgeMeReviewsForProduct } from "@/lib/judgeme-reviews-fetch";
+import { trackMetaViewContent } from "@/lib/meta-pixel";
 import { useCartStore } from "@/stores/cartStore";
 import {
   buildShiprocketProductPayload,
@@ -240,6 +241,18 @@ function ProductPage() {
     const idx = findProductImageIndexForVariant(product.images.edges, variantImageUrl);
     setSelectedImage(idx);
   }, [selectedVariant, product]);
+
+  useEffect(() => {
+    if (!product) return;
+    const variantNode = product.variants?.edges?.[selectedVariant]?.node;
+    if (!variantNode) return;
+    trackMetaViewContent({
+      id: variantNode.id,
+      title: product.title,
+      price: parseFloat(variantNode.price?.amount ?? "0"),
+      currency: variantNode.price?.currencyCode,
+    });
+  }, [product?.id, selectedVariant]);
 
   const handleAddToCart = async () => {
     if (!product) return;

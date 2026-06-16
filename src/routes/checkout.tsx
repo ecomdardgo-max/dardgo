@@ -14,6 +14,7 @@ import {
   isShiprocketCheckoutConfigured,
 } from "@/lib/shiprocket-checkout";
 import { toast } from "sonner";
+import { trackMetaInitiateCheckout } from "@/lib/meta-pixel";
 
 type CheckoutLocationState = { checkoutCoupon?: string };
 
@@ -83,6 +84,11 @@ function CheckoutPage() {
           if (!cancelled) setPhase("empty");
           return;
         }
+        const checkoutValue = latestItems.reduce(
+          (sum, i) => sum + parseFloat(i.price.amount) * i.quantity,
+          0,
+        );
+        trackMetaInitiateCheckout(latestItems, checkoutValue);
         try {
           await initiateShiprocketCartFromItems(latestItems, {
             couponCode: checkoutCoupon || undefined,
@@ -98,6 +104,11 @@ function CheckoutPage() {
       }
 
       if (shopifyUrl) {
+        const checkoutValue = latestItems.reduce(
+          (sum, i) => sum + parseFloat(i.price.amount) * i.quantity,
+          0,
+        );
+        trackMetaInitiateCheckout(latestItems, checkoutValue);
         window.location.assign(shopifyUrl);
         return;
       }

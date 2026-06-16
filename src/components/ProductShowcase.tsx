@@ -31,7 +31,10 @@ export function ProductShowcase() {
     e.preventDefault();
     e.stopPropagation();
     const variant = product.node.variants.edges[0]?.node;
-    if (!variant) return;
+    if (!variant?.availableForSale) {
+      toast.error("Out of stock");
+      return;
+    }
     await addItem({
       product,
       variantId: variant.id,
@@ -82,6 +85,8 @@ export function ProductShowcase() {
               const image = product.node.images.edges[0]?.node;
               const price = product.node.priceRange.minVariantPrice;
               const displayPrice = parseFloat(price.amount);
+              const variant = product.node.variants.edges[0]?.node;
+              const soldOut = variant ? !variant.availableForSale : false;
               return (
                 <ScrollReveal key={product.node.id} delay={i * 0.05} className="h-full min-w-0">
                   <Link
@@ -100,6 +105,13 @@ export function ProductShowcase() {
                       ) : (
                         <div className="flex h-full w-full items-center justify-center text-muted-foreground">
                           <Package className="w-10 h-10 sm:w-12 sm:h-12" />
+                        </div>
+                      )}
+                      {soldOut && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-foreground/40 backdrop-blur-[2px]">
+                          <span className="rounded-full bg-white px-3 py-1.5 text-xs font-bold tracking-wide text-foreground">
+                            Sold Out
+                          </span>
                         </div>
                       )}
                       {/* Wishlist button */}
@@ -133,13 +145,13 @@ export function ProductShowcase() {
                           </span>
                         </div>
                         <motion.button
-                          whileTap={{ scale: 0.9 }}
+                          whileTap={{ scale: soldOut ? 1 : 0.9 }}
                           onClick={(e) => handleAddToCart(product, e)}
-                          disabled={isLoading}
-                          className="inline-flex shrink-0 items-center gap-1.5 rounded-xl bg-primary px-3 py-2 text-[11px] font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50 sm:px-4 sm:py-2.5 sm:text-xs"
+                          disabled={isLoading || soldOut}
+                          className="inline-flex shrink-0 items-center gap-1.5 rounded-xl bg-primary px-3 py-2 text-[11px] font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-40 sm:px-4 sm:py-2.5 sm:text-xs"
                         >
                           <ShoppingCart className="h-3.5 w-3.5" />
-                          <span>Add</span>
+                          <span>{soldOut ? "Sold" : "Add"}</span>
                         </motion.button>
                       </div>
                     </div>

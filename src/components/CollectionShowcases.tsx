@@ -215,6 +215,7 @@ function ProductCard({ product }: { product: ShopifyProduct }) {
           >
             <ShoppingCart className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">{soldOut ? "Sold" : "Add"}</span>
+            <span className="sm:hidden">{soldOut ? "Sold" : ""}</span>
           </motion.button>
         </div>
       </div>

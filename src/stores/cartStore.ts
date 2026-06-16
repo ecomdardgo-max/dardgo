@@ -11,6 +11,7 @@ import {
   removeLineFromShopifyCart,
 } from "@/lib/shopify";
 import { trackMetaAddToCart } from "@/lib/meta-pixel";
+import { toast } from "sonner";
 
 export type { CartItem, ShopifyProduct };
 
@@ -39,6 +40,13 @@ export const useCartStore = create<CartStore>()(
 
       addItem: async (item) => {
         const { items, cartId, clearCart } = get();
+        const variant = item.product.node.variants.edges.find(
+          (edge) => edge.node.id === item.variantId,
+        )?.node;
+        if (!variant?.availableForSale) {
+          toast.error("Out of stock");
+          return;
+        }
         const existingItem = items.find((i) => i.variantId === item.variantId);
         set({ isLoading: true });
         try {

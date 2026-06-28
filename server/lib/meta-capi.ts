@@ -130,6 +130,7 @@ export async function sendMetaPurchaseEvent(input: MetaPurchaseInput): Promise<M
       events_received: meta.events_received,
       value: input.value,
       currency: input.currency,
+      test_mode: Boolean(testCode),
     });
     return { ok: true, eventId, meta };
   } catch (err) {

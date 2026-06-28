@@ -39,35 +39,71 @@ export function getShopifyWebhookSecret(): string | null {
   );
 }
 
-/** Raw body must match Shopify's payload byte-for-byte for HMAC verification. */
+type WebhookBodyContext = {
+  shopifyWebhookRawBody?: string;
+  shopifyWebhookBodyConsumed?: boolean;
+};
+
+function getWebhookBodyContext(event: H3Event): WebhookBodyContext {
+  return event.context as WebhookBodyContext;
+}
+
+/** Raw body must match Shopify's payload byte-for-byte for HMAC verification. Read only once per request. */
 export async function readShopifyWebhookRawBody(event: H3Event): Promise<string> {
-  const cached = (event.context as { shopifyWebhookRawBody?: string }).shopifyWebhookRawBody;
-  if (typeof cached === "string" && cached.length > 0) return cached;
+  const ctx = getWebhookBodyContext(event);
+  if (typeof ctx.shopifyWebhookRawBody === "string") return ctx.shopifyWebhookRawBody;
 
-  const raw = await readRawBody(event, false);
-  if (typeof raw === "string" && raw.length > 0) return raw;
-  if (Buffer.isBuffer(raw) && raw.length > 0) return raw.toString("utf8");
+  if (!ctx.shopifyWebhookBodyConsumed) {
+    ctx.shopifyWebhookBodyConsumed = true;
 
-  type NodeReq = { rawBody?: Buffer | string; body?: unknown; readable?: boolean; readableEnded?: boolean };
+    const webReq = (event as { web?: { request?: Request }; request?: Request }).web?.request
+      ?? (event as { request?: Request }).request;
+    if (webReq && !webReq.bodyUsed) {
+      try {
+        const text = await webReq.text();
+        ctx.shopifyWebhookRawBody = text;
+        return text;
+      } catch (err) {
+        console.warn(
+          "[shopify-webhook] request.text() failed:",
+          err instanceof Error ? err.message : String(err),
+        );
+      }
+    }
+
+    try {
+      const raw = await readRawBody(event, false);
+      if (typeof raw === "string" && raw.length > 0) {
+        ctx.shopifyWebhookRawBody = raw;
+        return raw;
+      }
+      if (Buffer.isBuffer(raw) && raw.length > 0) {
+        const text = raw.toString("utf8");
+        ctx.shopifyWebhookRawBody = text;
+        return text;
+      }
+    } catch (err) {
+      console.warn(
+        "[shopify-webhook] readRawBody failed:",
+        err instanceof Error ? err.message : String(err),
+      );
+    }
+  }
+
+  type NodeReq = { rawBody?: Buffer | string; body?: unknown };
   const nodeReq = (event as { node?: { req?: NodeReq } }).node?.req;
   if (nodeReq?.rawBody) {
-    return typeof nodeReq.rawBody === "string" ? nodeReq.rawBody : nodeReq.rawBody.toString("utf8");
+    const text =
+      typeof nodeReq.rawBody === "string" ? nodeReq.rawBody : nodeReq.rawBody.toString("utf8");
+    ctx.shopifyWebhookRawBody = text;
+    return text;
   }
-  if (typeof nodeReq?.body === "string" && nodeReq.body.length > 0) return nodeReq.body;
-
-  if (nodeReq && nodeReq.readable && !nodeReq.readableEnded) {
-    const fromStream = await new Promise<string>((resolve, reject) => {
-      const chunks: Buffer[] = [];
-      const req = nodeReq as NodeReq & {
-        on: (ev: string, fn: (...args: unknown[]) => void) => void;
-      };
-      req.on("data", (chunk) => chunks.push(Buffer.from(chunk as Buffer)));
-      req.on("end", () => resolve(Buffer.concat(chunks).toString("utf8")));
-      req.on("error", reject);
-    });
-    if (fromStream.length > 0) return fromStream;
+  if (typeof nodeReq?.body === "string" && nodeReq.body.length > 0) {
+    ctx.shopifyWebhookRawBody = nodeReq.body;
+    return nodeReq.body;
   }
 
+  ctx.shopifyWebhookRawBody = "";
   return "";
 }
 

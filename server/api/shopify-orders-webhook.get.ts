@@ -10,9 +10,8 @@ export default defineEventHandler(() => {
   const testCode = process.env.META_CAPI_TEST_EVENT_CODE?.trim();
   return {
     ok: true,
-    handler: "nitro-fallback",
+    handler: "nitro",
     endpoint: "POST /api/shopify-orders-webhook",
-    note: "On Vercel production, api/shopify-orders-webhook.ts handles POST with raw body.",
     meta_pixel_id: getMetaPixelId(),
     meta_access_token_configured: Boolean(getMetaAccessToken()),
     shopify_webhook_secret_configured: Boolean(getShopifyWebhookSecret()),

@@ -1,7 +1,0 @@
-{
-  "functions": {
-    "api/shopify-orders-webhook.ts": {
-      "maxDuration": 15
-    }
-  }
-}

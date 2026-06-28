@@ -48,7 +48,7 @@ function getWebhookBodyContext(event: H3Event): WebhookBodyContext {
   return event.context as WebhookBodyContext;
 }
 
-/** Raw body must match Shopify's payload byte-for-byte for HMAC verification. Read only once per request. */
+/** Raw body must match Shopify's payload byte-for-byte for HMAC verification. */
 export async function readShopifyWebhookRawBody(event: H3Event): Promise<string> {
   const ctx = getWebhookBodyContext(event);
   if (typeof ctx.shopifyWebhookRawBody === "string") return ctx.shopifyWebhookRawBody;
@@ -56,35 +56,29 @@ export async function readShopifyWebhookRawBody(event: H3Event): Promise<string>
   if (!ctx.shopifyWebhookBodyConsumed) {
     ctx.shopifyWebhookBodyConsumed = true;
 
-    const webReq = (event as { web?: { request?: Request }; request?: Request }).web?.request
-      ?? (event as { request?: Request }).request;
-    if (webReq && !webReq.bodyUsed) {
-      try {
-        const text = await webReq.text();
-        ctx.shopifyWebhookRawBody = text;
-        return text;
-      } catch (err) {
-        console.warn(
-          "[shopify-webhook] request.text() failed:",
-          err instanceof Error ? err.message : String(err),
-        );
+    try {
+      const asText = await readRawBody(event, "utf8");
+      if (typeof asText === "string" && asText.length > 0) {
+        ctx.shopifyWebhookRawBody = asText;
+        return asText;
       }
+    } catch (err) {
+      console.warn(
+        "[shopify-webhook] readRawBody(utf8) failed:",
+        err instanceof Error ? err.message : String(err),
+      );
     }
 
     try {
       const raw = await readRawBody(event, false);
-      if (typeof raw === "string" && raw.length > 0) {
-        ctx.shopifyWebhookRawBody = raw;
-        return raw;
-      }
-      if (Buffer.isBuffer(raw) && raw.length > 0) {
-        const text = raw.toString("utf8");
+      if (raw instanceof Uint8Array && raw.byteLength > 0) {
+        const text = Buffer.from(raw).toString("utf8");
         ctx.shopifyWebhookRawBody = text;
         return text;
       }
     } catch (err) {
       console.warn(
-        "[shopify-webhook] readRawBody failed:",
+        "[shopify-webhook] readRawBody(false) failed:",
         err instanceof Error ? err.message : String(err),
       );
     }

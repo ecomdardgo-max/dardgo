@@ -41,16 +41,32 @@ export function getShopifyWebhookSecret(): string | null {
 
 /** Raw body must match Shopify's payload byte-for-byte for HMAC verification. */
 export async function readShopifyWebhookRawBody(event: H3Event): Promise<string> {
+  const cached = (event.context as { shopifyWebhookRawBody?: string }).shopifyWebhookRawBody;
+  if (typeof cached === "string" && cached.length > 0) return cached;
+
   const raw = await readRawBody(event, false);
   if (typeof raw === "string" && raw.length > 0) return raw;
   if (Buffer.isBuffer(raw) && raw.length > 0) return raw.toString("utf8");
 
-  type NodeReq = { rawBody?: Buffer | string; body?: unknown };
+  type NodeReq = { rawBody?: Buffer | string; body?: unknown; readable?: boolean; readableEnded?: boolean };
   const nodeReq = (event as { node?: { req?: NodeReq } }).node?.req;
   if (nodeReq?.rawBody) {
     return typeof nodeReq.rawBody === "string" ? nodeReq.rawBody : nodeReq.rawBody.toString("utf8");
   }
   if (typeof nodeReq?.body === "string" && nodeReq.body.length > 0) return nodeReq.body;
+
+  if (nodeReq && nodeReq.readable && !nodeReq.readableEnded) {
+    const fromStream = await new Promise<string>((resolve, reject) => {
+      const chunks: Buffer[] = [];
+      const req = nodeReq as NodeReq & {
+        on: (ev: string, fn: (...args: unknown[]) => void) => void;
+      };
+      req.on("data", (chunk) => chunks.push(Buffer.from(chunk as Buffer)));
+      req.on("end", () => resolve(Buffer.concat(chunks).toString("utf8")));
+      req.on("error", reject);
+    });
+    if (fromStream.length > 0) return fromStream;
+  }
 
   return "";
 }

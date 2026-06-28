@@ -41,8 +41,19 @@ export default defineEventHandler(async (event) => {
   });
 
   if (!shouldSendPurchaseForOrder(order, topic)) {
-    console.info("[shopify-webhook] Skipped (not a paid order):", order.id, topic);
-    return { ok: true, skipped: true, reason: "not_paid", orderId: order.id };
+    console.info("[shopify-webhook] Skipped:", {
+      orderId: order.id,
+      topic,
+      financial_status: order.financial_status,
+    });
+    return {
+      ok: true,
+      skipped: true,
+      reason: "not_eligible",
+      orderId: order.id,
+      topic,
+      financial_status: order.financial_status,
+    };
   }
 
   const value = parseFloat(String(order.total_price ?? "0"));
@@ -61,6 +72,12 @@ export default defineEventHandler(async (event) => {
   });
 
   if (!capi.ok) {
+    console.error("[shopify-webhook] Meta CAPI failed:", {
+      orderId: order.id,
+      eventId: capi.eventId,
+      error: capi.error,
+      meta: capi.meta,
+    });
     setResponseStatus(event, 502);
     return {
       ok: false,

@@ -38,6 +38,10 @@ export const Route = createRootRoute({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
+      {
+        name: "facebook-domain-verification",
+        content: "gd06d348v0feylolzsn7fzhzy7xkv8",
+      },
       { title: DEFAULT_PAGE_TITLE },
       { name: "description", content: DEFAULT_META_DESCRIPTION },
       { property: "og:title", content: DEFAULT_PAGE_TITLE },
@@ -88,6 +92,7 @@ function RootShell({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <head>
+        <meta name="facebook-domain-verification" content="gd06d348v0feylolzsn7fzhzy7xkv8" />
         <HeadContent />
         {isMetaPixelEnabled() ? (
           <noscript>

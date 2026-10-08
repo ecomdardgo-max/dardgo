@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Loader2,
@@ -124,6 +124,7 @@ const TRUST_HIGHLIGHTS = [
 function ProductPage() {
   const { handle } = Route.useParams();
   const { variant: variantFromUrl } = Route.useSearch();
+  const navigate = useNavigate({ from: "/product/$handle" });
   const [product, setProduct] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState(0);
@@ -928,6 +929,24 @@ function ProductPage() {
                           onClick={() => {
                             setSelectedVariant(i);
                             setQuantity(1);
+
+                            // Keep the selected Shopify variant in the URL so
+                            // direct links from Meta Ads open this exact variant.
+                            const variantId = shopifyVariantGidToNumericId(v.node.id).replace(/^["']|["']$/g, "");
+
+                            // Update the address bar directly so the numeric Shopify
+                            // variant ID is written as a plain query value (without
+                            // JSON/string quotes such as ?variant="123456").
+                            // Keep any existing UTM/other query parameters intact.
+                            if (typeof window !== "undefined") {
+                              const url = new URL(window.location.href);
+                              url.searchParams.set("variant", variantId);
+                              window.history.replaceState(
+                                window.history.state,
+                                "",
+                                `${url.pathname}?${url.searchParams.toString()}${url.hash}`,
+                              );
+                            }
                           }}
                           className={`max-w-full break-words px-3 sm:px-5 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-semibold transition-all border ${
                             i === selectedVariant

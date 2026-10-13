@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Loader2,
@@ -79,11 +79,23 @@ import {
   resolvePdpTabsFromProduct,
 } from "@/lib/product-pdp-tabs";
 
+function coerceSearchString(value: unknown): string | undefined {
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    return trimmed || undefined;
+  }
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return String(Math.trunc(value));
+  }
+  return undefined;
+}
+
 export const Route = createFileRoute("/product/$handle")({
   component: ProductPage,
   validateSearch: (search: Record<string, unknown>) => ({
-    variant: typeof search.variant === "string" ? search.variant : undefined,
-    pb: typeof search.pb === "string" ? search.pb : undefined,
+    // Shopify ads/emails send ?variant=123 or ?variant_id=123 (sometimes as a number).
+    variant: coerceSearchString(search.variant ?? search.variant_id),
+    pb: coerceSearchString(search.pb),
   }),
   head: ({ params }) => {
     const readable = params.handle
@@ -124,6 +136,7 @@ const TRUST_HIGHLIGHTS = [
 function ProductPage() {
   const { handle } = Route.useParams();
   const { variant: variantFromUrl } = Route.useSearch();
+  const navigate = useNavigate({ from: "/product/$handle" });
   const [product, setProduct] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState(0);
@@ -220,17 +233,26 @@ function ProductPage() {
   }, [handle]);
 
   useEffect(() => {
-    if (!product?.variants?.edges?.length || !variantFromUrl) return;
-    const numeric = variantFromUrl.replace(/\D/g, "");
-    if (!numeric) return;
-    const idx = product.variants.edges.findIndex(
-      (e: { node: { id: string } }) => shopifyVariantGidToNumericId(e.node.id) === numeric,
-    );
-    if (idx >= 0) {
-      setSelectedVariant(idx);
-      setQuantity(1);
+    if (!product?.variants?.edges?.length) return;
+    const numeric = String(variantFromUrl ?? "").replace(/\D/g, "");
+    if (numeric) {
+      const idx = product.variants.edges.findIndex(
+        (e: { node: { id: string } }) => shopifyVariantGidToNumericId(e.node.id) === numeric,
+      );
+      if (idx >= 0) {
+        setSelectedVariant(idx);
+        setQuantity(1);
+      }
+      return;
     }
-  }, [product, variantFromUrl]);
+    if (product.variants.edges.length < 2) return;
+    const firstId = product.variants.edges[0]?.node?.id;
+    if (!firstId) return;
+    void navigate({
+      search: (prev) => ({ ...prev, variant: shopifyVariantGidToNumericId(firstId) }),
+      replace: true,
+    });
+  }, [product, variantFromUrl, navigate]);
 
   // When the selected variant changes, show that variant's image from Shopify.
   useEffect(() => {
@@ -923,12 +945,15 @@ function ProductPage() {
                     </h3>
                     <div className="flex flex-wrap gap-2">
                       {product.variants.edges.map((v: any, i: number) => (
-                        <button
+                        <Link
                           key={v.node.id}
-                          onClick={() => {
-                            setSelectedVariant(i);
-                            setQuantity(1);
-                          }}
+                          to="/product/$handle"
+                          params={{ handle }}
+                          search={(prev) => ({
+                            ...prev,
+                            variant: shopifyVariantGidToNumericId(v.node.id),
+                          })}
+                          replace
                           className={`max-w-full break-words px-3 sm:px-5 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-semibold transition-all border ${
                             i === selectedVariant
                               ? "bg-primary text-primary-foreground border-primary shadow-md"
@@ -936,7 +961,7 @@ function ProductPage() {
                           }`}
                         >
                           {v.node.title}
-                        </button>
+                        </Link>
                       ))}
                     </div>
                   </div>
